@@ -1,0 +1,129 @@
+{
+  "description": "CNAS第三方测试候选集 — 20张代表性图像（val split，未参与训练，已排除异型ljj样本）",
+  "created": "2026-03-22",
+  "model": "stage2_cleaned/weights/best.pt",
+  "selection_criteria": "覆盖损伤等级（轻/中/重/极重）× 类别构成（scratch/spot/critical主导）",
+  "images": [
+    {
+      "stem": "123l",
+      "boxes": 136,
+      "tier": "light",
+      "notes": "最清洁样本，三类均衡"
+    },
+    {
+      "stem": "84r",
+      "boxes": 166,
+      "tier": "light",
+      "notes": "spot-rich，spot占39%"
+    },
+    {
+      "stem": "9l",
+      "boxes": 215,
+      "tier": "light",
+      "notes": "spot-rich中轻度，spot占44%"
+    },
+    {
+      "stem": "100r",
+      "boxes": 233,
+      "tier": "light",
+      "notes": "中轻度均衡样本，scratch 55% / spot 35% / critical 10%"
+    },
+    {
+      "stem": "15r",
+      "boxes": 254,
+      "tier": "medium",
+      "notes": "scratch-dominant，scratch占77%"
+    },
+    {
+      "stem": "53r",
+      "boxes": 273,
+      "tier": "medium",
+      "notes": "三类均衡中轻度"
+    },
+    {
+      "stem": "92l",
+      "boxes": 304,
+      "tier": "medium",
+      "notes": "scratch-dominant，scratch占66%"
+    },
+    {
+      "stem": "110r",
+      "boxes": 339,
+      "tier": "medium",
+      "notes": "scratch-dominant，scratch占70%"
+    },
+    {
+      "stem": "20l",
+      "boxes": 339,
+      "tier": "medium",
+      "notes": "scratch+critical双高"
+    },
+    {
+      "stem": "82r",
+      "boxes": 357,
+      "tier": "medium",
+      "notes": "均衡中度，6:2:2"
+    },
+    {
+      "stem": "82l",
+      "boxes": 372,
+      "tier": "medium",
+      "notes": "spot-rich中度，spot占30%"
+    },
+    {
+      "stem": "47r",
+      "boxes": 425,
+      "tier": "medium",
+      "notes": "critical-heavy，critical占22%"
+    },
+    {
+      "stem": "17l",
+      "boxes": 439,
+      "tier": "medium",
+      "notes": "critical-heavy，critical占23%"
+    },
+    {
+      "stem": "119l",
+      "boxes": 457,
+      "tier": "medium",
+      "notes": "scratch-dominant，scratch占74%"
+    },
+    {
+      "stem": "74r",
+      "boxes": 588,
+      "tier": "heavy",
+      "notes": "scratch-dominant重度，scratch占79%"
+    },
+    {
+      "stem": "77l",
+      "boxes": 588,
+      "tier": "heavy",
+      "notes": "spot-rich重度，spot占23%"
+    },
+    {
+      "stem": "103r",
+      "boxes": 648,
+      "tier": "heavy",
+      "notes": "scratch-dominant重度，scratch占78%"
+    },
+    {
+      "stem": "38l",
+      "boxes": 729,
+      "tier": "very_heavy",
+      "notes": "极重度，scratch536+critical127"
+    },
+    {
+      "stem": "51r",
+      "boxes": 835,
+      "tier": "very_heavy",
+      "notes": "最密集，spot252（30%）"
+    },
+    {
+      "stem": "96r",
+      "boxes": 624,
+      "tier": "heavy",
+      "notes": "重度 critical-heavy，critical 120 (19%)"
+    }
+  ],
+  "updated": "2026-03-22"
+}

@@ -1,0 +1,65 @@
+# 暗场镜片缺陷检测 — 切图模式专用参数
+# ==========================================
+# 用于 build_tile_dataset.py 半自动标注
+# 640×640 tile 上的检测参数，相比全图模式更保守以减少噪声碎片
+
+detection:
+  # 候选区生成
+  frangi_sigmas: [1.0, 2.0, 3.0, 5.0]
+  frangi_alpha: 0.5
+  frangi_beta: 0.5
+  frangi_gamma: 15.0
+  tophat_kernel_size: 15
+
+  # 阈值 — tile 上 Otsu 表现稳定
+  threshold_method: "otsu"
+  adaptive_block_size: 51
+  adaptive_c: 10.0
+  # 候选图最低阈值（归一化 0-1），防止纯暗 tile 误检
+  # 若 Otsu 结果低于此值则提升到此值
+  otsu_floor: 0.08
+
+  # 形态学后处理 — tile 模式适当加严，减少增强带来的噪声碎片
+  morph_open_kernel: 3
+  min_area: 120             # 增大噪声过滤门槛（全图=50, tile=120）
+  min_length: 30.0          # 划痕最小长度（全图=20, tile=30）
+  min_aspect_ratio: 3.0
+
+  # 密度检测（tile 内的密集区）
+  density_kernel_ratio: 0.15    # tile 更小，核比例相应放大
+  density_threshold: 0.25
+  dense_min_area: 500           # tile 内密集区面积门槛更低
+
+  # Prominence 过滤 — tile 内增强后对比度更高，门槛略降
+  prominence_min_value: 12.0
+
+  # 划痕合并 — tile 内合并参数
+  merge_max_gap: 25.0
+  merge_max_angle: 20.0
+  scratch_extend_ratio: 0.25
+  scratch_extend_min_px: 10
+  scratch_extend_width_ratio: 1.0
+  scratch_extend_min_width: 4
+  scratch_merge_gray_tol: 20.0
+  merge_method: "rotated_box"
+
+  # 暗场增强（用于驱动检测，坐标映射回原始 tile）
+  # gamma 从 0.4 提升到 0.55，减少暗区噪声放大（灰度3: 14x→7x）
+  # 但中等缺陷仍清晰（灰度20: 4.6x→3.3x）
+  enhance_enabled: true
+  enhance_gamma: 0.55
+  clahe_enabled: true
+  clahe_clip_limit: 3.0
+  clahe_tile_size: 8
+
+scoring:
+  zone_center_ratio: 0.30
+  zone_transition_ratio: 0.60
+  weight_L_center: 0.35
+  weight_L_total: 0.15
+  weight_N: 0.10
+  weight_A: 0.15
+  weight_S_scatter: 0.25
+  grade_A_max: 15
+  grade_B_max: 40
+  grade_C_max: 70

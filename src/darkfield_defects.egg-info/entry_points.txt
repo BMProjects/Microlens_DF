@@ -1,0 +1,2 @@
+[console_scripts]
+darkfield-defects = darkfield_defects.cli.app:app

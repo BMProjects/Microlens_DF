@@ -1,0 +1,29 @@
+# Python / uv
+.venv/
+__pycache__/
+*.py[cod]
+*.so
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local tool state
+.claude/settings.local.json
+
+# Training / model cache
+runs/
+*.pt
+*.pth
+*.onnx
+*.engine
+
+# Large local artifacts
+output/**
+!output/
+!output/.gitkeep
+!output/README.md
+
+# Keep lightweight tracked docs/assets outside output
+
+# Optional local exports
+*.tar.gz

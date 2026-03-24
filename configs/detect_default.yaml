@@ -1,0 +1,107 @@
+# 暗场镜片缺陷检测 — 默认参数配置
+# ==========================================
+
+preprocess:
+  # 背景校正
+  bg_correction_method: "division"   # "division" (I/B) 或 "subtraction" (I-kB)
+  bg_epsilon: 1.0                    # 除法校正中的 eps，防止除零
+  # ROI 提取
+  roi_method: "hough"                # "hough" (Hough圆检测) 或 "threshold" (阈值+轮廓)
+  roi_shrink_ratio: 0.05             # ROI 内缩比例，去除边缘高亮环
+  roi_min_radius_ratio: 0.3          # 最小镜片半径占图像短边比例
+  # 降噪
+  denoise_method: "bilateral"        # "bilateral" 或 "nlm" (非局部均值)
+  bilateral_d: 9
+  bilateral_sigma_color: 75
+  bilateral_sigma_space: 75
+  # 对比度增强
+  clahe_enabled: false
+  clahe_clip_limit: 2.0
+  clahe_tile_size: 8
+
+detection:
+  # 候选区生成（阶段一：高召回）
+  frangi_sigmas: [1.0, 2.0, 3.0, 5.0]   # 多尺度 Frangi 滤波 sigma
+  frangi_alpha: 0.5
+  frangi_beta: 0.5
+  frangi_gamma: 15.0
+  tophat_kernel_size: 15              # 顶帽变换核大小
+  # 阈值
+  threshold_method: "otsu"            # "otsu", "triangle", "adaptive"
+  adaptive_block_size: 51
+  adaptive_c: 10.0
+  # 形态学后处理
+  morph_open_kernel: 3                # 开运算核大小（去除点状噪声）
+  min_area: 50                        # 最小连通域面积（像素）
+  min_length: 20                      # 最小骨架长度（像素）
+  min_aspect_ratio: 3.0               # 最小细长比（长/宽）
+  # 密度检测（crash）
+  density_kernel_ratio: 0.08          # 高斯核 = min(H,W) × ratio
+  density_threshold: 0.2              # 密度阈值（占255的比例）
+  dense_min_area: 2000                # 密集区最小面积
+  # Prominence 过滤
+  prominence_min_value: 20.0          # 非划痕类最低显著性（灰度差）
+  # 断裂合并（端点距离+方向）
+  merge_max_gap: 30                   # 端点距离阈值
+  merge_max_angle: 20.0               # 方向一致性阈值（度）
+  # 断裂合并（旋转包围盒延伸）
+  scratch_extend_ratio: 0.25          # 沿长轴延伸比例
+  scratch_extend_min_px: 12           # 延伸最小像素
+  scratch_extend_width_ratio: 1.0     # 沿短轴延伸比例
+  scratch_extend_min_width: 4         # 短轴延伸最小像素
+  scratch_merge_gray_tol: 20.0        # 散射强度合并容差
+  merge_method: "rotated_box"         # "endpoint" | "rotated_box" | "both"
+  # 暗场图像增强（gamma + CLAHE, 逐像素操作, 不扩大缺陷面积）
+  enhance_enabled: true                 # 启用两阶段增强
+  enhance_gamma: 0.4                    # gamma<1 提亮暗区 (0.3~0.5)
+  clahe_enabled: true                   # CLAHE 局部对比度均衡
+  clahe_clip_limit: 3.0                 # CLAHE 截断限制
+  clahe_tile_size: 8                    # CLAHE 分块大小
+
+scoring:
+  # 视区分区（以光学中心为基准）
+  zone_center_ratio: 0.30             # 中心视觉区半径 = R × 0.30
+  zone_transition_ratio: 0.60         # 过渡区外径 = R × 0.60
+  # WearScore 权重
+  weight_L_center: 0.35               # 中心区划痕长度权重
+  weight_L_total: 0.15                # 总划痕长度权重
+  weight_N: 0.10                      # 划痕条数权重
+  weight_A: 0.15                      # 划痕面积权重
+  weight_S_scatter: 0.25              # 散射强度权重
+  # 等级阈值 (WearScore 0-100)
+  grade_A_max: 15                     # ≤15: A (极佳)
+  grade_B_max: 40                     # ≤40: B (良好)
+  grade_C_max: 70                     # ≤70: C (警告)
+  # >70: D (报废)
+
+output:
+  save_overlay: true
+  save_mask: true
+  save_coco_json: true
+  save_report_html: true
+  overlay_alpha: 0.5
+  scratch_color: [0, 255, 0]          # BGR 绿色
+
+roi_pipeline:
+  # 离焦模板（sigma=30，充分模糊以平滑环形边缘）
+  template_blur_sigma: 30.0
+  template_blur_per_pass_sigma: 6.0
+  template_brightness_gain: 1.08
+  # 高光ring检测（中心相对阈值）
+  # threshold = center_level × center_ratio，中心亮度1.25倍以上才算ring
+  template_highlight_center_ratio: 1.25
+  template_highlight_center_sample_ratio: 0.40
+  template_edge_expand_px: 25
+  # ROI构建
+  roi_erode_ratio: 0.002
+  roi_extra_inset_px: 10.0
+  # 配准
+  ecc_max_iterations: 200
+  ecc_epsilon: 1e-6
+  registration_downsample: 0.75
+  max_scale_deviation: 0.05           # 缩放限制±5%
+  # 亮度修正
+  brightness_correction_mode: "subtract"
+  # 质量控制
+  quality_bg_std_max: 5.0
+  timing_log_enabled: true
