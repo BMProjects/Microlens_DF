@@ -10,6 +10,35 @@
 - Secondary: `mask->bbox AP@0.5`
 - Analysis: 边界质量、连通性、骨架长度稳定性
 
+## 详细量化指标
+
+为兼顾模型选型、物理意义和后续标注更新, 分割分支统一增加三层指标:
+
+### A. 结构学习指标
+
+- `val_mIoU`：源域结构对照的主排序指标
+- `scratch IoU`：细长划痕的首要指标
+- `spot IoU` / `damage IoU`：辅助观察模型对块状和大面积区域的适应性
+- `scratch Dice`：补足细长区域在小偏移下 IoU 过于苛刻的问题
+
+### B. 标注更新指标
+
+- `consensus ratio`：多模型一致像素比例，用于识别高置信区域
+- `pairwise disagreement ratio`：模型间两两差异比例，用于挑选人工复核优先级样本
+- `pixel accuracy vs weak mask`：弱标签一致性参考值
+- `scratch_length_error` / `scratch_area_error`：预测与弱标签在长度/面积上的相对误差
+
+### C. 物理量化指标
+
+- `scratch_length_mm`：划痕骨架总长度，对应实际磨损轨迹长度
+- `scratch_avg_width_mm`：划痕平均宽度，辅助判断损伤程度
+- `scratch_area_mm2`：划痕总面积
+- `spot_area_mm2`：斑点污染总面积
+- `damage_area_mm2`：大面积损伤总面积
+- `scratch_components`：划痕连通域数量，辅助判断断裂/过分碎片化问题
+
+当前系统统一采用 `6.8 um/pixel = 0.0068 mm/pixel` 进行物理量换算, 研发记录默认优先展示 `mm / mm²`.
+
 ## 数据边界
 
 - `CNAS` 测试子系统独立后，20 张留出图像不参与分割分支日常训练、模型选择和超参数调整
@@ -58,3 +87,9 @@
 - 最佳 loss
 - `mIoU`
 - 后续是否进入私有弱标签微调
+- 若是私有核查轮次，还要补充:
+  - `consensus ratio`
+  - `pairwise disagreement ratio`
+  - `scratch_length_mm / scratch_area_mm2 / scratch_components`
+  - `spot_area_mm2 / damage_area_mm2`
+  - 20~30 张私有图像并列可视化结果

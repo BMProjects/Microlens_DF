@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>暗场离焦微结构镜片缺陷检测项目技术开发与执行综合文档</title>
+  <style>
+    body {
+      font-family: "Noto Serif CJK SC", "Noto Sans CJK SC", "Microsoft YaHei", serif;
+      line-height: 1.65;
+      color: #1f2937;
+      margin: 32px 42px;
+    }
+    h1, h2, h3 {
+      color: #0f172a;
+      page-break-after: avoid;
+    }
+    h1 {
+      text-align: center;
+      font-size: 24pt;
+      margin-bottom: 10px;
+    }
+    h2 {
+      margin-top: 28px;
+      font-size: 16pt;
+      border-bottom: 1px solid #cbd5e1;
+      padding-bottom: 4px;
+    }
+    h3 {
+      margin-top: 18px;
+      font-size: 13pt;
+    }
+    p {
+      text-align: justify;
+      margin: 8px 0;
+    }
+    ul, ol {
+      margin: 8px 0 8px 22px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 14px 0 20px 0;
+      font-size: 10.5pt;
+    }
+    th, td {
+      border: 1px solid #94a3b8;
+      padding: 8px 10px;
+      vertical-align: top;
+    }
+    th {
+      background: #e2e8f0;
+      font-weight: bold;
+    }
+    .meta {
+      text-align: center;
+      color: #475569;
+      margin-bottom: 18px;
+    }
+    .figure {
+      text-align: center;
+      margin: 18px 0 26px 0;
+      page-break-inside: avoid;
+    }
+    .figure img {
+      max-width: 100%;
+      border: 1px solid #cbd5e1;
+    }
+    .caption {
+      font-size: 10pt;
+      color: #475569;
+      margin-top: 6px;
+    }
+    .note {
+      background: #f8fafc;
+      border-left: 4px solid #60a5fa;
+      padding: 10px 12px;
+      margin: 10px 0 16px 0;
+    }
+    .small {
+      font-size: 10pt;
+      color: #475569;
+    }
+  </style>
+</head>
+<body>
+  <h1>暗场离焦微结构镜片缺陷检测项目技术开发与执行综合文档</h1>
+  <div class="meta">
+    版本：2026-03-25 综合整理版<br />
+    用途：项目技术接手、阶段汇报、执行复盘、研发规划与资料归档
+  </div>
+
+  <h2>1. 文档说明</h2>
+  <p>本次整理的目标，是在当前项目已有文档基础上形成一份可以直接交付和阅读的综合性 Word 文档，统一回答以下问题：</p>
+  <ol>
+    <li>当前项目是否已经形成稳定可用的正式系统主线。</li>
+    <li>当前技术开发和项目执行过程中，哪些内容已经沉淀为稳定结构，哪些仍属于研究分支。</li>
+    <li>既有技术文档和执行文档是否足够图文并茂，是否需要新增示意图、结构图和实验结果图。</li>
+  </ol>
+  <p>在本次整理前，仓库中已经存在两份主要文档来源：</p>
+  <ul>
+    <li>《研究技术文档_20260324_预发布与算法演进》：偏重系统架构、算法关系与技术判断。</li>
+    <li>《项目执行文档_20260324_六个月实施复盘与排期》：偏重执行阶段、阶段输出和后续排期。</li>
+  </ul>
+  <p>这两份文档原本已经包含一定插图，例如 GUI 界面示意、ROI 参考图、训练曲线和识别算法对比图，因此不能算“纯文字文档”。但从交付视角看，仍存在三类图片不足：</p>
+  <ul>
+    <li>缺少能一眼解释“当前正式系统总架构”的总览图。</li>
+    <li>缺少能清楚说明“识别分支与分割分支关系”的算法结构图。</li>
+    <li>缺少把执行过程、系统收敛和研发分支放在同一页上说明的阶段图。</li>
+  </ul>
+  <p>因此，本次在保留原有图表基础上，新增了系统架构图、算法双分支结构图和执行阶段总览图，并补入最新的分割实验图表，以形成更完整的图文说明。</p>
+
+  <h2>2. 项目当前总体结论</h2>
+  <p>截至 2026 年 3 月末，项目已经从“研究代码集合”逐步收敛为三条清晰且相互解耦的主线：</p>
+  <ul>
+    <li><strong>GUI 预发布主线</strong>：面向普通非专业用户，导入单张镜片图像，执行缺陷检测分析并给出结论。</li>
+    <li><strong>独立测试子系统</strong>：用于第三方测试、固定留出集评测和 CNAS 相关材料准备。</li>
+    <li><strong>算法研发分支</strong>：包括识别算法改进和分割算法研发，不直接干扰正式系统主线。</li>
+  </ul>
+  <p>也就是说，当前项目已经具备 <code>v0.1-pre</code> 级别的预发布条件，适合做阶段汇报、交接和后续研发承接。</p>
+
+  <div class="figure">
+    <img src="assets/generated/project_system_architecture.png" alt="当前正式系统总体架构图" />
+    <div class="caption">图 1 当前正式系统总体架构图</div>
+  </div>
+
+  <h2>3. 当前正式系统功能与架构</h2>
+  <h3>3.1 功能边界</h3>
+  <p>当前正式系统以 GUI 为准，其面向普通用户的主流程只有四步：</p>
+  <ol>
+    <li>导入镜片图像。</li>
+    <li>执行缺陷检测分析。</li>
+    <li>查看检测叠加图、缺陷地形图、评分过程图和评级卡片。</li>
+    <li>得到最终分析结论。</li>
+  </ol>
+  <p>训练脚本、研究实验脚本、分割对照试验和独立测试脚本都不属于普通用户入口。</p>
+
+  <h3>3.2 系统组成</h3>
+  <p>从代码结构上看，当前系统已经形成比较稳定的分层关系：</p>
+  <ul>
+    <li><code>src/darkfield_defects/viz/app.py</code>：GUI 操作员工作台。</li>
+    <li><code>src/darkfield_defects/app_services/inference_service.py</code>：正式主线的全图推理服务。</li>
+    <li><code>src/darkfield_defects/scoring/</code>：统一评分、报告与物理量化逻辑。</li>
+    <li><code>cnas_test/</code>：独立测试子系统。</li>
+    <li><code>scripts/</code> 与 <code>research_loops/</code>：实验与研发规则。</li>
+  </ul>
+  <p>相比前期阶段，目前最大的进步不是单个模型分数的变化，而是“产品主线、测试链路和研究分支已经拆清楚”。</p>
+
+  <div class="figure">
+    <img src="assets/generated/web_ui_snapshot.png" alt="GUI 预发布界面快照" />
+    <div class="caption">图 2 GUI 预发布界面快照</div>
+  </div>
+
+  <h2>4. 技术主线与算法结构</h2>
+  <h3>4.1 识别主线</h3>
+  <p>识别主线当前仍以 <code>stage2_cleaned</code> 作为正式基线，通过整图切片、SAHI 滑窗、IOS NMS 和 <code>connect_scratches</code> 划痕链合并完成全图推理。该路线的优势是工程成熟度高、已通过固定留出集验证、且已经和 GUI 主线对齐。</p>
+
+  <h3>4.2 分割分支</h3>
+  <p>分割分支不是立即替代正式检测主线，而是为以下问题建立更贴近物理本质的表达：</p>
+  <ul>
+    <li>细长划痕的 IoU 脆弱性。</li>
+    <li>切片边界导致的碎片化监督。</li>
+    <li>后续长度、面积、骨架和评分量化缺少 mask 支撑。</li>
+  </ul>
+  <p>因此，当前更合理的技术判断是：<strong>识别主线负责正式产品，分割分支负责精修、量化和标注更新辅助</strong>。</p>
+
+  <div class="figure">
+    <img src="assets/generated/project_algorithm_branches.png" alt="识别与分割双分支结构图" />
+    <div class="caption">图 3 识别与分割双分支结构图</div>
+  </div>
+
+  <h3>4.3 物理尺度与评分逻辑</h3>
+  <p>当前系统已经把比例尺 <code>6.8 um/pixel</code> 纳入统一配置，对外默认使用 <code>mm</code> 和 <code>mm²</code>。这一改造的意义在于，评分体系可以逐步从“像素值统计”过渡到“物理尺寸与功能区权重”的统一逻辑。</p>
+  <p>评分主指标已经收敛为：</p>
+  <ul>
+    <li><code>L_center</code>：中心区关键划痕长度。</li>
+    <li><code>L_total</code>：区域加权后的总体划痕长度。</li>
+    <li><code>N</code>：区域加权缺陷数量。</li>
+    <li><code>A</code>：区域加权缺陷面积。</li>
+    <li><code>S_scatter</code>：区域加权散射强度。</li>
+  </ul>
+  <p>这使当前评分不再只是视觉上的“看起来多还是少”，而逐步转向“中心区和微结构关键区受损程度”的物理表达。</p>
+
+  <h2>5. 正式识别算法结果与判断</h2>
+  <p>当前正式识别主线的对比结果如下表所示。</p>
+
+  <table>
+    <tr>
+      <th>实验</th>
+      <th>mAP@0.5</th>
+      <th>mAP@0.5:0.95</th>
+      <th>Precision</th>
+      <th>Recall</th>
+      <th>Scratch AP@0.5</th>
+      <th>Spot AP@0.5</th>
+      <th>Critical AP@0.5</th>
+    </tr>
+    <tr><td>A0_baseline</td><td>0.6765</td><td>0.4541</td><td>0.5997</td><td>0.6735</td><td>0.4525</td><td>0.8180</td><td>0.7589</td></tr>
+    <tr><td>C1_ssgd_finetune</td><td>0.6755</td><td>0.4353</td><td>0.5875</td><td>0.6716</td><td>0.4409</td><td>0.8266</td><td>0.7591</td></tr>
+    <tr><td>C1_ssgd_freeze10</td><td>0.0000</td><td>0.0000</td><td>0.0000</td><td>0.0000</td><td>0.0000</td><td>0.0000</td><td>0.0000</td></tr>
+    <tr><td>B1_sfe_only</td><td>0.6262</td><td>0.4020</td><td>0.5575</td><td>0.6347</td><td>0.4062</td><td>0.7767</td><td>0.6956</td></tr>
+    <tr><td>B2_nwd_only</td><td>0.6802</td><td>0.4500</td><td>0.6080</td><td>0.6641</td><td>0.4488</td><td>0.8377</td><td>0.7542</td></tr>
+    <tr><td>B3_sfe_nwd</td><td>0.5856</td><td>0.3603</td><td>0.5246</td><td>0.6225</td><td>0.3811</td><td>0.7174</td><td>0.6581</td></tr>
+  </table>
+
+  <div class="figure">
+    <img src="assets/references/stage2_cleaned_results.png" alt="Stage2 训练曲线" />
+    <div class="caption">图 4 Stage2 基线训练曲线</div>
+  </div>
+
+  <div class="figure">
+    <img src="assets/generated/experiment_comparison.png" alt="识别算法改进对比图" />
+    <div class="caption">图 5 识别算法改进对比图</div>
+  </div>
+
+  <p>当前最稳的判断是：</p>
+  <ul>
+    <li><code>stage2_cleaned</code> 仍然是正式系统的稳定主线。</li>
+    <li><code>NWD-only</code> 是当前唯一值得继续观察的结构改进。</li>
+    <li>当前识别算法的稳定收益主要来自数据质量、伪标签补漏和推理链路工程化，而不是直接更换更复杂的网络。</li>
+  </ul>
+
+  <h2>6. 分割分支实验结果与技术意义</h2>
+  <p>分割分支已经从“是否能跑通”进入“结构对照和人工核查”的正式研发阶段。</p>
+
+  <h3>6.1 源域 MSD 预训练结果</h3>
+  <table>
+    <tr>
+      <th>模型</th>
+      <th>运行轮数</th>
+      <th>最佳 Epoch</th>
+      <th>最佳 val_mIoU</th>
+      <th>scratch IoU</th>
+      <th>spot IoU</th>
+      <th>quick mIoU</th>
+    </tr>
+    <tr><td>LightUNet</td><td>13</td><td>5</td><td>0.5393</td><td>0.3837</td><td>0.5855</td><td>0.3231</td></tr>
+    <tr><td>Unet++</td><td>23</td><td>14</td><td>0.4191</td><td>0.6632</td><td>0.8404</td><td>0.5012</td></tr>
+    <tr><td>DeepLabV3+</td><td>50</td><td>50</td><td>0.8669</td><td>0.8174</td><td>0.8827</td><td>0.8501</td></tr>
+    <tr><td>FPN</td><td>50</td><td>46</td><td>0.8787</td><td>0.8201</td><td>0.8907</td><td>0.8554</td></tr>
+  </table>
+
+  <div class="figure">
+    <img src="assets/generated/segmentation_source_miou_curves.png" alt="分割源域 mIoU 对照曲线" />
+    <div class="caption">图 6 分割源域预训练 mIoU 对照曲线</div>
+  </div>
+
+  <h3>6.2 私有弱标签微调结果</h3>
+  <table>
+    <tr>
+      <th>模型</th>
+      <th>运行轮数</th>
+      <th>最佳 Epoch</th>
+      <th>最佳 loss</th>
+      <th>最终 loss</th>
+    </tr>
+    <tr><td>LightUNet</td><td>40</td><td>40</td><td>0.2974</td><td>0.2974</td></tr>
+    <tr><td>Unet++</td><td>40</td><td>34</td><td>0.2766</td><td>0.2779</td></tr>
+    <tr><td>FPN</td><td>40</td><td>40</td><td>0.2813</td><td>0.2813</td></tr>
+    <tr><td>DeepLabV3+</td><td>40</td><td>32</td><td>0.2822</td><td>0.2844</td></tr>
+  </table>
+
+  <div class="figure">
+    <img src="assets/generated/segmentation_private_loss_curves.png" alt="私有弱标签微调曲线" />
+    <div class="caption">图 7 私有弱标签微调曲线</div>
+  </div>
+
+  <h3>6.3 24 张私有图像人工核查与量化</h3>
+  <p>从 197 张私有弱标签图像中选取了 24 张代表样本，并将 <code>Unet++</code>、<code>FPN</code> 和 <code>DeepLabV3+</code> 的结果并列展示。当前综合判断是：</p>
+  <ul>
+    <li><strong>FPN</strong>：弱标签一致性和几何稳定性最均衡，适合优先做标注更新辅助。</li>
+    <li><strong>Unet++</strong>：对细长划痕更保守，更适合后续与骨架长度和评分体系耦合。</li>
+    <li><strong>DeepLabV3+</strong>：当前存在面积过扩张倾向，不宜直接作为标注更新主模型。</li>
+  </ul>
+
+  <div class="figure">
+    <img src="assets/generated/segmentation_review_contact_sheet.png" alt="分割人工核查样本总览" />
+    <div class="caption">图 8 代表性分割人工核查样本总览</div>
+  </div>
+
+  <div class="figure">
+    <img src="assets/generated/segmentation_private_review_metrics.png" alt="分割人工核查量化指标图" />
+    <div class="caption">图 9 分割人工核查量化指标图</div>
+  </div>
+
+  <table>
+    <tr>
+      <th>模型</th>
+      <th>scratch IoU</th>
+      <th>scratch Dice</th>
+      <th>spot IoU</th>
+      <th>damage IoU</th>
+      <th>pixel accuracy</th>
+      <th>consensus ratio</th>
+      <th>scratch length error</th>
+      <th>scratch area error</th>
+    </tr>
+    <tr><td>Unet++</td><td>0.1479</td><td>0.2541</td><td>0.1969</td><td>0.4818</td><td>0.9382</td><td>0.9433</td><td>0.6160</td><td>0.8721</td></tr>
+    <tr><td>FPN</td><td>0.1593</td><td>0.2721</td><td>0.2126</td><td>0.4562</td><td>0.9396</td><td>0.9433</td><td>0.3954</td><td>0.8790</td></tr>
+    <tr><td>DeepLabV3+</td><td>0.1514</td><td>0.2606</td><td>0.2053</td><td>0.4375</td><td>0.9272</td><td>0.9433</td><td>0.9013</td><td>1.6245</td></tr>
+  </table>
+
+  <div class="note">
+    需要特别说明的是：私有图像上的弱标签一致性分数显著低于源域 clean-mask 结果，并不代表分割路线失效，而更可能说明当前弱标签本身噪声较大、damage 与 scratch 的边界定义尚不稳定。分割分支的真正价值在于支持后续标注提质与物理量化，而不仅仅是追求与弱标签的像素级重合。
+  </div>
+
+  <h2>7. 测试与研发边界</h2>
+  <p>当前项目已经把测试逻辑从研发主线中拆开。独立 CNAS 子系统、固定留出集和正式评测口径不再参与日常模型调参。这样做的好处是：</p>
+  <ul>
+    <li>正式系统可以保持稳定，不被实验结果频繁扰动。</li>
+    <li>研发分支可以持续迭代，而不用担心“边训练边改变测试口径”。</li>
+    <li>后续第三方机构测试时，能够直接使用清晰、简洁、可复现的测试链路。</li>
+  </ul>
+
+  <h2>8. 项目执行过程与阶段复盘</h2>
+  <p>从 2025 年 10 月到 2026 年 3 月，项目可以划分为六个月的连续收敛过程：从技术调研与预处理打底，逐步进入数据建设、基线训练、全图推理、GUI 收口、测试独立和分割研发线启动。</p>
+
+  <div class="figure">
+    <img src="assets/generated/project_execution_overview.png" alt="项目执行阶段总览图" />
+    <div class="caption">图 10 项目执行阶段总览图</div>
+  </div>
+
+  <table>
+    <tr>
+      <th>阶段</th>
+      <th>时间</th>
+      <th>主题</th>
+      <th>主要输出</th>
+    </tr>
+    <tr><td>Phase 0</td><td>2025-10 ~ 2025-11</td><td>需求澄清与技术路线确定</td><td>调研、方案比较、原型方向</td></tr>
+    <tr><td>Phase 1</td><td>2025-11 ~ 2026-01</td><td>预处理流水线与图像标准化</td><td>ROI、配准、背景扣除、光学口径</td></tr>
+    <tr><td>Phase 2</td><td>2026-01 ~ 2026-02</td><td>切片标注、训练基线、推理修正</td><td>stage2_cleaned 基线、全图推理链路</td></tr>
+    <tr><td>Phase 3</td><td>2026-02 ~ 2026-03</td><td>GUI 收敛、评分统一、测试独立、分割准备</td><td>GUI 预发布、CNAS 子系统、分割实验起步</td></tr>
+  </table>
+
+  <p>从执行视角看，过去六个月最重要的成果不是“跑了多少个模型”，而是：</p>
+  <ul>
+    <li>把图像处理、检测、评分、测试和交付逐步拆清楚。</li>
+    <li>明确了正式系统与研发分支的边界。</li>
+    <li>让项目从研究脚本集合演化为可交付、可接手、可继续扩展的系统工程。</li>
+  </ul>
+
+  <h2>9. 当前文档图文完整性检查结论</h2>
+  <table>
+    <tr>
+      <th>文档</th>
+      <th>是否已存在</th>
+      <th>原有图片情况</th>
+      <th>本次补充内容</th>
+      <th>结论</th>
+    </tr>
+    <tr>
+      <td>研究技术文档</td>
+      <td>是</td>
+      <td>已有 GUI 示意、训练曲线、识别对比图</td>
+      <td>补充系统架构图、算法双分支图、分割实验图</td>
+      <td>现在已具备较完整图文结构</td>
+    </tr>
+    <tr>
+      <td>项目执行文档</td>
+      <td>是</td>
+      <td>已有 ROI 图、训练曲线、GUI 示意</td>
+      <td>补充阶段总览图，并在综合文档中统一归并</td>
+      <td>现在可用于汇报和交接</td>
+    </tr>
+  </table>
+
+  <h2>10. 后续建议</h2>
+  <ol>
+    <li>正式系统继续冻结当前 GUI 主线，不把研究分支结果直接并入产品。</li>
+    <li>识别算法分支继续以 <code>NWD-only</code> 为父实验推进，保持单变量实验纪律。</li>
+    <li>分割分支继续以 <code>FPN + Unet++</code> 为主候选，一条侧重标注更新，一条侧重物理量化与评分耦合。</li>
+    <li>继续围绕 <code>L_center / L_total / N / A / S_scatter</code> 建立更可解释的评分理论。</li>
+    <li>后续所有阶段性汇报，优先使用本综合文档作为主文档，再按需要拆分为测试资料、研发资料和执行资料。</li>
+  </ol>
+
+  <h2>11. 结论</h2>
+  <p>本项目当前已经具备“可展示、可交接、可继续研发”的综合条件。原有技术开发文档和执行过程文档已经存在，但配图仍偏向结果展示。本次新增的系统架构图、算法结构图和执行阶段图，已经把“系统是什么、算法如何分层、项目如何收敛”三个关键问题补齐，能够更好地支撑项目汇报、团队协作和后续接手。</p>
+
+  <p class="small">附注：本综合文档以仓库中的现有技术文档、执行文档、实验日志、系统源码结构和最新分割实验产物为基础整理而成，并已补入新的解释型配图。</p>
+</body>
+</html>
