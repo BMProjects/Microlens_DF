@@ -1,133 +1,138 @@
 # Microlens_DF
 
-> **暗场离焦微结构镜片缺陷检测、分析与磨损评估系统**
-> Dark-field defect detection, analysis & wear-grading for defocused micro-structured lenses.
+> **Dark-field defect detection, analysis & wear-grading for defocused micro-structured lenses**
+> 暗场离焦微结构镜片缺陷检测、分析与磨损评估系统
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](pyproject.toml)
-[![Status](https://img.shields.io/badge/status-阶段性成果%20·%20架构定型-success.svg)](#)
+[![Status](https://img.shields.io/badge/status-mid--term%20·%20architecture%20stable-success.svg)](#)
 
-从暗场显微图像中**检测三类缺陷（划痕 / 斑点 / 缺损）→ 像素级分析 → 量化磨损评分与 A/B/C/D 评级**，并提供面向非专业用户的图形化工作台。
+From a dark-field micrograph, the system **detects three defect classes (scratch / spot / critical) → analyzes them at the pixel level → produces a quantitative WearScore and an A/B/C/D grade**, and ships a graphical workbench for non-expert operators.
 
-![GUI 演示：上传 → 检测 → 结果](doc/assets/generated/gui_demo.webp)
+![GUI demo: upload → detect → results](doc/assets/generated/gui_demo.webp)
 
-*上传单张镜片图像，一键得到检测叠加图、缺陷地形图、WearScore 计算过程与磨损评级卡。*
+*Upload a single lens image and get, in one click, the detection overlay, defect topography map, WearScore breakdown, and a wear-grade card.*
 
 ---
 
-## ✨ 核心能力
+## ✨ Capabilities
 
-| 能力 | 说明 |
+| Capability | Notes |
 |---|---|
-| 暗场预处理流水线 | 背景模板融合、高光环配准、亮度修正、ROI 提取 |
-| 缺陷检测 | YOLOv12m + SAHI 切片推理 + IOS 跨片合并；mAP@0.5 = **0.6765**（CNAS 测试集） |
-| 缺陷分割 | HRNet-OCR / SegFormer 像素级形态刻画（研发分支） |
-| 磨损评分 | WearScore 五因子加权评分 → A/B/C/D 评级与结论 |
-| 图形工作台 | Gradio 四步流程，面向非专业操作员 |
-| 第三方测试 | 独立、可复现的 CNAS 准确率测试子系统 |
+| Dark-field preprocessing pipeline | Background-template fusion, highlight-ring registration, brightness correction, ROI extraction |
+| Defect detection | YOLOv12m + SAHI tiled inference + IOS cross-tile merging; mAP@0.5 = **0.6765** (CNAS test set) |
+| Defect segmentation | HRNet-OCR / SegFormer pixel-level morphology (now the core research direction) |
+| Wear scoring | WearScore five-factor weighted score → A/B/C/D grade and verdict |
+| Graphical workbench | Gradio four-step flow for non-expert operators |
+| Third-party testing | Independent, reproducible CNAS accuracy-testing subsystem |
 
 ---
 
-## 🏗️ 模块化架构
+## 🏗️ Modular Architecture
 
-系统按 8 个接口清晰的模块组织（详见 [系统架构_模块化梳理](doc/系统架构_模块化梳理_20260531.md)）：
+The system is organized into 8 modules with clean interfaces (see [System Architecture](doc/系统架构_模块化梳理_20260531.md)):
 
 ```text
-原始暗场图像 ─①数据集─▶ ②预处理 ─▶ ④识别(YOLO+SFE+NWD) ─┐
-                              └─▶ ⑤分割(HRNet-OCR/SegFormer)─┤
-                                                              ▼
-                              ⑥评估(mAP / WearScore 评级) ─▶ ⑦前端
-                                                              ▲
-              ③半监督标注(伪/弱标签)──回流──▶ ①数据集         │
-                                                  ⑧CNAS 第三方测试
+raw dark-field image ─①dataset─▶ ②preprocessing ─▶ ④detection (YOLO+SFE+NWD) ─┐
+                                       └─▶ ⑤segmentation (HRNet-OCR/SegFormer) ─┤
+                                                                                ▼
+                                       ⑥evaluation (mAP / WearScore grade) ─▶ ⑦frontend
+                                                                                ▲
+                  ③semi-supervised labeling (pseudo/weak) ──feedback──▶ ①dataset│
+                                                              ⑧CNAS third-party testing
 ```
 
-| # | 模块 | 主要代码 |
+| # | Module | Key code |
 |---|---|---|
-| ① | 数据集 | `output/dataset_v2/`（数据，不入库）、`src/.../data/`、`scripts/build_tile_dataset.py` |
-| ② | 预处理 | `src/darkfield_defects/preprocessing/` |
-| ③ | 半监督标注 | `scripts/step1_label_cleanup.py` … `step5_retrain.py`、`generate_weak_masks.py` |
-| ④ | 识别算法 | `src/darkfield_defects/{detection,ml}/`、`scripts/infer_full_pipeline.py` |
-| ⑤ | 分割算法 | `src/.../ml/{segmentation_factory,hrnet_ocr}.py`、`configs/segmentation/mmseg/` |
-| ⑥ | 评估算法 | `src/darkfield_defects/{eval,scoring}/` |
-| ⑦ | 前端系统 | `src/darkfield_defects/viz/app.py`、`app_services/inference_service.py` |
-| ⑧ | 第三方测试 | `cnas_test/` |
+| ① | Dataset | `output/dataset_v2/` (data, not tracked), `src/.../data/`, `scripts/build_tile_dataset.py` |
+| ② | Preprocessing | `src/darkfield_defects/preprocessing/` |
+| ③ | Semi-supervised labeling | `scripts/step1_label_cleanup.py` … `step5_retrain.py`, `generate_weak_masks.py` |
+| ④ | Detection | `src/darkfield_defects/{detection,ml}/`, `scripts/infer_full_pipeline.py` |
+| ⑤ | Segmentation | `src/.../ml/{segmentation_factory,hrnet_ocr}.py`, `configs/segmentation/mmseg/` |
+| ⑥ | Evaluation | `src/darkfield_defects/{eval,scoring}/` |
+| ⑦ | Frontend | `src/darkfield_defects/viz/app.py`, `app_services/inference_service.py` |
+| ⑧ | Third-party testing | `cnas_test/` |
 
-![系统总架构](doc/assets/generated/project_system_architecture.png)
+![System architecture](doc/assets/generated/project_system_architecture.png)
+
+> **Project status (mid-term):** the architecture is stable. The core algorithm focus is shifting from
+> the detection baseline toward the **segmentation** pipeline for finer, pixel-level defect analysis.
 
 ---
 
-## 🚀 快速开始
+## 🚀 Quick Start
 
-项目使用 [`uv`](https://github.com/astral-sh/uv) 管理 Python 环境。
+The project uses [`uv`](https://github.com/astral-sh/uv) to manage the Python environment.
 
 ```bash
-# 1. 安装依赖（GUI 主线通常只需这一条）
+# 1. Install dependencies (the GUI line usually only needs this)
 uv sync --extra dev --extra ml --extra viz
 
-# 2. 启动图形工作台 → http://127.0.0.1:7860
+# 2. Launch the graphical workbench → http://127.0.0.1:7860
 uv run python -m darkfield_defects.viz.app
 
-# 3. 运行测试
+# 3. Run tests
 uv run pytest -q
 ```
 
-> **注意**：仓库不含数据集与训练权重。GUI 默认权重路径为
-> `output/experiments/phase3e/.../weights/best.pt`，需在本地提供权重后方可推理。
+> **Note:** datasets and training weights are not shipped in this repository. The GUI's default weight
+> path is `output/experiments/phase3e/.../weights/best.pt`; provide weights locally before running inference.
 
-### 其他入口
+### Other entry points
 
 ```bash
-uv run python -m cnas_test.runner.run_eval --help       # CNAS 第三方测试
-uv run python scripts/train_msd_segmentation.py --help   # 分割实验
-uv run python scripts/infer_full_pipeline.py --help      # 全图推理流水线
+uv run python -m cnas_test.runner.run_eval --help        # CNAS third-party testing
+uv run python scripts/train_msd_segmentation.py --help    # segmentation experiments
+uv run python scripts/infer_full_pipeline.py --help       # full-image inference pipeline
 ```
 
 ---
 
-## 📂 目录结构
+## 📂 Layout
 
 ```text
-src/            系统源码（8 模块）
-scripts/        研究与批处理脚本
-configs/        检测/分割配置
-tests/          自动化测试
-cnas_test/      独立第三方测试子系统
-research_loops/ 自动化研发规则与实验程序
-doc/            成果型图文文档（web 版） + doc/assets/ 长期引用图片
-output/         数据集 / 权重 / 实验与运行产物（默认不入 Git）
+src/            source code (8 modules)
+scripts/        research & batch scripts
+configs/        detection / segmentation configs
+tests/          automated tests
+cnas_test/      standalone third-party testing subsystem
+research_loops/ automated R&D rules and experiment programs
+doc/            illustrated web docs + doc/assets/ long-lived reference images
+output/         datasets / weights / experiment & run artifacts (not tracked by default)
 ```
 
 ---
 
-## 🔒 数据与代码分离
+## 🔒 Data / Code Separation
 
-仓库仅同步**源码、配置、测试、轻量清单/模板与成果型文档**。以下默认**不纳入版本控制**（见 [.gitignore](.gitignore)）：
+The repository tracks **only source, configs, tests, lightweight manifests/templates, and illustrated docs**.
+The following are **excluded from version control** by default (see [.gitignore](.gitignore)):
 
-- 数据集与切片（`output/dataset_v2/`、`output/tile_dataset/` …）
-- 训练输出与实验产物（`output/training/`、`output/experiments/`、`runs/`）
-- 模型权重（`*.pt` / `*.pth` / `*.onnx`）
-- 评测运行产物（`cnas_test/outputs/`）
-- 二进制/敏感交付件（`*.pdf` / `*.docx` / `*.odt`）与归档文档（`output/_doc_archive/`）
-
----
-
-## 📑 文档索引
-
-打开 [`doc/index.html`](doc/index.html) 浏览全部图文文档。关键成果文档：
-
-- [系统架构_模块化梳理](doc/系统架构_模块化梳理_20260531.md) — 本项目模块化总览
-- [软件系统说明文档 SDD v1](doc/软件系统说明文档_SDD_v1.md)
-- [研究技术文档_预发布与算法演进](doc/研究技术文档_20260324_预发布与算法演进.md)
-- [背景技术综合研究报告 v1](doc/背景技术综合研究报告_v1.md)
-- [GitHub 协作同步与大文件管理说明](doc/GitHub协作同步与大文件管理说明_20260324.md)
+- Datasets and tiles (`output/dataset_v2/`, `output/tile_dataset/`, …)
+- Training outputs and experiment artifacts (`output/training/`, `output/experiments/`, `runs/`)
+- Model weights (`*.pt` / `*.pth` / `*.onnx`)
+- Test-run artifacts (`cnas_test/outputs/`)
+- Binary / sensitive deliverables (`*.pdf` / `*.docx` / `*.odt`) and archived docs (`output/_doc_archive/`)
 
 ---
 
-## 📜 许可证与知识产权
+## 📑 Documentation
 
-代码以 [Apache License 2.0](LICENSE) 授权。本项目为国家重点研发计划相关课题
-（2024YFC2419504 / 2024YFC2419500）研究成果的一部分；原始数据、官方任务书与
-科技报告等不随本仓库公开。详见 [NOTICE](NOTICE)。
+Open [`doc/index.html`](doc/index.html) to browse all illustrated docs. Key documents:
 
-> 第三方组件 Ultralytics YOLO 采用 AGPL-3.0，若用于分发或网络服务请遵守其义务。
+- [System Architecture (modular overview)](doc/系统架构_模块化梳理_20260531.md)
+- [Software Design Document (SDD v1)](doc/软件系统说明文档_SDD_v1.md)
+- [Research & Tech Note — pre-release & algorithm evolution](doc/研究技术文档_20260324_预发布与算法演进.md)
+- [Background Technology Survey v1](doc/背景技术综合研究报告_v1.md)
+- [GitHub collaboration & large-file management](doc/GitHub协作同步与大文件管理说明_20260324.md)
+
+---
+
+## 📜 License & IP
+
+The code is licensed under [Apache License 2.0](LICENSE). This project is part of research conducted under
+national key R&D program topics (2024YFC2419504 / 2024YFC2419500); the raw data, official task statements,
+and sci-tech reports are not published with this repository. See [NOTICE](NOTICE).
+
+> Third-party component Ultralytics YOLO is licensed under AGPL-3.0; if you redistribute or provide a network
+> service, comply with its obligations.
