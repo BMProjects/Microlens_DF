@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>磨损识别准确率测试大纲制定思路说明</title>
+  <style>
+    body { margin: 0; background: #f5f7fb; color: #0f172a; font-family: "Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; }
+    .page { max-width: 1080px; margin: 28px auto; background: #fff; padding: 36px 42px 56px; border-radius: 18px; box-shadow: 0 8px 24px rgba(15,23,42,.08); }
+    .doc-nav { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; }
+    .doc-nav a { display:inline-block; padding:6px 10px; border-radius:999px; background:#fff; border:1px solid #bfdbfe; color:#1d4ed8; text-decoration:none; }
+    h1 { margin:0 0 18px; font-size:2rem; border-bottom:3px solid #dbeafe; padding-bottom:12px; }
+    h2 { margin-top:30px; font-size:1.35rem; border-left:5px solid #60a5fa; padding-left:12px; }
+    h3 { margin-top:22px; font-size:1.08rem; color:#0f172a; }
+    p, li { line-height:1.82; font-size:15px; }
+    ul, ol { padding-left:22px; }
+    .lead { background:#eff6ff; border:1px solid #dbeafe; padding:16px 18px; border-radius:14px; color:#334155; }
+    code { background:#eff6ff; padding:1px 6px; border-radius:6px; }
+    .shot { margin: 14px 0 22px; }
+    .shot img { max-width: 100%; height: auto; border: 1px solid #cbd5e1; border-radius: 12px; display:block; }
+    .shot figcaption { color:#475569; font-size:14px; margin-top:8px; }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <nav class="doc-nav">
+      <a href="/home/bm/Dev/Microlens_DF/cnas_test/docs/README.md">测试文档目录说明</a>
+      <a href="/home/bm/Dev/Microlens_DF/cnas_test/docs/磨损识别准确率测试大纲制定思路说明_当前版.md">Markdown 源文档</a>
+      <a href="/home/bm/Dev/Microlens_DF/cnas_test/docs/CNAS测试大纲_当前版.html">测试大纲 Web 版</a>
+    </nav>
+    <h1>磨损识别准确率测试大纲制定思路说明</h1>
+    <p class="lead">这份材料主要给项目组内部交流使用。目标不是写得很学术，而是把“为什么测试大纲要这么写”这件事，用更直接、更容易讨论的方式说明白。</p>
+
+    <h2>1 这份材料是做什么的</h2>
+    <p>这份材料是发给项目组成员交流使用的说明稿，用来回答一个实际问题：</p>
+    <p><strong>为什么当前测试大纲没有把“磨损识别准确率”直接写死成某一种算法指标？</strong></p>
+    <p>它不是正式测试依据，正式测试仍以测试大纲和测试报告为准。</p>
+
+    <h2>2 现在遇到的核心问题</h2>
+    <p>当前项目的实际应用场景为日常使用中的镜片磨损程度识别，与生产端缺陷检测场景存在明显差异。</p>
+    <p>生产端通常是：</p>
+    <ul>
+      <li>缺陷少</li>
+      <li>缺陷相对独立</li>
+      <li>一个缺陷对应一个目标，比较容易数清楚</li>
+    </ul>
+    <p>而我们现在的镜片磨损图像更常见的是：</p>
+    <ul>
+      <li>磨损很多</li>
+      <li>相互重叠、粘连、交叉</li>
+      <li>很多时候很难稳定地说“这里到底是几个独立缺陷”</li>
+    </ul>
+    <p>因此，若完全照搬生产端“独立缺陷实例检测”的指标体系，会与本项目真实业务目标存在偏差。</p>
+
+    <h2>3 现有实验给了我们什么提醒</h2>
+    <h3>3.1 当前检测方案是能工作的</h3>
+    <p>当前测试版本 <code>LWIA-Det v1.0.0</code>（内部训练注释：<code>B2_nwd_only_phase3e</code>）在完整测试集上的结果是：</p>
+    <ul>
+      <li><code>mAP50 = 0.6844</code></li>
+      <li><code>Precision = 0.6030</code></li>
+      <li><code>Recall = 0.6725</code></li>
+    </ul>
+    <p>这说明：<strong>当前检测方案已经可以作为正式送测版本使用。</strong></p>
+
+    <h3>3.2 但分割实验说明，真正难点不只是“框出来”</h3>
+    <p>第二批分割实验里，几个模型在私有数据上的表现并不一样：</p>
+    <ul>
+      <li><code>FPN private best_loss = 0.2904</code></li>
+      <li><code>HRNet-OCR-W18 private best_loss = 0.3029</code></li>
+      <li><code>SegFormer-B2 private best_loss = 0.3258</code></li>
+    </ul>
+    <figure class="shot">
+      <img src="../../output/experiments/phase3_segmentation/analysis/batch2_compare/batch2_private_compare.png" alt="Batch2 Private Compare" />
+      <figcaption>图 1 第二批分割实验私有数据对比结果</figcaption>
+    </figure>
+    <p>这说明后续技术路线很可能会从“目标检测”逐步转向“区域识别/分割增强”。</p>
+
+    <h3>3.3 形态规则结果说明，重叠区域确实很复杂</h3>
+    <p>当前形态规则分类的统计结果是：</p>
+    <ul>
+      <li><code>n_images = 197</code></li>
+      <li><code>n_components = 91235</code></li>
+      <li><code>uncertain = 16610</code></li>
+    </ul>
+    <p>这说明很多区域并不是简单数目标就能说清楚的，尤其是重叠、粘连和复杂形态区域。</p>
+    <figure class="shot">
+      <img src="../../output/experiments/phase3_segmentation/analysis/segmentation_review_phase3e/panels/55l_compare.png" alt="Segmentation Compare 55l" />
+      <figcaption>图 2 同一复杂样本在不同分割模型下的输出差异</figcaption>
+    </figure>
+    <figure class="shot">
+      <img src="../../output/experiments/phase3_segmentation/morphology_rules/rule_panels/55l.png" alt="Morphology Rule Panel 55l" />
+      <figcaption>图 3 复杂区域的形态规则拆解结果示例</figcaption>
+    </figure>
+
+    <h2>4 我们讨论过的几种写法</h2>
+    <h3>方案一：测试大纲直接写死为 <code>mAP50</code></h3>
+    <p>好处是最标准、最容易送检、和当前实现完全一致；问题是后续如果改成区域识别，测试大纲就会被卡住。</p>
+
+    <h3>方案二：写成“正确检出数量 / 全部标注数量”</h3>
+    <p>好处是好懂；问题是太像检出率，不够严谨，也容易被质疑。</p>
+
+    <h3>方案三：直接把区域重合度当正式指标</h3>
+    <p>好处是更接近真实业务目标；问题是现在就这么改，第三方容易觉得这是自定义指标，而且当前送测版本也不是按这个口径实现的。</p>
+
+    <h2>5 最后为什么定成现在这个版本</h2>
+    <h3>5.1 指标名字不变</h3>
+    <p>统一叫：<strong>磨损识别准确率</strong>。这样和任务书一致，也方便后续沿用。</p>
+
+    <h3>5.2 定义写成上位表述</h3>
+    <p>测试大纲里不把它直接绑定成某一个固定公式，而写成：</p>
+    <p><strong>被测软件产品在规定测试图像集上，对磨损目标识别结果与基准结果一致程度的评价指标。</strong></p>
+    <p>这样做的好处是：当前检测方案能用，后续区域方案也能接。</p>
+
+    <h3>5.3 当前怎么执行</h3>
+    <p>当前送测版本还是目标级检测输出，所以：</p>
+    <ul>
+      <li>当前正式测试继续按目标级评价方式执行</li>
+      <li>当前正式结果写成 <code>mAP50</code></li>
+    </ul>
+    <p>也就是说，<strong>当前没有改送测指标，只是给后续技术路线留了空间。</strong></p>
+
+    <h2>6 现在这套写法的实际意义</h2>
+    <p>对当前送测来说：</p>
+    <ul>
+      <li>不影响现在的检测测试</li>
+      <li>可以直接使用现有成熟结果</li>
+    </ul>
+    <p>对后续改进来说：</p>
+    <ul>
+      <li>如果以后转向区域识别，不需要把整个测试大纲推翻重写</li>
+      <li>只需要在委托测试文件和测试报告里明确当前采用的评价方式</li>
+    </ul>
+
+    <h2>7 一句话结论</h2>
+    <p><strong>指标名称先稳住，当前检测照常送测，后续区域方案也能接进来。</strong></p>
+    <p>这就是当前版本想解决的核心问题。</p>
+  </main>
+</body>
+</html>

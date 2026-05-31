@@ -8,7 +8,10 @@ __pycache__/
 .ruff_cache/
 
 # Local tool state
-.claude/settings.local.json
+.claude/
+.codex
+.lo-profile-doc-site/
+tmp/
 
 # Training / model cache
 runs/
@@ -24,6 +27,15 @@ output/**
 !output/README.md
 
 # Keep lightweight tracked docs/assets outside output
+
+# Sensitive / binary deliverables — never publish
+*.pdf
+*.docx
+*.odt
+# CNAS run products (kept locally, archived)
+cnas_test/outputs/
+# Build/package metadata
+*.egg-info/
 
 # Optional local exports
 *.tar.gz

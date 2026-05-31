@@ -7,42 +7,56 @@ import time
 from pathlib import Path
 
 from cnas_test.runner.config import (
-    CLASS_DISTRIBUTION,
     COMPAT_COMMAND,
+    DATASET_CONSTRUCTION_METHOD,
+    DATASET_NAME,
     DATASET_SUMMARY,
+    MODEL_DESCRIPTION,
     OUTPUT_SUBDIRS,
-    PASS_THRESHOLD,
     RECOMMENDED_COMMAND,
+    SOFTWARE_NAME,
+    SOFTWARE_VERSION,
+    STANDARD_SAMPLE_UNIT,
     TEMPLATES_DIR,
+    VERSION_NOTE,
 )
 
 
-def print_report(result: dict) -> None:
+def format_print_lines(result: dict) -> list[str]:
+    """返回与 print_report 一致的文本行（供截图/日志复用，不含 ANSI）。"""
     sep = "=" * 60
-    verdict = "✅ 通过" if result["passed"] else "❌ 未通过"
-
-    print()
-    print(sep)
-    print("  暗场镜片缺陷检测系统 — CNAS 第三方测试结果")
-    print(sep)
-    print(f"  测试日期    : {result['test_timestamp']}")
-    print(f"  模型权重    : {result['model_weights']}")
-    print(f"  测试切片数  : {result['n_tiles']} 张")
-    print(f"  评测参数    : conf={result['eval_conf']}, IoU={result['eval_iou']}")
-    print()
-    print("  --- 各类别 AP@0.5 ---")
+    lines = [
+        sep,
+        f"  {SOFTWARE_NAME} — 第三方测试结果记录",
+        sep,
+        f"  测试版本    : {SOFTWARE_VERSION}（{VERSION_NOTE}）",
+        f"  测试日期    : {result['test_timestamp']}",
+        f"  模型权重    : {result['model_weights']}",
+        f"  评测样本数  : {result['n_tiles']} 个",
+        f"  评测参数    : conf={result['eval_conf']}, IoU={result['eval_iou']}",
+        "",
+        "  --- 各类别 AP@0.5 ---",
+    ]
     for cls_name, ap in result["metrics"]["per_class_AP50"].items():
-        print(f"  {cls_name:<12}: {ap:.4f}")
+        lines.append(f"  {cls_name:<12}: {ap:.4f}")
+    lines += [
+        "",
+        f"  mAP@0.5     : {result['metrics']['mAP50']:.4f}   <- 测试指标",
+        f"  mAP@0.5:0.95: {result['metrics']['mAP50_95']:.4f}",
+        f"  Precision   : {result['metrics']['precision']:.4f}",
+        f"  Recall      : {result['metrics']['recall']:.4f}",
+        "",
+        "  结果说明    : 本页记录第三方测试实测值；判定依据以委托测试文件为准",
+        f"  耗时        : {result['elapsed_seconds']:.1f} 秒",
+        sep,
+    ]
+    return lines
+
+
+def print_report(result: dict) -> None:
     print()
-    print(f"  mAP@0.5     : {result['metrics']['mAP50']:.4f}   ← 测试指标")
-    print(f"  mAP@0.5:0.95: {result['metrics']['mAP50_95']:.4f}")
-    print(f"  Precision   : {result['metrics']['precision']:.4f}")
-    print(f"  Recall      : {result['metrics']['recall']:.4f}")
-    print()
-    print(f"  通过标准    : mAP@0.5 ≥ {result['pass_threshold']:.0%}")
-    print(f"  测试结论    : {verdict}")
-    print(f"  耗时        : {result['elapsed_seconds']:.1f} 秒")
-    print(sep)
+    for line in format_print_lines(result):
+        print(line)
 
 
 def build_result_payload(
@@ -53,6 +67,7 @@ def build_result_payload(
     eval_iou: float,
     pass_threshold: float,
     metrics: dict,
+    dataset_summary: dict,
     elapsed_seconds: float,
 ) -> dict:
     return {
@@ -64,6 +79,7 @@ def build_result_payload(
         "pass_threshold": pass_threshold,
         "passed": metrics["mAP50"] >= pass_threshold,
         "metrics": metrics,
+        "dataset": dataset_summary,
         "elapsed_seconds": round(elapsed_seconds, 1),
     }
 
@@ -78,7 +94,9 @@ def prepare_output_dirs(save_root: Path) -> dict[str, Path]:
     return output_dirs
 
 
-def save_result_json(payload: dict, save_dir: Path, filename: str = "cnas_eval_results.json") -> Path:
+def save_result_json(
+    payload: dict, save_dir: Path, filename: str = "cnas_eval_results.json"
+) -> Path:
     save_dir.mkdir(parents=True, exist_ok=True)
     out_path = save_dir / filename
     with open(out_path, "w", encoding="utf-8") as f:
@@ -105,24 +123,38 @@ def save_markdown_report(
 ) -> Path:
     save_dir.mkdir(parents=True, exist_ok=True)
     template_path = TEMPLATES_DIR / "cnas_test_report_template.md"
-    holdout = DATASET_SUMMARY["holdout"]
-    holdout_dist = CLASS_DISTRIBUTION["holdout"]
+    dataset = payload["dataset"]
+    class_counts = dataset["class_counts"]
     metrics = payload["metrics"]
     content = _render_template(
         template_path,
         {
             "TEST_TIMESTAMP": payload["test_timestamp"],
+            "SOFTWARE_NAME": SOFTWARE_NAME,
+            "SOFTWARE_VERSION": SOFTWARE_VERSION,
+            "VERSION_NOTE": VERSION_NOTE,
+            "MODEL_DESCRIPTION": MODEL_DESCRIPTION,
+            "DATASET_NAME": DATASET_NAME,
+            "DATASET_CONSTRUCTION_METHOD": DATASET_CONSTRUCTION_METHOD,
+            "STANDARD_SAMPLE_UNIT": STANDARD_SAMPLE_UNIT,
             "TEST_SET_PATH": str(test_set_path),
             "MODEL_WEIGHTS": str(weights_path),
             "COMMAND": command,
             "COMPAT_COMMAND": compat_command,
             "N_TILES": str(payload["n_tiles"]),
-            "HOLDOUT_IMAGES": str(holdout["images"]),
-            "HOLDOUT_TILES": str(holdout["tiles"]),
-            "HOLDOUT_BOXES": str(holdout["boxes"]),
-            "SCRATCH_BOXES": str(holdout_dist["scratch"]),
-            "SPOT_BOXES": str(holdout_dist["spot"]),
-            "CRITICAL_BOXES": str(holdout_dist["critical"]),
+            "DATASET_IMAGES": str(dataset["images"]),
+            "DATASET_TILES": str(dataset["tiles"]),
+            "DATASET_BOXES": str(dataset["boxes"]),
+            "BACKGROUND_TILES": str(dataset["background_tiles"]),
+            "TRAIN_IMAGES": str(DATASET_SUMMARY["train"]["images"]),
+            "TRAIN_TILES": str(DATASET_SUMMARY["train"]["tiles"]),
+            "TRAIN_BOXES": str(DATASET_SUMMARY["train"]["boxes"]),
+            "VAL_IMAGES": str(DATASET_SUMMARY["val"]["images"]),
+            "VAL_TILES": str(DATASET_SUMMARY["val"]["tiles"]),
+            "VAL_BOXES": str(DATASET_SUMMARY["val"]["boxes"]),
+            "SCRATCH_BOXES": str(class_counts["scratch"]),
+            "SPOT_BOXES": str(class_counts["spot"]),
+            "CRITICAL_BOXES": str(class_counts["critical"]),
             "EVAL_CONF": f"{payload['eval_conf']}",
             "EVAL_IOU": f"{payload['eval_iou']}",
             "SCRATCH_AP50": f"{metrics['per_class_AP50']['scratch']:.4f}",
@@ -132,8 +164,6 @@ def save_markdown_report(
             "MAP50_95": f"{metrics['mAP50_95']:.4f}",
             "PRECISION": f"{metrics['precision']:.4f}",
             "RECALL": f"{metrics['recall']:.4f}",
-            "PASS_THRESHOLD": f"{PASS_THRESHOLD:.2f}",
-            "VERDICT": "通过" if payload["passed"] else "未通过",
             "ELAPSED_SECONDS": f"{payload['elapsed_seconds']:.1f}",
         },
     )
@@ -151,20 +181,34 @@ def save_delivery_manifest(
     result_json_path: Path,
     report_path: Path,
     plots_dir: Path,
+    html_report_path: Path | None = None,
+    docx_report_path: Path | None = None,
+    provenance_path: Path | None = None,
+    screenshots_dir: Path | None = None,
 ) -> Path:
+    artifacts = {
+        "dataset_yaml": str(dataset_yaml_path),
+        "dataset_list": str(dataset_yaml_path.parent / "cnas_val_list.txt"),
+        "result_json": str(result_json_path),
+        "markdown_report": str(report_path),
+        "plots_dir": str(plots_dir),
+    }
+    if html_report_path is not None:
+        artifacts["html_report"] = str(html_report_path)
+    if docx_report_path is not None:
+        artifacts["docx_report"] = str(docx_report_path)
+    if provenance_path is not None:
+        artifacts["provenance"] = str(provenance_path)
+    if screenshots_dir is not None:
+        artifacts["screenshots_dir"] = str(screenshots_dir)
+
     payload = {
         "delivery_root": str(save_root),
         "recommended_command": RECOMMENDED_COMMAND,
         "compat_command": COMPAT_COMMAND,
         "test_set_manifest": str(test_set_path),
         "weights_path": str(weights_path),
-        "artifacts": {
-            "dataset_yaml": str(dataset_yaml_path),
-            "dataset_list": str(dataset_yaml_path.parent / "cnas_val_list.txt"),
-            "result_json": str(result_json_path),
-            "markdown_report": str(report_path),
-            "plots_dir": str(plots_dir),
-        },
+        "artifacts": artifacts,
     }
     out_path = save_root / "delivery_manifest.json"
     with open(out_path, "w", encoding="utf-8") as f:

@@ -2,7 +2,7 @@
 """
 Phase 3.1: MSD 数据集分割模型预训练
 =====================================
-在 MSD 公开数据集上训练 LightUNet 分割模型，学习玻璃缺陷的像素级特征。
+在 MSD 公开数据集上训练分割模型，学习玻璃缺陷的像素级特征。
 MSD 数据已通过 prepare_msd_segmentation.py 转换为灰度+class-ID 格式。
 
 类别对齐:
@@ -57,6 +57,7 @@ def main():
     parser.add_argument("--model-name", default="light_unet")
     parser.add_argument("--encoder-name", default=None)
     parser.add_argument("--encoder-weights", default=None)
+    parser.add_argument("--hf-model-id", default=None)
     parser.add_argument("--max-minutes", type=float, default=None)
     parser.add_argument("--output-dir", type=Path, default=None)
     parser.add_argument("--num-workers", type=int, default=0)
@@ -126,6 +127,7 @@ def main():
             model_name=args.model_name,
             encoder_name=args.encoder_name,
             encoder_weights=args.encoder_weights,
+            hf_model_id=args.hf_model_id,
             max_minutes=args.max_minutes,
             num_workers=args.num_workers,
             save_metric=args.save_metric,

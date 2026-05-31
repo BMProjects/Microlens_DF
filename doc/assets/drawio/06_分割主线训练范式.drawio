@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-05-18T12:00:00.000Z" agent="claude-code" version="24.0.0" type="device">
+  <diagram id="diagram-1" name="分割训练范式">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="t" value="分割主线双源域训练范式 + 多模型一致性伪标签闭环" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1f4e79;strokeColor=#1f4e79;fontSize=15;fontStyle=1;fontColor=#ffffff;align=center;" vertex="1" parent="1"><mxGeometry x="50" y="20" width="1300" height="50" as="geometry"/></mxCell>
+        <mxCell id="s0" value="源域 MSD&#10;clean mask 公开数据集" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#6c8ebf;fontSize=14;fontStyle=1;verticalAlign=middle;align=center;" vertex="1" parent="1"><mxGeometry x="60" y="100" width="280" height="80" as="geometry"/></mxCell>
+        <mxCell id="s1" value="源域结构对照预训练&#10;50 epoch" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;fontStyle=1;verticalAlign=middle;align=center;" vertex="1" parent="1"><mxGeometry x="380" y="100" width="280" height="80" as="geometry"/></mxCell>
+        <mxCell id="s2" value="排名: FPN(0.8787) ≈ DLv3+(0.8669) &gt; Unet++(0.4191) &gt; LightUNet" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;fontStyle=1;verticalAlign=middle;align=center;" vertex="1" parent="1"><mxGeometry x="700" y="100" width="620" height="80" as="geometry"/></mxCell>
+        <mxCell id="t0" value="目标域 247 张暗场图&#10;Frangi+TopHat 弱标签" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#6c8ebf;fontSize=14;fontStyle=1;verticalAlign=middle;align=center;" vertex="1" parent="1"><mxGeometry x="60" y="220" width="280" height="80" as="geometry"/></mxCell>
+        <mxCell id="t1" value="私有弱标签微调&#10;L_total = L_seg + λ·L_struct" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;fontStyle=1;verticalAlign=middle;align=center;" vertex="1" parent="1"><mxGeometry x="380" y="220" width="280" height="80" as="geometry"/></mxCell>
+        <mxCell id="t2" value="排名: Unet++ loss 0.2756 最低; FPN 物理量稳定性最好" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;fontStyle=1;verticalAlign=middle;align=center;" vertex="1" parent="1"><mxGeometry x="700" y="220" width="620" height="80" as="geometry"/></mxCell>
+        <mxCell id="mc" value="多模型一致性伪标签闭环 (FPN + Unet++ + SegFormer-B2 + HRNet-OCR-W18)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;fontStyle=1;verticalAlign=middle;align=center;" vertex="1" parent="1"><mxGeometry x="80" y="360" width="1240" height="60" as="geometry"/></mxCell>
+        <mxCell id="mc1" value="高一致区 ≥3 模型&#10;→ 自动高置信标签" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;fontStyle=1;verticalAlign=middle;align=center;" vertex="1" parent="1"><mxGeometry x="80" y="440" width="400" height="70" as="geometry"/></mxCell>
+        <mxCell id="mc2" value="中等分歧区&#10;→ 软标签/低权重" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;fontStyle=1;verticalAlign=middle;align=center;" vertex="1" parent="1"><mxGeometry x="500" y="440" width="400" height="70" as="geometry"/></mxCell>
+        <mxCell id="mc3" value="高分歧区&#10;→ 人工复核优先" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=14;fontStyle=1;verticalAlign=middle;align=center;" vertex="1" parent="1"><mxGeometry x="920" y="440" width="400" height="70" as="geometry"/></mxCell>
+        <mxCell id="out" value="形态规则解析: spot / scratch / damage / critical-crash&#10;输出: mask + class + morphology + zone" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=14;fontStyle=1;verticalAlign=middle;align=center;" vertex="1" parent="1"><mxGeometry x="280" y="560" width="840" height="80" as="geometry"/></mxCell>
+        <mxCell id="q1" value="" style="endArrow=block;html=1;rounded=0;strokeColor=#444;strokeWidth=2;fontSize=12;" edge="1" parent="1" source="s0" target="s1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="q2" value="" style="endArrow=block;html=1;rounded=0;strokeColor=#444;strokeWidth=2;fontSize=12;" edge="1" parent="1" source="s1" target="s2"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="q3" value="" style="endArrow=block;html=1;rounded=0;strokeColor=#444;strokeWidth=2;fontSize=12;" edge="1" parent="1" source="s2" target="t1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="q4" value="" style="endArrow=block;html=1;rounded=0;strokeColor=#444;strokeWidth=2;fontSize=12;" edge="1" parent="1" source="t0" target="t1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="q5" value="" style="endArrow=block;html=1;rounded=0;strokeColor=#444;strokeWidth=2;fontSize=12;" edge="1" parent="1" source="t1" target="t2"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="q6" value="" style="endArrow=block;html=1;rounded=0;strokeColor=#444;strokeWidth=2;fontSize=12;" edge="1" parent="1" source="t2" target="mc"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="q7" value="" style="endArrow=block;html=1;rounded=0;strokeColor=#444;strokeWidth=2;fontSize=12;" edge="1" parent="1" source="mc" target="mc1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="q8" value="" style="endArrow=block;html=1;rounded=0;strokeColor=#444;strokeWidth=2;fontSize=12;" edge="1" parent="1" source="mc" target="mc2"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="q9" value="" style="endArrow=block;html=1;rounded=0;strokeColor=#444;strokeWidth=2;fontSize=12;" edge="1" parent="1" source="mc" target="mc3"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="q10" value="" style="endArrow=block;html=1;rounded=0;strokeColor=#444;strokeWidth=2;fontSize=12;" edge="1" parent="1" source="mc1" target="out"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="q11" value="" style="endArrow=block;html=1;rounded=0;strokeColor=#444;strokeWidth=2;fontSize=12;" edge="1" parent="1" source="mc2" target="out"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>deep-research-report</title>
+  <style>
+body {
+  margin: 0;
+  background: #f5f7fb;
+  color: #1f2937;
+  font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+.page {
+  max-width: 1100px;
+  margin: 32px auto;
+  background: #ffffff;
+  padding: 36px 48px 56px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  border-radius: 18px;
+}
+.doc-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #eff6ff;
+  border: 1px solid #dbeafe;
+}
+.doc-nav a {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+  font-size: 13px;
+}
+h1, h2, h3, h4 {
+  color: #0f172a;
+  line-height: 1.35;
+}
+h1 { font-size: 2rem; border-bottom: 3px solid #dbeafe; padding-bottom: 12px; }
+h2 { font-size: 1.45rem; margin-top: 2rem; border-left: 5px solid #60a5fa; padding-left: 12px; }
+h3 { font-size: 1.15rem; margin-top: 1.4rem; }
+p, li { font-size: 15px; line-height: 1.8; }
+code {
+  background: #eff6ff;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-family: "JetBrains Mono", "Consolas", monospace;
+}
+pre {
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 16px 18px;
+  border-radius: 12px;
+  overflow-x: auto;
+  line-height: 1.55;
+}
+pre code { background: transparent; color: inherit; padding: 0; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 18px 0 24px;
+  font-size: 14px;
+}
+th, td {
+  border: 1px solid #dbe2ea;
+  padding: 10px 12px;
+  vertical-align: top;
+}
+th {
+  background: #eff6ff;
+  font-weight: 700;
+}
+tr:nth-child(even) td {
+  background: #fafcff;
+}
+img {
+  max-width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.10);
+}
+figure {
+  margin: 24px 0;
+}
+figcaption {
+  color: #475569;
+  font-size: 14px;
+  margin-top: 8px;
+}
+a { color: #2563eb; text-decoration: none; }
+a:hover { text-decoration: underline; }
+hr { border: 0; border-top: 1px solid #dbe2ea; margin: 28px 0; }
+.meta {
+  color: #64748b;
+  margin-bottom: 24px;
+  font-size: 14px;
+}
+</style>
+</head>
+<body>
+  <main class="page">
+    <nav class="doc-nav"><a href="index.html">文档总目录</a><a href="deep-research-report.md">Markdown 源文档</a><a href="系统架构_模块化梳理_20260531.html">系统架构_模块化梳理_20260531</a></nav>
+    <div class="meta">自动渲染的 HTML 研究日志，适合继续补充图片、表格与结果对比图。</div>
+    <h1>Algorithmic Design for Decomposing Overlapping Scratches in Dark-Field Microstructured Lens Inspection</h1>
+<h2>Executive summary</h2>
+<p>You already have a reliable <strong>foreground extraction</strong> stage (thresholding on dark-field images), but the industrial—and publishable—core problem is <strong>post-segmentation structural reasoning</strong>: decomposing one connected, thin-structure mask into a set of <strong>individual scratch instances</strong> (ideally as <strong>vectorized curves</strong>) and producing <strong>region-level risk classification</strong> in dense overlap zones.</p>
+<p>This report synthesizes primary research on thin-structure analysis (cracks, vessels, neurites, roads, wireframes), and then proposes three concrete algorithm designs suitable for an industrial system and a paper contribution:</p>
+<ul>
+<li>A <strong>classical skeleton → graph → junction pairing</strong> pipeline with principled costs (angle/width/intensity/curvature) and explicit handling of ill-posed dense overlap via a “risk region” output.</li>
+<li>A <strong>hybrid learned multi-head</strong> network (predicting skeleton/junction/orientation/width + uncertainty) coupled with the same graph solver, enabling robustness under realistic noise and blur while keeping outputs interpretable and vectorized.</li>
+<li>An <strong>end-to-end vectorized tracing</strong> approach inspired by wireframe parsing and road graph extraction, producing polylines/graphs directly when you can afford vector supervision.</li>
+</ul>
+<p>The most robust practical path for “publishable + deployable” is typically the <strong>hybrid multi-head + graph solver</strong>, with a strong ablation plan showing why each head and each solver term matters, and why topology-aware objectives improve connectivity fidelity (vs. simple IoU). This aligns with established conclusions in vessel tracing (the real bottleneck is crossover reasoning) and road extraction (pixel masks alone do not ensure correct connectivity). citeturn7search0turn5search0</p>
+<p>A critical enabler is data: you can bootstrap overlapping-scratch decomposition labels using <strong>synthetic overlap generation</strong> from stroke-like datasets (e.g., online handwriting trajectories or vector doodles) and/or <strong>scratch-specific synthesis</strong> methods that generate realistic annotated scratches. citeturn2view0turn2view2turn2view3turn1search3</p>
+<p>Unspecified in your request (treated as unknown constraints): image resolution and field-of-view, defect density distribution across production lots, real-time latency budget, hardware limits, whether “scratch instances” need physical continuity at crossings, and the operational definition of “risk” (yield loss vs. cosmetic reject vs. downstream failure).</p>
+<h2>Problem statement and assumptions</h2>
+<h3>Task definition</h3>
+<p><strong>Input</strong>:</p>
+<ul>
+<li>Dark-field image \(I\) (grayscale or RGB), unspecified resolution.</li>
+<li>A <strong>foreground defect mask</strong> \(M\) (binary or probabilistic) from thresholding (already working), depicting <em>all</em> defect pixels (scratches + spots + damage clusters).</li>
+</ul>
+<p><strong>Desired outputs</strong>: 1) A set of <strong>scratch instances</strong> \(\{S_k\}\), where each instance is preferably a <strong>vectorized curve</strong> (polyline/spline) and optionally also a raster mask. 2) A <strong>region-level risk map</strong> \(R(x,y)\) or region labels (e.g., “critical overlap zone”) for locations where instance decomposition is ambiguous or operationally unnecessary (dense entanglement).</p>
+<h3>Why this is not standard instance segmentation</h3>
+<p>At scratch crossings, pixels may be explained by <strong>multiple underlying curves</strong>. Pure pixel-to-instance assignment can become ill-posed at intersections, motivating curve/graph representations rather than mask instances alone. This is analogous to “crossover issues” in vessel tracing, where deciding which segments belong to which tree at junctions is the core difficulty. citeturn7search0</p>
+<h3>Imaging/inspection context</h3>
+<p>Dark-field optical inspection often yields defects that are brighter than the background, making threshold segmentation viable; published optical-device dark-field work explicitly uses threshold segmentation due to this intensity separation and then classifies defects into point vs line types. citeturn1search1 Deep models exist for weak scratch segmentation on optical surfaces, but segmentation alone does not solve the structural decomposition problem when overlaps are dense. citeturn1search0</p>
+<h2>Related work landscape mapped to your problem</h2>
+<h3>Thin-structure segmentation and crack literature</h3>
+<p>Crack detection/segmentation work (e.g., DeepCrack) targets thin elongated structures with discontinuities and clutter, using multi-scale features and post-refinement (e.g., guided filtering/CRF). It provides useful architectures and evaluation framing for line-like defects, but it generally outputs <strong>a crack mask</strong>, not decomposed curve instances. citeturn6search0</p>
+<h3>Vessel tracing and crossover reasoning</h3>
+<p>Vessel tracing literature is unusually aligned with your need: it separates (i) segmentation aimed at <strong>connectivity-preserving high recall</strong> from (ii) a tracing stage that explicitly handles junction ambiguity. A representative approach constructs a skeleton graph and frames crossover separation as graph-based inference with both local and global context. citeturn7search0turn7search4</p>
+<p>Key transferable idea: treat your scratch mask as a <strong>network</strong>, convert it to a graph, and solve “which branches belong together” using orientation continuity and context—exactly the operation you need at scratch crossings. citeturn7search0</p>
+<h3>Topology-aware metrics and losses</h3>
+<p>For tubular/network structures, IoU/Dice can miss connectivity failures (broken links). clDice defines a skeleton-focused similarity and provides a differentiable loss (soft-clDice) that improves connectivity and graph-based measures. citeturn5search2 Persistent-homology-based topological losses (NeurIPS’ topology-preserving segmentation; and related topological-prior work) formalize topology discrepancies and can provide gradients targeted at broken connections and incorrect components. citeturn5search3turn7search3turn7search7</p>
+<p>These are directly relevant for:</p>
+<ul>
+<li>training any learned refinement/skeleton head, and</li>
+<li>defining evaluation metrics that correlate with your “instance decomposition correctness.”</li>
+</ul>
+<h3>Wireframe parsing and vectorized line extraction</h3>
+<p>L-CNN (end-to-end wireframe parsing) targets exactly what you want as an output representation: <strong>junctions + connectivity</strong> → vectorized lines, designed to avoid heuristic line extraction. citeturn5search1 This framework is attractive when you can annotate junctions/lines (vector supervision) and want direct polylines.</p>
+<h3>Road network extraction and graph-first reasoning</h3>
+<p>RoadTracer argues segmentation→heuristics pipelines fail because connectivity decisions are delegated to brittle post-processing; it instead constructs the road graph iteratively with a learned decision function and shows improved junction capture. citeturn5search0 The core lesson for scratches: if you need robust connectivity/instance curves, treat the output as a <strong>graph prediction</strong> problem, not only pixel labeling.</p>
+<p>Road graph extraction also offers graph metrics like APLS (Average Path Length Similarity) used in SpaceNet-style evaluation, which can be adapted to scratch graphs when you produce vectorized networks. citeturn8search0turn8search4</p>
+<h3>Instance segmentation, embedding, watershed, and amodal approaches</h3>
+<ul>
+<li><strong>Mask R-CNN</strong> is a foundational instance segmentation method, but it assumes objects are separable instances and is not designed for thin, massively crossing line structures. citeturn4search4turn4search0</li>
+<li><strong>InstanceCut (MultiCut)</strong> combines semantic masks and boundaries to globally partition into instances—useful conceptual grounding for “boundary + global partition,” but still challenged by true crossings where boundaries are ambiguous. citeturn4search5</li>
+<li><strong>Discriminative embedding losses</strong> cluster pixels into instances; this can help for touching objects but still struggles when crossing pixels should support multiple underlying curves. citeturn6search2turn6search6</li>
+<li><strong>Deep Watershed Transform</strong> learns an energy landscape where instances become basins; helpful for blob-like instance splits, less natural for line crossings. citeturn6search1</li>
+<li><strong>Amodal instance segmentation</strong> addresses occlusion completion; conceptually relevant to “multiple underlying objects,” but typically label-expensive and not the most direct formulation for scratch networks. citeturn6search3</li>
+</ul>
+<h2>Engineering baselines, evaluation metrics, and method comparison tables</h2>
+<h3>Baselines you should implement first</h3>
+<p>These baselines are needed for both engineering sanity and publishable ablations:</p>
+<p>1) <strong>Connected components as instances</strong>: fast; fails immediately under overlaps crossings. 2) <strong>Connected components + marker watershed</strong>: improves blob separation; often over/under-splits thin lines depending on marker quality. Watershed is a classic immersion-based morphology method with strong implementations and graph extensions. citeturn7search1 3) <strong>Skeleton segments as instances</strong>: each segment between junctions is an “instance”; over-segments but provides a lower bound. 4) <strong>No pairing vs heuristic pairing</strong>: pairing at junctions via angle continuity as a baseline for “instance assembly.” 5) <strong>Segmentation-only deep baseline</strong> (optional): demonstrates that better masks do not equal correct instance decomposition in dense overlaps—this mirrors arguments in road extraction and vessel tracing. citeturn5search0turn7search0</p>
+<h3>Evaluation protocol (what to measure and how)</h3>
+<p>A publishable protocol should separate three goals:</p>
+<ul>
+<li><strong>Connectivity/centerline fidelity</strong>:</li>
+<li>clDice / soft-clDice as metric (centerline overlap). citeturn5search2</li>
+<li>Skeleton precision/recall/F1 computed on 1-pixel skeleton (tolerance-based).</li>
+<li>Betti number error / topology error (if you use topology-loss frameworks). citeturn5search3turn7search3</li>
+</ul>
+<ul>
+<li><strong>Instance decomposition quality</strong>:</li>
+<li>Instance-level precision/recall: match predicted scratch polylines to GT polylines using average symmetric distance (Chamfer) with a tolerance; compute F1.</li>
+<li>“Junction pairing accuracy”: accuracy of edge-to-edge pairing decisions at junctions.</li>
+<li>Length error per matched instance (absolute and relative), and area error if you also output rasterized width masks.</li>
+</ul>
+<ul>
+<li><strong>Region-level risk</strong>:</li>
+<li>Risk region IoU/F1 for “critical overlap zones,” plus calibration metrics (AUC) if risk is probabilistic.</li>
+</ul>
+<p><strong>Success criteria (example, tune to your industrial needs)</strong>:</p>
+<ul>
+<li>On moderate-overlap subset: instance F1 ≥ 0.80 and median length relative error ≤ 10%.</li>
+<li>On dense-overlap subset: risk-region recall ≥ 0.95 at precision ≥ 0.90, and “graceful degradation” where decomposed instances are only reported when confidence is high.</li>
+</ul>
+<h3>Method comparison table (families from related work)</h3>
+<table><thead><tr><th>Method family</th><th>Input assumptions</th><th>Supervision required</th><th>Label types</th><th>Compute cost</th><th>Robust to dense overlaps</th><th>Vectorized curve output</th><th>Typical evaluation</th></tr></thead><tbody><tr><td>Connected components</td><td>Mask quality high; overlaps rare</td><td>None</td><td>None</td><td>Very low</td><td>Very low</td><td>No</td><td>Instance count error, IoU</td></tr><tr><td>Marker watershed</td><td>Markers separable; crossings limited</td><td>None / weak markers</td><td>Optional markers</td><td>Low–Medium</td><td>Low–Medium</td><td>No</td><td>IoU, instance split/merge counts citeturn7search1</td></tr><tr><td>Skeleton + local heuristics</td><td>Thin structures; skeleton stable</td><td>None</td><td>None</td><td>Low</td><td>Medium (fails in dense hubs)</td><td>Yes (by tracing edges)</td><td>Skeleton F1, length error</td></tr><tr><td>Vessel-style graph inference</td><td>Network-like; crossovers common</td><td>Moderate (graph labels)</td><td>Junctions, roots/paths</td><td>Medium</td><td>Medium–High</td><td>Yes</td><td>Graph correctness, crossover accuracy citeturn7search0</td></tr><tr><td>DeepCrack-style mask model</td><td>Target is line-like mask</td><td>Full mask supervision</td><td>Pixel masks</td><td>Medium</td><td>Medium (mask only)</td><td>No</td><td>IoU/F1 on mask citeturn6search0</td></tr><tr><td>clDice/topology-aware training</td><td>Thin/tubular; connectivity matters</td><td>Pixel masks (+ topology prior)</td><td>Masks; optional topology</td><td>Medium</td><td>Medium</td><td>Not directly</td><td>clDice, topology metrics citeturn5search2turn5search3</td></tr><tr><td>L-CNN-like wireframe</td><td>Junctions + lines exist</td><td>Vector supervision</td><td>Junctions, line connectivity</td><td>Medium–High</td><td>Medium</td><td>Yes (native)</td><td>Junction/line correctness citeturn5search1</td></tr><tr><td>RoadTracer-like tracing</td><td>Graph can be built iteratively</td><td>Graph/path supervision</td><td>Centerlines/paths</td><td>High</td><td>High</td><td>Yes (native graph)</td><td>Junction capture, graph metrics citeturn5search0</td></tr><tr><td>Pixel embeddings for instances</td><td>Instances separable in embedding</td><td>Instance labels</td><td>Per-pixel instance IDs</td><td>Medium–High</td><td>Low–Medium</td><td>Not directly</td><td>AP, PQ-like, clustering scores citeturn6search2turn6search6</td></tr><tr><td>Amodal instance methods</td><td>Occlusion completion typical</td><td>Heavy (amodal masks)</td><td>Visible+occluded masks</td><td>High</td><td>Potentially high</td><td>No/limited</td><td>Amodal IoU/AP citeturn6search3</td></tr></tbody></table>
+<p>The table’s judgments about overlap robustness follow the core claims and failure modes documented in vessel crossover work and road extraction critiques (segmentation-first is brittle for connectivity), and in wireframe parsing’s emphasis on vectorized structure, not pixel masks. citeturn7search0turn5search0turn5search1</p>
+<h2>Proposed algorithmic designs with pseudocode, losses, and ablations</h2>
+<h3>Classical skeleton–graph–pairing decomposition</h3>
+<h4>Design intent</h4>
+<p>Provide a strong, fully explainable baseline that:</p>
+<ul>
+<li>emits vectorized curves,</li>
+<li>cleanly separates “decomposable” vs “ambiguous dense overlap” regions,</li>
+<li>produces interpretable features for region risk scoring.</li>
+</ul>
+<h4>Core steps</h4>
+<p>1) Skeletonize the mask (unit-width centerline). Thinning methods like Zhang–Suen preserve connectivity and endpoints and yield a 1-pixel skeleton. citeturn7search2 2) Identify keypoints (endpoints degree=1, junction degree≥3, body degree=2). 3) Build a graph where edges are skeleton segments between keypoints (junction-to-junction, junction-to-endpoint, endpoint-to-endpoint). 4) Compute edge features from image + mask:</p>
+<ul>
+<li>length, mean orientation, curvature proxy,</li>
+<li>width estimate via distance transform,</li>
+<li>intensity continuity along centerline.</li>
+</ul>
+<p>5) Junction pairing: for each junction node, decide which incident edges belong to the same physical scratch (curve continuation). Use minimum-cost matching based on orientation + width/intensity continuity. 6) Trace paired edges to form scratch polylines. 7) Detect “ill-posed hubs” (high degree, high pairing ambiguity, high density) and output risk region rather than overconfident decomposition.</p>
+<h4>Pseudocode (high level)</h4>
+<pre><code>Input: image I, binary mask M
+
+S = Skeletonize(M)                        # 1-pixel skeleton
+K = DetectKeypoints(S)                    # endpoints, junctions
+G = BuildGraphFromSkeleton(S, K)          # nodes=keypoints, edges=segments
+
+for each edge e in G.edges:
+    e.features = ExtractEdgeFeatures(I, M, S, e)
+
+P = empty pairing map
+for each junction v in G.junction_nodes:
+    C = ComputePairCosts(v.incident_edges)     # angle+width+intensity+curvature
+    P[v] = SolveMinCostMatching(C)             # local matching (optionally global refinement)
+
+scratches = TracePaths(G, P)                   # follow pairings from endpoints
+risk_map = DetectAmbiguousDenseZones(G, P)     # degree, cost gaps, density metrics
+
+Output: scratches (vector polylines), risk_map, optional per-scratch attributes</code></pre>
+<h4>Computational cost</h4>
+<ul>
+<li>Skeletonization: linear in pixels. citeturn7search2</li>
+<li>Graph construction: linear in skeleton pixels.</li>
+<li>Junction pairing: per-junction matching; Hungarian is \(O(d^3)\) for degree \(d\), typically small except in dense hubs.</li>
+<li>Overall: very feasible for industrial pipelines unless images are extremely large and scratch density is extreme.</li>
+</ul>
+<h4>Strengths / weaknesses</h4>
+<ul>
+<li>Strong interpretability; good baseline; emits vector curves.</li>
+<li>Fails when skeleton is noisy or junction degrees become large; requires robust pruning and hub handling.</li>
+</ul>
+<hr />
+<h3>Hybrid learned multi-head structural evidence + graph solver</h3>
+<h4>Design intent</h4>
+<p>Retain the strong inductive bias of graphs while making the pipeline robust to:</p>
+<ul>
+<li>blur/defocus,</li>
+<li>nonuniform illumination,</li>
+<li>threshold artifacts,</li>
+<li>extremely dense overlaps where local heuristics become unstable.</li>
+</ul>
+<p>This matches the “segmentation with high recall for connectivity” emphasis in vessel tracing and the “avoid heuristic connectivity extraction” argument from RoadTracer. citeturn7search0turn5search0</p>
+<h4>Model outputs (multi-head)</h4>
+<p>Given image \(I\) and optionally mask \(M\), predict:</p>
+<ul>
+<li>\(p_{fg}(x)\): refined foreground probability (optional; may be fixed since threshold works)</li>
+<li>\(p_{sk}(x)\): skeleton/centerline probability</li>
+<li>\(p_{junc}(x)\): junction heatmap</li>
+<li>\(p_{end}(x)\): endpoint heatmap</li>
+<li>\(o(x)\): local orientation (unit vector or angle distribution)</li>
+<li>\(w(x)\): local width (distance-to-boundary proxy)</li>
+<li>\(u(x)\): uncertainty (optional; used for risk and gating decomposition)</li>
+</ul>
+<p>Then graph extraction uses predicted junctions/endpoints and centerline probability to build a cleaner graph than pure morphology.</p>
+<h4>Losses (training objectives)</h4>
+<p>Assuming you can synthesize or annotate sparse structural labels:</p>
+<ul>
+<li><strong>Skeleton loss</strong>: BCE + Dice on skeleton pixels (thin structures need class imbalance handling).</li>
+<li><strong>Keypoint loss</strong>: focal loss on \(p_{junc}\) and \(p_{end}\).</li>
+<li><strong>Orientation loss</strong>: cosine similarity or von-Mises negative log-likelihood on angle.</li>
+<li><strong>Width loss</strong>: Huber/L1 between predicted width and pseudo/GT width.</li>
+<li><strong>Topology-aware terms</strong>:</li>
+<li>soft-clDice between predicted and target masks/skeletons to preserve connectivity. citeturn5search2</li>
+<li>Persistent-homology topological loss to penalize broken connections / wrong components when ground truth is available (or when topology priors can be stated). citeturn5search3turn7search3turn7search7</li>
+</ul>
+<p>A concrete combined loss:</p>
+<p>\[ \mathcal{L}=\lambda_{sk}\mathcal{L}_{sk}+\lambda_{kp}\mathcal{L}_{kp}+\lambda_{ori}\mathcal{L}_{ori}+\lambda_{w}\mathcal{L}_{w}+\lambda_{cl}\mathcal{L}_{soft\_clDice}+\lambda_{topo}\mathcal{L}_{topo} \]</p>
+<h4>Pseudocode (training + inference)</h4>
+<pre><code># Training
+for batch (I, labels) in data:
+    pred = Net(I)
+    L = WeightedSum(
+        SkeletonLoss(pred.sk, labels.sk),
+        KeypointLoss(pred.junc, pred.end, labels.junc, labels.end),
+        OrientationLoss(pred.ori, labels.ori),
+        WidthLoss(pred.width, labels.width),
+        SoftClDiceLoss(pred.fg_or_sk, labels.fg_or_sk),
+        TopologyLoss(pred.fg_or_sk, labels.fg_or_sk)    # optional/ablation
+    )
+    Backprop(L)
+
+# Inference
+pred = Net(I)
+G = BuildGraph(pred.sk, pred.junc, pred.end)
+P = SolveJunctionPairing(G, pred.ori, pred.width, pred.uncertainty)
+scratches = TracePaths(G, P)
+risk = RiskFromUncertaintyAndDensity(G, P, pred.uncertainty)</code></pre>
+<h4>Data / annotations needed</h4>
+<p>This design is compatible with <strong>sparse supervision</strong>:</p>
+<ul>
+<li>Dense mask \(M\) from threshold as weak label.</li>
+<li>Auto-derived pseudo-skeleton from \(M\) (skeletonize) with manual correction only in hard regions.</li>
+<li>Sparse manual junction labels in dense overlap zones (dozens per image can be enough for calibration).</li>
+<li>Region-level risk labels (polygons/tiles) for ambiguous dense hubs.</li>
+</ul>
+<p>It also benefits strongly from <strong>synthetic overlap datasets</strong> (see the dedicated section below).</p>
+<h4>Why this is paper-worthy</h4>
+<p>Your novelty can be cast as: 1) A representation: <strong>scratch decomposition as graph junction pairing with uncertainty-aware abstention</strong> (risk regions). 2) A learning+solver hybrid: <strong>multi-head structural field prediction + constrained global pairing</strong>. 3) A dataset/benchmark: controlled overlap difficulty, with metrics beyond IoU (clDice + instance curve metrics + risk scoring).</p>
+<hr />
+<h3>End-to-end vectorized tracing for scratches</h3>
+<h4>Design intent</h4>
+<p>Directly output a vector graph/polyline set (junctions + edges), reducing dependence on skeletonization heuristics and aligning with vectorized evaluation.</p>
+<p>Two strong inspirations:</p>
+<ul>
+<li>L-CNN learns junction proposals and line verification to output a vectorized wireframe. citeturn5search1</li>
+<li>RoadTracer iteratively constructs a graph guided by a CNN decision function, motivated by failures of segmentation-based connectivity postprocessing. citeturn5search0</li>
+</ul>
+<h4>Two variants</h4>
+<p><strong>Variant A (wireframe-style)</strong>: Predict junction candidates; evaluate candidate connections with a line-scoring head; solve connectivity globally.</p>
+<p><strong>Variant B (tracing-style)</strong>: Start from seed endpoints, iteratively extend a polyline by predicting next direction/step until termination.</p>
+<h4>Pseudocode (wireframe-style)</h4>
+<pre><code>J = PredictJunctions(I)            # top-K junctions
+E_candidates = GeneratePairs(J)    # 제한된半径/方向约束
+score(e) = LineVerifier(I, e)      # sample features along segment
+G = SelectEdgesMaximizingScoreWithConstraints(E_candidates, score)
+Output: G as vector graph; derive scratch instances by path extraction</code></pre>
+<h4>Supervision needed</h4>
+<p>This approach typically requires <strong>vector labels</strong> (junction coordinates and connectivity). You can obtain these from:</p>
+<ul>
+<li>your classical/hybrid solver on curated images,</li>
+<li>plus human correction to ensure “ground truth pairing” at crossings.</li>
+</ul>
+<h4>Strengths / weaknesses</h4>
+<ul>
+<li>Best native vector output; clean integration with graph metrics (APLS-like). citeturn8search0turn8search4</li>
+<li>Label cost is highest; tracing errors can accumulate; engineering complexity is greater than the hybrid approach.</li>
+</ul>
+<h2>Synthetic data and pre-annotation for overlapping-scratch decomposition</h2>
+<p>You asked for a concrete plan to <strong>construct an overlapping-defect dataset</strong> using “stroke-like” databases (e.g., Chinese handwriting), by pruning/unrolling strokes and overlaying them into pre-labeled training data. This is a strong idea and consistent with prior use of synthetic overlap datasets (e.g., MultiMNIST overlays) to study overlapping-object decomposition. citeturn2view0turn0search1</p>
+<h3>Why stroke datasets are a good proxy</h3>
+<p>Scratch centerlines resemble handwriting strokes: long, thin, curved, intersecting. The advantage is that many handwriting resources provide <strong>vector trajectories (online pen paths)</strong>, making stroke separation essentially free.</p>
+<p>Two practical sources:</p>
+<ul>
+<li>CASIA online/offline Chinese handwriting databases (official dataset portal; includes large-scale segmented annotated character data, and explicitly provides online trajectory data plus offline images). citeturn2view2turn2view1</li>
+<li>The <strong>entity["video_game","Quick, Draw!","drawing game dataset"]</strong> dataset provides millions of vector doodles (timestamped strokes), enabling stroke-level composition at scale. citeturn0search15turn0search3</li>
+</ul>
+<h3>Synthesis pipeline: from strokes to “overlapping scratch” prelabels</h3>
+<p><strong>Goal</strong>: generate triplets \((I_{syn}, \{C_k\}, R_{syn})\) where</p>
+<ul>
+<li>\(I_{syn}\) is a synthetic dark-field-like image,</li>
+<li>\(C_k\) are ground-truth scratch curves (vector polylines) and rasterized masks,</li>
+<li>\(R_{syn}\) is a region-level risk label derived from overlap density/ambiguity.</li>
+</ul>
+<p><strong>Steps</strong>:</p>
+<p>1) <strong>Stroke extraction (vector domain)</strong></p>
+<ul>
+<li>If using online handwriting or vector doodles: each stroke path is given directly. citeturn2view2turn0search15</li>
+<li>If using offline-only images: skeletonize and split into strokes (harder; prefer online data first).</li>
+</ul>
+<p>2) <strong>Stroke pruning / normalization</strong></p>
+<ul>
+<li>Remove tiny strokes, enforce minimum length.</li>
+<li>Smooth with spline fitting, control curvature distribution to mimic scratch morphology.</li>
+</ul>
+<p>3) <strong>Rendering into dark-field style</strong></p>
+<ul>
+<li>Render strokes with controlled width distribution (match your imaging scale).</li>
+<li>Apply blur/defocus kernels, add speckle/noise, and optional background texture.</li>
+<li>Apply a circular/irregular aperture mask to mimic lens FOV (important domain realism).</li>
+</ul>
+<p>4) <strong>Controlled overlap composition</strong></p>
+<ul>
+<li>Sample \(N\) strokes; apply random transforms (shift/rotate/scale).</li>
+<li>Control overlap rate by tuning transforms so that expected intersection probability hits target bands (low/medium/high density splits).</li>
+</ul>
+<p>5) <strong>Automatic labels</strong></p>
+<ul>
+<li>Instance polyline for each stroke (vector GT).</li>
+<li>Instance mask by rasterization with width.</li>
+<li>Junction map: compute intersections of polylines; label junction points and their incident stroke IDs.</li>
+<li>Risk map: define as high overlap density regions (e.g., local junction count / area, local skeleton length / area, orientation entropy).</li>
+</ul>
+<p>This directly produces the label types needed by your hybrid model (skeleton/junction/orientation) and the solver evaluation (pairing correctness).</p>
+<h3>Evidence that synthetic scratch data is worthwhile</h3>
+<p>Scratch-specific synthetic generation is increasingly used in industrial inspection because real defect collection and labeling is expensive.</p>
+<ul>
+<li>SCRS uses a mask-guided diffusion model to synthesize realistic scratch images for chip scratch detection and reports mIoU improvements for deep and shallow scratches, demonstrating industrial relevance of scratch synthesis. citeturn2view3turn1search2</li>
+<li>A 2026 semiconductor wafer scratch case study explicitly motivates synthetic data integration due to limited realistic annotated defect data. citeturn1search3</li>
+</ul>
+<p>Your stroke-overlay approach is complementary: it emphasizes <strong>structural controllability and perfect instance labels</strong>, while diffusion/physics simulators emphasize <strong>appearance realism</strong>. A publishable dataset strategy is to combine both: structure-first stroke synthesis + appearance transfer/augmentation.</p>
+<h2>Ablation study plan and experimental protocol</h2>
+<h3>Ablations (what to vary, what to prove)</h3>
+<p>A strong paper should isolate contributions across three layers: (i) representation, (ii) learning, (iii) solver.</p>
+<p><strong>Classical solver ablations</strong></p>
+<ul>
+<li>Skeletonization method (thinning vs medial axis) and pruning strength. citeturn7search2</li>
+<li>Pairing cost terms:</li>
+<li>angle continuity only</li>
+<li>angle + width</li>
+<li>angle + width + intensity</li>
+<li>+ curvature regularization</li>
+<li>Local pairing vs global refinement (e.g., junction-by-junction vs graph-wide objective)</li>
+<li>With/without “abstention”: replacing forced decomposition by risk labeling in dense hubs</li>
+</ul>
+<p><strong>Hybrid network ablations</strong></p>
+<ul>
+<li>Which heads matter: remove junction head / remove orientation head / remove width head</li>
+<li>Topology-aware losses:</li>
+<li>+soft-clDice vs none citeturn5search2</li>
+<li>+persistent-homology topology loss vs none citeturn5search3turn7search3</li>
+<li>Synthetic pretraining:</li>
+<li>none</li>
+<li>stroke-overlay pretraining</li>
+<li>scratch diffusion/physics synthetic pretraining citeturn2view3turn1search11</li>
+</ul>
+<p><strong>End-to-end vectorization ablations</strong></p>
+<ul>
+<li>Junction proposal size K</li>
+<li>Candidate edge filtering strategy</li>
+<li>Greedy vs constrained global selection (planarity, degree constraints, score thresholds)</li>
+</ul>
+<h3>Experimental evaluation protocol</h3>
+<p><strong>Data splits</strong>:</p>
+<ul>
+<li>Stratify by defect density / overlap complexity (low / medium / high).</li>
+<li>Ensure dense-overlap subset has enough samples to stress pairing.</li>
+</ul>
+<p><strong>Metrics</strong>:</p>
+<ul>
+<li>clDice on masks/skeletons (connectivity). citeturn5search2</li>
+<li>Skeleton F1 (tolerance-based)</li>
+<li>Instance curve matching F1 (polyline distance threshold)</li>
+<li>Junction pairing accuracy</li>
+<li>Physical proxy errors: length error, width/area error per instance</li>
+<li>Risk region metrics: IoU/F1 + AUC if probabilistic</li>
+</ul>
+<p><strong>Success criteria</strong>:</p>
+<ul>
+<li>Explicit numeric targets as described in the earlier evaluation section (tune with your QC needs).</li>
+</ul>
+<h2>Visual aids to include in the paper</h2>
+<p>Recommended figures (high information density, reviewer-friendly):</p>
+<ul>
+<li>Pipeline overview: threshold mask → skeleton → graph → pairing → vector scratches + risk regions.</li>
+<li>Junction ambiguity illustration: show a dense crossing, candidate pairings, and final selection.</li>
+<li>Error modes: over-splitting vs under-splitting vs abstention.</li>
+<li>Quantitative plots: instance F1 vs overlap density, clDice vs topology loss weight, latency vs accuracy.</li>
+</ul>
+<h3>Mermaid flowchart for graph construction and junction pairing</h3>
+<pre><code>flowchart TD
+    A[Input image I] --&gt; B[Thresholding / foreground mask M]
+    B --&gt; C[Skeleton probability or skeletonize(M)]
+    C --&gt; D[Detect keypoints: endpoints &amp; junctions]
+    D --&gt; E[Extract skeleton segments between keypoints]
+    E --&gt; F[Build graph G=(V,E)\nV:keypoints E:segments]
+    F --&gt; G[Edge features\nlength, orientation, width, intensity]
+    G --&gt; H[Per-junction pairing candidates]
+    H --&gt; I[Pairing solver\nmin-cost matching / inference]
+    I --&gt; J[Trace paired edges into paths]
+    J --&gt; K[Output scratch polylines + per-instance attributes]
+    I --&gt; L[Ambiguity detection\n(high degree / low margin / uncertainty)]
+    L --&gt; M[Risk region map / label]</code></pre>
+<p>This graph-first decomposition is directly motivated by vessel crossover handling (graph inference) and by vectorized line parsing (junction + connectivity), which are primary sources for this style of representation. citeturn7search0turn5search1</p>
+<h3>Mermaid Gantt timeline for implementation and experiments</h3>
+<pre><code>gantt
+    title Overlapping Scratch Decomposition Project Plan
+    dateFormat  YYYY-MM-DD
+    axisFormat  %b %d
+
+    section Data &amp; Specs
+    Define label ontology (instances + risk)        :a1, 2026-04-08, 10d
+    Build synthetic stroke-overlap generator        :a2, 2026-04-12, 21d
+    Collect/curate real dark-field samples          :a3, 2026-04-08, 28d
+
+    section Baselines
+    CC + watershed + skeleton-segment baselines     :b1, 2026-04-15, 14d
+    Classical graph + pairing solver                :b2, 2026-04-22, 21d
+
+    section Hybrid Model
+    Multi-head network implementation               :c1, 2026-05-06, 21d
+    Train w/ synthetic pretraining + finetune       :c2, 2026-05-20, 28d
+    Topology-aware loss ablations (clDice/topo)     :c3, 2026-06-03, 21d
+
+    section End-to-end Vectorization
+    Wireframe-style junction+edge prototype         :d1, 2026-06-10, 21d
+    Tracing-style prototype (optional)              :d2, 2026-06-20, 21d
+
+    section Evaluation &amp; Paper
+    Full evaluation protocol + stress tests         :e1, 2026-06-24, 21d
+    Paper writing + figures + reproducibility       :e2, 2026-07-10, 28d</code></pre>
+<p>Dates are placeholders relative to today and should be mapped to your actual resourcing and latency requirements (which are currently unspecified).</p>
+<h2>Recommended sources and datasets to prioritize</h2>
+<h3>Primary sources to anchor the paper (high priority reading order)</h3>
+<p>1) Vessel crossover graph inference and skeleton→graph formulation (crossover is the same structural ambiguity you face). citeturn7search0turn7search4 2) clDice (connectivity metric/loss for tubular structures). citeturn5search2 3) Topology-preserving segmentation (persistent homology topological loss). citeturn5search3turn7search3 4) L-CNN wireframe parsing (junction+connectivity → vector lines). citeturn5search1 5) RoadTracer (graph-first criticism of segmentation+heuristics). citeturn5search0 6) DeepCrack (thin-structure segmentation baseline and dataset framing). citeturn6search0 7) Optical scratch/defect inspection domain papers (dark-field thresholding, weak scratch detection). citeturn1search1turn1search0 8) Amodal/embedding/instance alternatives (to position why your graph approach is needed). citeturn6search3turn6search2</p>
+<h3>Dataset building recommendations</h3>
+<ul>
+<li>Internal lens dark-field data: the true deployment distribution (must be your main evaluation).</li>
+<li>Synthetic overlap data:</li>
+<li>MultiMNIST overlay principle as a canonical overlapping-object benchmark. citeturn2view0</li>
+<li>CASIA online handwriting trajectories for stroke-level decomposition and controlled overlaps. citeturn2view2turn2view1</li>
+<li>Quick, Draw vector doodles to scale stroke diversity. citeturn0search15turn0search3</li>
+<li>Scratch-specific synthesis (diffusion/physics) for appearance realism. citeturn2view3turn1search11</li>
+</ul>
+<h2>Recommended next steps and draft outline for a publishable paper</h2>
+<h3>Recommended next steps</h3>
+<p>1) Freeze a clear operational definition of outputs:</p>
+<ul>
+<li>when to emit instances vs when to emit only risk regions (abstention policy).</li>
+</ul>
+<p>2) Implement the <strong>classical skeleton-graph-pairing</strong> baseline and define failure taxonomies. 3) Build the <strong>stroke-overlap synthetic dataset generator</strong> and pretrain the hybrid model. 4) Collect sparse human labels specifically for:</p>
+<ul>
+<li>junctions/pairings in dense overlap zones</li>
+<li>region-level risk masks</li>
+</ul>
+<p>5) Run the ablations and publish with:</p>
+<ul>
+<li>open-source solver + synthetic generator (if possible),</li>
+<li>complete metric suite (clDice + instance curve metrics + risk).</li>
+</ul>
+<h3>Draft paper outline (expected contributions and experiments)</h3>
+<ul>
+<li>Introduction: industrial dark-field scratch overlap problem; why segmentation is solved but decomposition is not.</li>
+<li>Related Work: cracks (DeepCrack), vessels (crossover tracing), topology metrics (clDice/topo loss), wireframes (L-CNN), roads (RoadTracer), instance/amodal alternatives. citeturn6search0turn7search0turn5search2turn5search1turn5search0turn6search3</li>
+<li>Problem Formulation: scratch network graph model; instance as paths; risk as abstention region.</li>
+<li>Method:</li>
+<li>Graph construction from skeleton evidence</li>
+<li>Junction pairing objective; uncertainty-aware abstention</li>
+<li>Hybrid multi-head network and losses (with topology-aware losses)</li>
+<li>Synthetic Dataset Construction:</li>
+<li>stroke-based overlap generator (CASIA/Quick, Draw)</li>
+<li>appearance augmentations; labeling scheme (junctions, paths, risk) citeturn2view2turn0search15turn2view0</li>
+<li>Experiments:</li>
+<li>Baselines (CC, watershed, skeleton segments)</li>
+<li>Classical vs Hybrid vs End-to-end vectorization</li>
+<li>Ablations (loss terms, heads, pairing features, synthetic pretraining)</li>
+<li>Metrics: clDice, skeleton F1, instance curve F1, length error, risk IoU/AUC citeturn5search2turn5search3</li>
+<li>Stress tests: overlap density sweeps; robustness to blur/noise</li>
+<li>Discussion: failure cases, domain gap, production considerations.</li>
+<li>Conclusion: contributions and deployment path.</li>
+</ul>
+<p>If you want, I can also produce (in a follow-up) a “solver specification” document that defines the exact matching objective at junctions (local vs global), and a concrete annotation schema (JSON for polylines + junction IDs + risk polygons) aligned with the pseudocode and metrics above.</p>
+  </main>
+</body>
+</html>

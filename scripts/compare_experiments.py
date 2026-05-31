@@ -45,6 +45,20 @@ KNOWN_EXPERIMENTS = [
 ]
 
 
+def _normalize_eval_result(result: dict) -> dict:
+    """兼容不同版本 run_cnas_eval 的返回结构."""
+    metrics = result.get("metrics", {}) if isinstance(result, dict) else {}
+    per_class = result.get("per_class_AP50") or metrics.get("per_class_AP50") or {}
+
+    normalized = dict(result)
+    normalized["per_class_AP50"] = per_class
+    normalized["mAP50"] = result.get("mAP50", metrics.get("mAP50", 0.0))
+    normalized["mAP50_95"] = result.get("mAP50_95", metrics.get("mAP50_95", 0.0))
+    normalized["precision"] = result.get("precision", metrics.get("precision", 0.0))
+    normalized["recall"] = result.get("recall", metrics.get("recall", 0.0))
+    return normalized
+
+
 def discover_experiments() -> list[tuple[Path, str]]:
     """自动发现所有已完成训练的实验权重。"""
     found = []
@@ -174,9 +188,10 @@ def main():
             result = run_cnas_eval(
                 weights_path=weights_path,
                 save_dir=args.save_dir / tag,
-                tag=tag,
                 verbose=True,
             )
+            result = _normalize_eval_result(result)
+            result["tag"] = tag
             all_results.append(result)
         except Exception as e:
             print(f"  ✗ 评估失败: {e}")

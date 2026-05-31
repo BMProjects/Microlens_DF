@@ -1,7 +1,7 @@
 {
   "description": "CNAS第三方测试候选集 — 20张代表性图像（val split，未参与训练，已排除异型ljj样本）",
   "created": "2026-03-22",
-  "model": "stage2_cleaned/weights/best.pt",
+  "model": "b2_nwd_only_phase3e/weights/best.pt",
   "selection_criteria": "覆盖损伤等级（轻/中/重/极重）× 类别构成（scratch/spot/critical主导）",
   "images": [
     {

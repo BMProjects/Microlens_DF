@@ -36,6 +36,7 @@ from darkfield_defects.ml.predict import load_model, predict_full_image
 PHASE3_ROOT = PROJECT_ROOT / "output/experiments/phase3_segmentation"
 ANALYSIS_ROOT = PHASE3_ROOT / "analysis"
 DOC_ASSETS_ROOT = PROJECT_ROOT / "doc/assets/generated"
+COMPLEXITY_MANIFEST = PHASE3_ROOT / "data_stratification/complexity_manifest.json"
 PIXEL_SIZE_MM = DEFAULT_CALIBRATION.pixel_size_mm
 CLASS_NAMES = ["background", "scratch", "spot", "damage"]
 CLASS_COLORS = {
@@ -118,6 +119,17 @@ def ensure_dir(path: Path) -> None:
 
 def read_json(path: Path):
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def load_complexity_levels(path: Path) -> dict[str, str]:
+    if not path.exists():
+        return {}
+    payload = read_json(path)
+    level_map: dict[str, str] = {}
+    for level, stems in payload.get("levels", {}).items():
+        for stem in stems:
+            level_map[f"{stem}.png"] = level
+    return level_map
 
 
 def parse_quick_val_metrics(log_path: Path | None) -> dict[str, float]:
@@ -319,36 +331,107 @@ def score_for_selection(mask_path: Path) -> tuple[float, float, float, float]:
     return mixed, total, scratch, spot + damage
 
 
-def select_representative_images(image_dir: Path, mask_dir: Path, sample_count: int) -> list[str]:
+def select_representative_images(
+    image_dir: Path,
+    mask_dir: Path,
+    sample_count: int,
+    complexity_levels: dict[str, str] | None = None,
+) -> list[str]:
     names = [p.name for p in sorted(image_dir.glob("*.png")) if (mask_dir / p.name).exists()]
     scratch_rank = sorted(names, key=lambda n: score_for_selection(mask_dir / n)[2], reverse=True)
     mix_rank = sorted(names, key=lambda n: score_for_selection(mask_dir / n), reverse=True)
     spot_damage_rank = sorted(names, key=lambda n: score_for_selection(mask_dir / n)[3], reverse=True)
 
     ordered: list[str] = []
-    for candidate_list, quota in [
-        (mix_rank, max(sample_count // 3, 8)),
-        (scratch_rank, max(sample_count // 3, 8)),
-        (spot_damage_rank, max(sample_count // 3, 8)),
-    ]:
+    for candidate_list in [mix_rank, scratch_rank, spot_damage_rank]:
         for name in candidate_list:
             if name not in ordered:
                 ordered.append(name)
-            if len(ordered) >= quota and len(ordered) >= sample_count:
+
+    for name in names:
+        if name not in ordered:
+            ordered.append(name)
+    if not complexity_levels:
+        return ordered[:sample_count]
+
+    level_groups = {
+        "L1": [name for name in ordered if complexity_levels.get(name) == "L1"],
+        "L2": [name for name in ordered if complexity_levels.get(name) == "L2"],
+        "L3": [name for name in ordered if complexity_levels.get(name) == "L3"],
+    }
+    quotas = {"L1": 0, "L2": 0, "L3": 0}
+    l3_target = min(len(level_groups["L3"]), max(sample_count // 4, 4))
+    main_target = sample_count - l3_target
+    l1_count = len(level_groups["L1"])
+    l2_count = len(level_groups["L2"])
+    if l1_count + l2_count > 0:
+        quotas["L1"] = min(l1_count, max(1, round(main_target * l1_count / (l1_count + l2_count))))
+        quotas["L2"] = min(l2_count, max(1, main_target - quotas["L1"]))
+        while quotas["L1"] + quotas["L2"] > main_target:
+            if quotas["L1"] >= quotas["L2"] and quotas["L1"] > 1:
+                quotas["L1"] -= 1
+            elif quotas["L2"] > 1:
+                quotas["L2"] -= 1
+            else:
+                break
+        while quotas["L1"] + quotas["L2"] < main_target:
+            if quotas["L1"] < l1_count:
+                quotas["L1"] += 1
+            elif quotas["L2"] < l2_count:
+                quotas["L2"] += 1
+            else:
+                break
+    quotas["L3"] = l3_target
+
+    selected: list[str] = []
+    for level in ("L1", "L2", "L3"):
+        for name in level_groups[level]:
+            if name not in selected:
+                selected.append(name)
+            if len([item for item in selected if complexity_levels.get(item) == level]) >= quotas[level]:
                 break
 
-    if len(ordered) < sample_count:
-        for name in names:
-            if name not in ordered:
-                ordered.append(name)
-            if len(ordered) >= sample_count:
+    if len(selected) < sample_count:
+        for name in ordered:
+            if name not in selected:
+                selected.append(name)
+            if len(selected) >= sample_count:
                 break
-    return ordered[:sample_count]
+    return selected[:sample_count]
 
 
 def aggregate_metric(rows: list[dict], key: str) -> float:
     vals = [row[key] for row in rows if not math.isnan(float(row[key]))]
     return float(np.mean(vals)) if vals else float("nan")
+
+
+def build_aggregate_rows(
+    metrics_by_model: dict[str, list[dict]],
+    *,
+    only_levels: set[str] | None = None,
+) -> list[dict]:
+    summary_rows: list[dict] = []
+    for model in PRIVATE_MODELS:
+        rows = metrics_by_model[model.key]
+        if only_levels is not None:
+            rows = [row for row in rows if row.get("complexity_level") in only_levels]
+        summary_rows.append(
+            {
+                "model": model.display_name,
+                "n_samples": len(rows),
+                "scratch_iou_mean": aggregate_metric(rows, "scratch_iou"),
+                "scratch_dice_mean": aggregate_metric(rows, "scratch_dice"),
+                "spot_iou_mean": aggregate_metric(rows, "spot_iou"),
+                "damage_iou_mean": aggregate_metric(rows, "damage_iou"),
+                "pixel_accuracy_mean": aggregate_metric(rows, "pixel_accuracy"),
+                "consensus_ratio_mean": aggregate_metric(rows, "consensus_ratio"),
+                "scratch_length_error_mean": aggregate_metric(rows, "scratch_length_error"),
+                "scratch_area_error_mean": aggregate_metric(rows, "scratch_area_error"),
+                "spot_area_error_mean": aggregate_metric(rows, "spot_area_error"),
+                "damage_area_error_mean": aggregate_metric(rows, "damage_area_error"),
+            }
+        )
+    return summary_rows
 
 
 def save_panel(
@@ -392,7 +475,8 @@ def write_markdown_report(
     output_path: Path,
     source_rows: list[dict],
     private_rows: list[dict],
-    aggregate_rows: list[dict],
+    aggregate_rows_main: list[dict],
+    aggregate_rows_l3: list[dict],
     sample_count: int,
 ) -> None:
     ensure_dir(output_path.parent)
@@ -426,14 +510,28 @@ def write_markdown_report(
 
     lines += [
         "",
-        f"## {sample_count} 张私有图像人工核查汇总",
+        f"## {sample_count} 张私有图像人工核查汇总（主指标：L1+L2）",
         "",
-        "| 模型 | scratch IoU | scratch Dice | spot IoU | damage IoU | consensus ratio | scratch length error | scratch area error |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|",
+        "| 模型 | 样本数 | scratch IoU | scratch Dice | spot IoU | damage IoU | consensus ratio | scratch length error | scratch area error |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
-    for row in aggregate_rows:
+    for row in aggregate_rows_main:
         lines.append(
-            f"| {row['model']} | {row['scratch_iou_mean']:.4f} | {row['scratch_dice_mean']:.4f} | "
+            f"| {row['model']} | {row['n_samples']} | {row['scratch_iou_mean']:.4f} | {row['scratch_dice_mean']:.4f} | "
+            f"{row['spot_iou_mean']:.4f} | {row['damage_iou_mean']:.4f} | {row['consensus_ratio_mean']:.4f} | "
+            f"{row['scratch_length_error_mean']:.4f} | {row['scratch_area_error_mean']:.4f} |"
+        )
+
+    lines += [
+        "",
+        "## 复杂样本参考汇总（L3，仅参考不计入主指标）",
+        "",
+        "| 模型 | 样本数 | scratch IoU | scratch Dice | spot IoU | damage IoU | consensus ratio | scratch length error | scratch area error |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
+    ]
+    for row in aggregate_rows_l3:
+        lines.append(
+            f"| {row['model']} | {row['n_samples']} | {row['scratch_iou_mean']:.4f} | {row['scratch_dice_mean']:.4f} | "
             f"{row['spot_iou_mean']:.4f} | {row['damage_iou_mean']:.4f} | {row['consensus_ratio_mean']:.4f} | "
             f"{row['scratch_length_error_mean']:.4f} | {row['scratch_area_error_mean']:.4f} |"
         )
@@ -483,7 +581,13 @@ def main() -> None:
 
     image_dir = PHASE3_ROOT / "private_weak_masks/images"
     mask_dir = PHASE3_ROOT / "private_weak_masks/masks"
-    selected_names = select_representative_images(image_dir, mask_dir, args.sample_count)
+    complexity_levels = load_complexity_levels(COMPLEXITY_MANIFEST)
+    selected_names = select_representative_images(
+        image_dir,
+        mask_dir,
+        args.sample_count,
+        complexity_levels=complexity_levels,
+    )
     (analysis_dir / "selected_samples.json").write_text(
         json.dumps(selected_names, indent=2, ensure_ascii=False),
         encoding="utf-8",
@@ -522,6 +626,7 @@ def main() -> None:
             pred_physical = physical_stats(pred)
             row = {
                 "image": image_name,
+                "complexity_level": complexity_levels.get(image_name, "unknown"),
                 "model": model.display_name,
                 "scratch_iou": compute_iou(weak_mask, pred, 1),
                 "scratch_dice": compute_dice(weak_mask, pred, 1),
@@ -563,24 +668,8 @@ def main() -> None:
         save_panel(image_name, image, weak_mask, predictions, sample_metrics, panel_path)
         panel_paths.append(panel_path)
 
-    summary_rows: list[dict] = []
-    for model in PRIVATE_MODELS:
-        rows = aggregate_by_model[model.key]
-        summary_rows.append(
-            {
-                "model": model.display_name,
-                "scratch_iou_mean": aggregate_metric(rows, "scratch_iou"),
-                "scratch_dice_mean": aggregate_metric(rows, "scratch_dice"),
-                "spot_iou_mean": aggregate_metric(rows, "spot_iou"),
-                "damage_iou_mean": aggregate_metric(rows, "damage_iou"),
-                "pixel_accuracy_mean": aggregate_metric(rows, "pixel_accuracy"),
-                "consensus_ratio_mean": aggregate_metric(rows, "consensus_ratio"),
-                "scratch_length_error_mean": aggregate_metric(rows, "scratch_length_error"),
-                "scratch_area_error_mean": aggregate_metric(rows, "scratch_area_error"),
-                "spot_area_error_mean": aggregate_metric(rows, "spot_area_error"),
-                "damage_area_error_mean": aggregate_metric(rows, "damage_area_error"),
-            }
-        )
+    summary_rows_main = build_aggregate_rows(aggregate_by_model, only_levels={"L1", "L2"})
+    summary_rows_l3 = build_aggregate_rows(aggregate_by_model, only_levels={"L3"})
 
     save_csv(
         analysis_dir / "source_summary.csv",
@@ -611,15 +700,26 @@ def main() -> None:
     )
     save_csv(
         analysis_dir / "private_review_aggregate.csv",
-        summary_rows,
-        list(summary_rows[0].keys()) if summary_rows else ["model"],
+        summary_rows_main,
+        list(summary_rows_main[0].keys()) if summary_rows_main else ["model"],
+    )
+    save_csv(
+        analysis_dir / "private_review_aggregate_l3_reference.csv",
+        summary_rows_l3,
+        list(summary_rows_l3[0].keys()) if summary_rows_l3 else ["model"],
     )
     (analysis_dir / "summary.json").write_text(
         json.dumps(
             {
+                "evaluation_protocol": {
+                    "main_levels": ["L1", "L2"],
+                    "reference_levels": ["L3"],
+                    "complexity_manifest": str(COMPLEXITY_MANIFEST),
+                },
                 "source_summary": source_rows,
                 "private_finetune_summary": private_rows,
-                "private_review_aggregate": summary_rows,
+                "private_review_aggregate": summary_rows_main,
+                "private_review_aggregate_l3_reference": summary_rows_l3,
                 "selected_samples": selected_names,
                 "panel_count": len(panel_paths),
             },
@@ -633,7 +733,8 @@ def main() -> None:
         analysis_dir / "README.md",
         source_rows,
         private_rows,
-        summary_rows,
+        summary_rows_main,
+        summary_rows_l3,
         len(selected_names),
     )
 

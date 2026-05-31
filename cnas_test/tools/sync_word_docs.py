@@ -11,8 +11,8 @@ from zipfile import ZIP_DEFLATED, ZipFile
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DOCS = [
-    PROJECT_ROOT / "doc" / "暗场镜片缺陷检测系统_测试大纲.docx",
-    PROJECT_ROOT / "doc" / "暗场镜片缺陷检测系统_测试报告_20260322.docx",
+    PROJECT_ROOT / "cnas_test" / "docs" / "暗场镜片缺陷检测系统_测试大纲.docx",
+    PROJECT_ROOT / "cnas_test" / "docs" / "暗场镜片缺陷检测系统_测试报告_20260322.docx",
 ]
 
 REPLACEMENTS = {

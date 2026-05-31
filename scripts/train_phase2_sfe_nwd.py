@@ -161,7 +161,8 @@ def run_experiment(
     YOLO,
 ) -> dict | None:
     """运行单个消融实验。"""
-    exp_name = config["name"]
+    exp_name = args.run_name or config["name"]
+    project_dir = args.project
     print()
     print("═" * 60)
     print(f"  实验 {exp_id}: {config['desc']}")
@@ -172,6 +173,9 @@ def run_experiment(
     if not actual_yaml.exists():
         print(f"  ✗ 数据集不存在: {actual_yaml}")
         return None
+    print(f"  输出目录: {args.project / exp_name}")
+    print(f"  缓存模式: {args.cache}")
+    print(f"  AMP: {'on (forced)' if args.force_amp else ('off' if config['use_nwd'] else 'on')}")
 
     # 注册 SFE 模块 (如需)
     if config["use_sfe"]:
@@ -216,19 +220,21 @@ def run_experiment(
 
         # 训练
         t0 = time.time()
+        amp_enabled = args.force_amp or not config["use_nwd"]
+        cache_mode = False if args.cache == "false" else args.cache
         results = model.train(
             data=str(actual_yaml),
             epochs=args.epochs,
             imgsz=640,
             batch=args.batch,
             device=args.device,
-            project=str(OUTPUT_DIR),
+            project=str(project_dir),
             name=exp_name,
             exist_ok=True,
 
             workers=args.workers,
-            cache="ram",
-            amp=True,
+            cache=cache_mode,
+            amp=amp_enabled,
             optimizer="AdamW",
 
             lr0=config.get("lr0", args.lr0),  # 实验级 lr 优先于全局 lr0
@@ -268,7 +274,7 @@ def run_experiment(
             restore_bbox_loss(orig_bbox_loss)
 
     # 提取结果
-    out_dir = OUTPUT_DIR / exp_name
+    out_dir = project_dir / exp_name
     best_weights = out_dir / "weights" / "best.pt"
 
     try:
@@ -327,6 +333,13 @@ def main():
     parser.add_argument("--device",  default="0")
     parser.add_argument("--workers", type=int, default=8)
     parser.add_argument("--lr0",     type=float, default=0.002)
+    parser.add_argument("--project", type=Path, default=OUTPUT_DIR)
+    parser.add_argument("--run-name", default=None,
+                        help="覆盖默认实验目录名，便于多轮复现实验并存")
+    parser.add_argument("--cache", choices=["ram", "disk", "false"], default="disk",
+                        help="图像缓存模式；NWD 实验默认用 disk 降低非确定性")
+    parser.add_argument("--force-amp", action="store_true",
+                        help="强制启用 AMP。NWD 实验默认关闭 AMP 以提高稳定性")
     parser.add_argument("--transfer-weights", action="store_true", default=True,
                         help="SFE 模型部分迁移基线权重")
     parser.add_argument("--no-countdown", action="store_true")

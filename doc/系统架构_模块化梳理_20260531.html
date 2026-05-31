@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>系统架构_模块化梳理_20260531</title>
+  <style>
+body {
+  margin: 0;
+  background: #f5f7fb;
+  color: #1f2937;
+  font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+.page {
+  max-width: 1100px;
+  margin: 32px auto;
+  background: #ffffff;
+  padding: 36px 48px 56px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  border-radius: 18px;
+}
+.doc-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #eff6ff;
+  border: 1px solid #dbeafe;
+}
+.doc-nav a {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+  font-size: 13px;
+}
+h1, h2, h3, h4 {
+  color: #0f172a;
+  line-height: 1.35;
+}
+h1 { font-size: 2rem; border-bottom: 3px solid #dbeafe; padding-bottom: 12px; }
+h2 { font-size: 1.45rem; margin-top: 2rem; border-left: 5px solid #60a5fa; padding-left: 12px; }
+h3 { font-size: 1.15rem; margin-top: 1.4rem; }
+p, li { font-size: 15px; line-height: 1.8; }
+code {
+  background: #eff6ff;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-family: "JetBrains Mono", "Consolas", monospace;
+}
+pre {
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 16px 18px;
+  border-radius: 12px;
+  overflow-x: auto;
+  line-height: 1.55;
+}
+pre code { background: transparent; color: inherit; padding: 0; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 18px 0 24px;
+  font-size: 14px;
+}
+th, td {
+  border: 1px solid #dbe2ea;
+  padding: 10px 12px;
+  vertical-align: top;
+}
+th {
+  background: #eff6ff;
+  font-weight: 700;
+}
+tr:nth-child(even) td {
+  background: #fafcff;
+}
+img {
+  max-width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.10);
+}
+figure {
+  margin: 24px 0;
+}
+figcaption {
+  color: #475569;
+  font-size: 14px;
+  margin-top: 8px;
+}
+a { color: #2563eb; text-decoration: none; }
+a:hover { text-decoration: underline; }
+hr { border: 0; border-top: 1px solid #dbe2ea; margin: 28px 0; }
+.meta {
+  color: #64748b;
+  margin-bottom: 24px;
+  font-size: 14px;
+}
+</style>
+</head>
+<body>
+  <main class="page">
+    <nav class="doc-nav"><a href="index.html">文档总目录</a><a href="系统架构_模块化梳理_20260531.md">Markdown 源文档</a><a href="deep-research-report.html">deep-research-report</a></nav>
+    <div class="meta">自动渲染的 HTML 研究日志，适合继续补充图片、表格与结果对比图。</div>
+    <h1>暗场镜片缺陷检测系统 — 模块化架构梳理</h1>
+<p>&gt; 版本：v1.0（2026-05-31）　|　视角：暗场图像缺陷识别算法开发　|　状态：阶段性成果，整体架构定型</p>
+<p>本文从<strong>算法开发</strong>视角，把项目拆解为 8 个相对独立、接口清晰的模块：数据集 → 预处理 → 半监督标注 → 识别算法 → 分割算法 → 评估算法 → 前端系统 → 第三方测试。每个模块给出<strong>职责、关键代码路径、输入·输出、当前状态</strong>，便于协作者按模块接手。</p>
+<p><figure><img src="assets/generated/project_system_architecture.png" alt="系统总架构" /><figcaption>系统总架构</figcaption></figure></p>
+<hr />
+<h2>0. 总览：双主线 + 八模块</h2>
+<p>系统收敛为两条主线：</p>
+<ul>
+<li><strong>GUI 预发布主线</strong> —— 面向非专业用户，单张镜片图像 → 缺陷检测 → 评分评级 → 结论（模块 ②④⑥⑦）。</li>
+<li><strong>研发与测试分支</strong> —— 识别/分割算法改进、半监督标注迭代、独立 CNAS 第三方测试（模块 ①③④⑤⑥⑧）。</li>
+</ul>
+<p>数据流主链：</p>
+<pre><code>原始暗场图像 ──①数据集──▶ ②预处理(ROI/亮度/配准) ──▶ ④识别(YOLO+SFE+NWD) ──┐
+                                          └──▶ ⑤分割(HRNet-OCR/SegFormer) ──┤
+                                                                            ▼
+                                              ⑥评估(mAP / WearScore 评级) ──▶ ⑦前端展示
+                                                                            ▲
+                              ③半监督标注(伪标签/弱标签) ──回流──▶ ①数据集     │
+                                                                  ⑧CNAS 第三方测试</code></pre>
+<hr />
+<h2>① 数据集模块</h2>
+<p><strong>职责</strong>：管理暗场镜片原始图像、ROI 切片（tile）数据集、训练/验证/测试划分与清单（manifest）。</p>
+<p><strong>关键路径</strong></p>
+<ul>
+<li>数据根目录：<code>output/dataset_v2/</code>（247 张全镜片图像 + 标定件，<strong>不入 Git</strong>）</li>
+<li>切片数据集构建：<code>scripts/build_tile_dataset.py</code>（640×640，stride 480）</li>
+<li>数据加载抽象：<code>src/darkfield_defects/data/{dataset.py,loader.py}</code></li>
+<li>分割数据集准备：<code>scripts/prepare_msd_segmentation.py</code>、<code>prepare_ssgd_yolo.py</code></li>
+<li>测试集清单：<code>cnas_test/manifests/test_set_v1.json</code>（860 tiles）</li>
+</ul>
+<p><strong>输入·输出</strong>：原始 <code>.png</code> 镜片图 → 切片 + YOLO 格式标签 + 数据集 yaml/manifest。</p>
+<p><strong>当前状态</strong>：<code>dataset_v2</code> 为生产基线数据；3 类缺陷 <code>scratch / spot / critical</code>。数据与代码物理分离，仅清单与模板入库。</p>
+<p><figure><img src="assets/generated/darkfield_dataset_overview.png" alt="数据集概览" /><figcaption>数据集概览</figcaption></figure></p>
+<hr />
+<h2>② 预处理模块</h2>
+<p><strong>职责</strong>：把成像条件不一致的暗场原图，归一化为可比、可检测的标准输入——抑制高光环、统一亮度、配准到模板坐标系、提取有效 ROI。</p>
+<p><strong>关键路径</strong>：<code>src/darkfield_defects/preprocessing/</code></p>
+<table><thead><tr><th>子模块</th><th>作用</th></tr></thead><tbody><tr><td><code>background_fusion.py</code></td><td>多张背景平均 → 生成离焦模糊模板</td></tr><tr><td><code>roi_builder.py</code></td><td>高光 ring 结构掩膜 → 构建有效 ROI</td></tr><tr><td><code>registration.py</code></td><td>高光 ring 模板匹配（平移+旋转+缩放 ≤5%）</td></tr><tr><td><code>brightness_correction.py</code></td><td>线性亮度修正 + 图像最终化</td></tr><tr><td><code>circle_fitting.py</code> / <code>arc_extraction.py</code></td><td>圆/弧几何拟合，定位镜片边界</td></tr><tr><td><code>pipeline.py</code></td><td>编排：标定阶段 + 处理阶段，产出可复现的预处理结果</td></tr></tbody></table>
+<p><strong>输入·输出</strong>：原始暗场图 + 背景图集 → ROI 掩膜 + 亮度修正后的标准图（含 JSON 元数据）。</p>
+<p><strong>当前状态</strong>：流水线稳定，已用于全量数据；标定与处理两阶段分离，参数可复现。</p>
+<p><figure><img src="assets/generated/preproc_before_after.png" alt="预处理：前后对比" /><figcaption>预处理：前后对比</figcaption></figure></p>
+<hr />
+<h2>③ 半监督标注模块</h2>
+<p><strong>职责</strong>：在有限人工标注下，通过标签清洗、伪标签、弱标签扩充训练数据，并对标注质量做审计回流。</p>
+<p><strong>关键路径</strong>（脚本化迭代，<code>scripts/</code>）</p>
+<ul>
+<li><code>step1_label_cleanup.py</code> → <code>step2_pseudo_labels.py</code> → <code>step3_retrain.py</code> → <code>step4_compare.py</code> → <code>step5_retrain.py</code>：标注-训练闭环</li>
+<li><code>generate_weak_masks.py</code>：分割弱标签生成（私有数据）</li>
+<li><code>audit_stage2_labels.py</code>、<code>relabel_merge_critical.py</code>：标注审计与关键类合并</li>
+<li>产物：<code>output/pseudo_labels/</code>（<strong>不入 Git</strong>）</li>
+</ul>
+<p><strong>输入·输出</strong>：人工标注 + 模型预测 → 清洗后标签 / 伪标签 / 弱掩膜 → 回流至 ① 数据集。</p>
+<p><strong>当前状态</strong>：检测伪标签闭环（stage1 → stage2_cleaned）已固化为生产基线；分割弱标签已生成并用于私有微调。</p>
+<hr />
+<h2>④ 识别算法模块（检测）</h2>
+<p><strong>职责</strong>：在切片上检测三类缺陷并定位，是生产主线核心。基于 <strong>YOLOv12m</strong>，并探索 SFE（浅层特征增强）与 <strong>NWD</strong>（Normalized Wasserstein Distance）检测头改进。</p>
+<p><strong>关键路径</strong></p>
+<ul>
+<li>检测引擎与特征：<code>src/darkfield_defects/detection/</code>（classical, features, preprocess, rendering, params）</li>
+<li>ML 训练/推理：<code>src/darkfield_defects/ml/{models,sfe_modules,nwd_loss,train,predict}.py</code></li>
+<li>改进训练入口：<code>scripts/train_phase2_sfe_nwd.py</code>、<code>train_stage1_baseline.py</code></li>
+<li>全图推理流水线：<code>scripts/infer_full_pipeline.py</code>（SAHI 切片 → IOS-NMS → <code>connect_scratches</code> 链接 → WearScore）</li>
+</ul>
+<p><strong>输入·输出</strong>：标准切片 → 缺陷框（类别+置信度+坐标）→ 全图拼接框链。</p>
+<p><strong>当前状态（基线，CNAS 测试集 2026-03-22）</strong></p>
+<table><thead><tr><th>指标</th><th>值</th></tr></thead><tbody><tr><td>mAP@0.5</td><td><strong>0.6765</strong>（通过 ≥60% 目标）</td></tr><tr><td>scratch AP</td><td>0.4525（最大短板）</td></tr><tr><td>spot AP</td><td>0.8180</td></tr><tr><td>critical AP</td><td>0.7589</td></tr></tbody></table>
+<p>&gt; Phase 3B 检测头改进（SFE/NWD/SSGD 微调）经全量实验，<strong>均未超越基线 scratch AP</strong>；FN 分析定位根因为<strong>低对比度图像域偏移</strong>（非 bbox 几何问题），后续转向数据级对比度增强。生产部署仍采用基线权重 <code>output/training/stage2_cleaned/weights/best.pt</code>。</p>
+<p><figure><img src="assets/generated/detection_network_architecture.png" alt="检测网络结构" /><figcaption>检测网络结构</figcaption></figure> <figure><img src="assets/generated/training_results_curves.png" alt="训练结果曲线" /><figcaption>训练结果曲线</figcaption></figure></p>
+<hr />
+<h2>⑤ 分割算法模块</h2>
+<p><strong>职责</strong>：像素级刻画缺陷形态（划痕、凹坑、大面积裂纹），为重叠缺陷结构解析与精细评分提供基础。研发分支，未进入生产主线。</p>
+<p><strong>关键路径</strong></p>
+<ul>
+<li>分割工厂与模型：<code>src/darkfield_defects/ml/{segmentation_factory.py,hrnet_ocr.py,models.py}</code>（含 LightUNet 4 类基础模型）</li>
+<li>mmseg 配置模板：<code>configs/segmentation/mmseg/</code>（HRNet-OCR-W18 / HRNetV2-W18 / SegFormer-B2，各含 MSD 与 private 两套）</li>
+<li>训练入口：<code>scripts/train_msd_segmentation.py</code>、<code>train_private_segmentation.py</code>、<code>train_mmseg_experiment.py</code></li>
+<li>实验范式：MSD 公共数据预训练 → 私有弱标签微调 → 桥接评审（<code>run_bridge_review.py</code>）</li>
+</ul>
+<p><strong>输入·输出</strong>：切片 → 缺陷分割掩膜（多类）→ 形态特征（供评估/重叠缺陷解析）。</p>
+<p><strong>当前状态</strong>：MSD 预训练 + 私有微调完成；多模型对比与可视化核查完成（Phase 3C–3F）。已可经 <code>infer_full_pipeline.py --use-segmentation</code> 集成，但未作为普通用户主线默认开启。</p>
+<p><figure><img src="assets/generated/segmentation_private_review_compare_20260326.png" alt="分割模型对比" /><figcaption>分割模型对比</figcaption></figure></p>
+<hr />
+<h2>⑥ 评估算法模块</h2>
+<p><strong>职责</strong>：两层评估——（a）算法精度评估（mAP / AP / 混淆矩阵）；（b）业务级 <strong>WearScore 磨损评分与评级</strong>，把检测/分割结果换算为可解释的 A/B/C/D 等级与结论。</p>
+<p><strong>关键路径</strong></p>
+<ul>
+<li>检测精度指标：<code>src/darkfield_defects/eval/metrics.py</code>、<code>scripts/compare_experiments.py</code>、<code>eval_utils.run_cnas_eval()</code></li>
+<li>磨损量化与评分：<code>src/darkfield_defects/scoring/{quantify.py,wear_score.py,report.py}</code></li>
+<li>CNAS 固定评估参数：<code>conf=0.001, iou=0.6</code>，860 tiles</li>
+</ul>
+<p><strong>WearScore 评分链路</strong>：五项贡献因子加权 → 总分 → 等级</p>
+<table><thead><tr><th>贡献因子</th><th>含义</th><th>权重</th></tr></thead><tbody><tr><td>center_length</td><td>中心区划痕</td><td>0.30</td></tr><tr><td>effective_length</td><td>区域加权长度</td><td>0.20</td></tr><tr><td>defect_area</td><td>区域加权面积</td><td>0.20</td></tr><tr><td>defect_count</td><td>区域加权缺陷数</td><td>0.15</td></tr><tr><td>scatter_intensity</td><td>区域加权散射</td><td>0.15</td></tr></tbody></table>
+<p><strong>等级阈值</strong>（2026-03-22）：A &lt; 25，B &lt; 50，C &lt; 80，D ≥ 80。</p>
+<p><strong>输入·输出</strong>：缺陷框/掩膜 → 精度指标（评测）/ 磨损分+等级+结论（业务）。</p>
+<p><figure><img src="assets/generated/wearscore_breakdown.png" alt="WearScore 评分构成" /><figcaption>WearScore 评分构成</figcaption></figure></p>
+<hr />
+<h2>⑦ 前端系统模块</h2>
+<p><strong>职责</strong>：面向非专业操作员的工作台。四步流程：导入镜片图像 → 执行缺陷检测 → 查看四联结果（检测叠加图 / 缺陷地形图 / 评分过程图 / 评级卡片）→ 得到分析结论。</p>
+<p><strong>关键路径</strong></p>
+<ul>
+<li>GUI 主程序：<code>src/darkfield_defects/viz/app.py</code>（Gradio，左控制面板 25% + 右 2×2 结果网格 75%）</li>
+<li>应用服务层：<code>src/darkfield_defects/app_services/inference_service.py</code>（<code>run_full_image_inference</code>、<code>get_default_weights_path</code>）</li>
+<li>默认权重：<code>output/experiments/phase3e/detection_training/b2_nwd_only_phase3e/weights/best.pt</code></li>
+</ul>
+<p><strong>启动</strong></p>
+<pre><code>uv run python -m darkfield_defects.viz.app   # http://127.0.0.1:7860</code></pre>
+<p><strong>输入·输出</strong>：单张镜片图像 → 检测叠加图 + 缺陷地形图 + WearScore 计算过程 + A/B/C/D 评级卡。</p>
+<p><strong>当前状态</strong>：预发布主线，四步流程可用；不含批量处理、训练入口、研究脚本、CNAS 执行入口。</p>
+<p><figure><img src="assets/generated/gui_demo.webp" alt="GUI 演示" /><figcaption>GUI 演示</figcaption></figure></p>
+<hr />
+<h2>⑧ 第三方测试模块（CNAS）</h2>
+<p><strong>职责</strong>：独立、可复现的第三方算法准确率测试子系统，产出符合 CNAS 留痕要求的测试报告与见证材料。与生产系统解耦，单独运行。</p>
+<p><strong>关键路径</strong>：<code>cnas_test/</code></p>
+<table><thead><tr><th>子目录</th><th>内容</th></tr></thead><tbody><tr><td><code>runner/</code></td><td>评测主流程：<code>run_eval.py</code>、<code>evaluator.py</code>、<code>dataset_loader.py</code>、<code>report*.py</code>、<code>provenance.py</code>、<code>screenshot.py</code></td></tr><tr><td><code>manifests/</code></td><td>测试集清单（<code>test_set_v1.json</code>、<code>full_dataset_v1.json</code>）</td></tr><tr><td><code>templates/</code></td><td>测试大纲/报告模板</td></tr><tr><td><code>tools/</code></td><td>Word 同步、环境记录、报告构建工具</td></tr><tr><td><code>outputs/</code></td><td>评测运行产物（<strong>不入 Git</strong>，归档保存）</td></tr></tbody></table>
+<p><strong>运行</strong></p>
+<pre><code>uv run python -m cnas_test.runner.run_eval --help</code></pre>
+<p><strong>输入·输出</strong>：固定测试集 + 待测权重 → 评测指标 JSON + Markdown/HTML/Word 报告 + 过程截图与溯源信息。</p>
+<p><strong>当前状态</strong>：评测流程、报告生成、过程留痕、溯源（provenance）均已实现并跑通；测试结果与交付件归档于 <code>output/_doc_archive/</code> 与 <code>cnas_test/outputs/</code>。</p>
+<hr />
+<h2>模块接口与依赖一览</h2>
+<table><thead><tr><th>模块</th><th>上游输入</th><th>下游输出</th><th>入 Git</th></tr></thead><tbody><tr><td>① 数据集</td><td>原始暗场图</td><td>切片+标签+清单</td><td>仅清单/模板</td></tr><tr><td>② 预处理</td><td>原图+背景</td><td>标准图+ROI</td><td>✅ 代码</td></tr><tr><td>③ 半监督标注</td><td>标注+预测</td><td>伪/弱标签</td><td>✅ 脚本</td></tr><tr><td>④ 识别</td><td>标准切片</td><td>缺陷框链</td><td>✅ 代码</td></tr><tr><td>⑤ 分割</td><td>切片</td><td>缺陷掩膜</td><td>✅ 代码/配置</td></tr><tr><td>⑥ 评估</td><td>框/掩膜</td><td>指标+评级</td><td>✅ 代码</td></tr><tr><td>⑦ 前端</td><td>单张镜片图</td><td>四联结果+结论</td><td>✅ 代码</td></tr><tr><td>⑧ 第三方测试</td><td>测试集+权重</td><td>报告+留痕</td><td>✅ 代码/模板</td></tr></tbody></table>
+<p><strong>统一约定</strong>：数据集、训练输出、实验产物、权重、评测运行产物、归档文档均位于 <code>output/</code> 与 <code>runs/</code>，默认不入 Git；仓库仅同步源码、配置、测试、轻量清单/模板与成果型文档。</p>
+  </main>
+</body>
+</html>

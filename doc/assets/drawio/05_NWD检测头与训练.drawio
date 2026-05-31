@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-05-18T12:00:00.000Z" agent="claude-code" version="24.0.0" type="device">
+  <diagram id="diagram-1" name="NWD与训练">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="t" value="NWD 检测头改造原理与训练稳态化" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1f4e79;strokeColor=#1f4e79;fontSize=15;fontStyle=1;fontColor=#ffffff;align=center;" vertex="1" parent="1"><mxGeometry x="50" y="20" width="1300" height="50" as="geometry"/></mxCell>
+        <mxCell id="a" value="原理: bbox → 各向异性 2D 高斯" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;fontStyle=1;verticalAlign=middle;align=center;" vertex="1" parent="1"><mxGeometry x="60" y="100" width="600" height="60" as="geometry"/></mxCell>
+        <mxCell id="a1" value="μ = (cx, cy)&#10;Σ = diag((w/2)², (h/2)²)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;fontStyle=1;verticalAlign=middle;align=center;" vertex="1" parent="1"><mxGeometry x="60" y="180" width="280" height="80" as="geometry"/></mxCell>
+        <mxCell id="a2" value="W₂² = ‖μ₁−μ₂‖² + ‖Σ₁^½ − Σ₂^½‖²_F" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;fontStyle=1;verticalAlign=middle;align=center;" vertex="1" parent="1"><mxGeometry x="380" y="180" width="280" height="80" as="geometry"/></mxCell>
+        <mxCell id="a3" value="NWD = exp( − √W₂² / C )    (C: 物理尺度归一化)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;fontStyle=1;verticalAlign=middle;align=center;" vertex="1" parent="1"><mxGeometry x="60" y="280" width="600" height="70" as="geometry"/></mxCell>
+        <mxCell id="a4" value="对细长 bbox 平移敏感度  ↓↓&#10;相比 IoU 在 scratch 类上更友好" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;fontStyle=1;verticalAlign=middle;align=center;" vertex="1" parent="1"><mxGeometry x="60" y="370" width="600" height="70" as="geometry"/></mxCell>
+        <mxCell id="b" value="训练稳态化: 三次 AMP NaN 与修复路径" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=14;fontStyle=1;verticalAlign=middle;align=center;" vertex="1" parent="1"><mxGeometry x="720" y="100" width="600" height="60" as="geometry"/></mxCell>
+        <mxCell id="b1" value="失稳1 / epoch=1: float32 cast + exponent clamp" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;fontStyle=1;verticalAlign=middle;align=center;" vertex="1" parent="1"><mxGeometry x="720" y="180" width="600" height="70" as="geometry"/></mxCell>
+        <mxCell id="b2" value="失稳2 / epoch=17: torch.amp.autocast(enabled=False)&#10;包裹 HybridBboxLoss.forward" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;fontStyle=1;verticalAlign=middle;align=center;" vertex="1" parent="1"><mxGeometry x="720" y="270" width="600" height="70" as="geometry"/></mxCell>
+        <mxCell id="b3" value="失稳3 / epoch=20: lr0 由 0.002 降至 0.001&#10;(NWD 梯度在 15-25 区段过大)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;fontStyle=1;verticalAlign=middle;align=center;" vertex="1" parent="1"><mxGeometry x="720" y="360" width="600" height="70" as="geometry"/></mxCell>
+        <mxCell id="b4" value="最终稳定配置 → CNAS mAP@0.5 = 0.6802 (+0.0037)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;fontStyle=1;verticalAlign=middle;align=center;" vertex="1" parent="1"><mxGeometry x="720" y="450" width="600" height="60" as="geometry"/></mxCell>
+        <mxCell id="r" value="Phase 3B 总结: NWD-only 唯一稳定增益; SFE / SFE+NWD / SSGD 均退化或崩溃" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;fontStyle=1;verticalAlign=middle;align=center;" vertex="1" parent="1"><mxGeometry x="80" y="540" width="1240" height="60" as="geometry"/></mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -58,6 +58,7 @@ def train(
     model_name: str = "light_unet",
     encoder_name: str | None = None,
     encoder_weights: str | None = None,
+    hf_model_id: str | None = None,
     max_minutes: float | None = None,
     num_workers: int = 0,
     save_metric: str = "loss",
@@ -82,6 +83,7 @@ def train(
         model_name: 分割模型名称.
         encoder_name: 若为 SMP 模型，所用 encoder 名称.
         encoder_weights: 若为 SMP 模型，encoder 初始化权重.
+        hf_model_id: 若为 HF SegFormer，指定 Hugging Face 模型 ID.
         max_minutes: 固定训练时长预算；到时后在 epoch 边界提前停止.
         num_workers: DataLoader 进程数.
         save_metric: 最佳模型保存准则，支持 loss / miou.
@@ -143,6 +145,7 @@ def train(
         base_features=base_features,
         encoder_name=encoder_name,
         encoder_weights=encoder_weights,
+        hf_model_id=hf_model_id,
     )
     model = build_segmentation_model(model_spec)
     model.to(dev)
@@ -277,6 +280,7 @@ def train(
                 "base_features": base_features,
                 "encoder_name": encoder_name,
                 "encoder_weights": encoder_weights,
+                "hf_model_id": hf_model_id,
                 "save_metric": save_metric,
             }, best_path)
             if save_metric == "miou" and val_miou is not None:

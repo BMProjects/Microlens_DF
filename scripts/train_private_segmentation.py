@@ -2,7 +2,7 @@
 """
 Phase 3.3: 私有数据分割模型微调
 =================================
-从 MSD 预训练的 LightUNet 出发，在私有弱标签数据上微调。
+从 MSD 预训练的分割模型出发，在私有弱标签数据上微调。
 
 预训练权重: output/experiments/phase3_segmentation/msd_trained/best.pt
 弱标签数据: output/experiments/phase3_segmentation/private_weak_masks/
@@ -65,6 +65,10 @@ def main():
     parser.add_argument("--output-dir", type=Path, default=OUTPUT_DIR)
     parser.add_argument("--max-minutes", type=float, default=None)
     parser.add_argument("--num-workers", type=int, default=0)
+    parser.add_argument("--model-name", default=None)
+    parser.add_argument("--encoder-name", default=None)
+    parser.add_argument("--encoder-weights", default=None)
+    parser.add_argument("--hf-model-id", default=None)
     args = parser.parse_args()
 
     print()
@@ -109,6 +113,14 @@ def main():
     print(f"  加载预训练模型 ...", end="", flush=True)
     ckpt = torch.load(str(args.pretrained), map_location="cpu", weights_only=False)
     model_spec = spec_from_checkpoint(ckpt)
+    if args.model_name:
+        model_spec.model_name = args.model_name
+    if args.encoder_name is not None:
+        model_spec.encoder_name = args.encoder_name
+    if args.encoder_weights is not None:
+        model_spec.encoder_weights = args.encoder_weights
+    if args.hf_model_id is not None:
+        model_spec.hf_model_id = args.hf_model_id
     model = build_segmentation_model(model_spec)
     model.load_state_dict(ckpt["model_state_dict"])
     model.to(device)
@@ -208,6 +220,7 @@ def main():
                     "base_features": model_spec.base_features,
                     "encoder_name": model_spec.encoder_name,
                     "encoder_weights": model_spec.encoder_weights,
+                    "hf_model_id": model_spec.hf_model_id,
                 }, best_path)
 
             if args.max_minutes is not None and (time.time() - t0) >= args.max_minutes * 60:

@@ -19,7 +19,14 @@ logger = get_logger(__name__)
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
 DEFAULT_WEIGHTS = (
-    PROJECT_ROOT / "output" / "training" / "stage2_cleaned" / "weights" / "best.pt"
+    PROJECT_ROOT
+    / "output"
+    / "experiments"
+    / "phase3e"
+    / "detection_training"
+    / "b2_nwd_only_phase3e"
+    / "weights"
+    / "best.pt"
 )
 
 TILE_SIZE = 640

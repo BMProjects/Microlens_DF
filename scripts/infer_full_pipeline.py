@@ -17,7 +17,7 @@ SAHI 滑窗推理 → 全图 NMS → Scratch 连接 → WearMetrics → WearScor
 
     # 自定义权重
     python scripts/infer_full_pipeline.py --stems 13r \\
-        --weights output/training/stage2_cleaned/weights/best.pt
+        --weights output/experiments/phase3e/detection_training/b2_nwd_only_phase3e/weights/best.pt
 
     # 启用分割模型（补充 mask 量化指标）
     python scripts/infer_full_pipeline.py --image output/dataset_v2/images/13r.png \\
@@ -56,8 +56,8 @@ from scripts.fullimage_utils import (
 
 # ── 路径 ──────────────────────────────────────────────────────────────
 IMAGES_DIR   = PROJECT_ROOT / "output" / "dataset_v2" / "images"
-WEIGHTS_PATH = (PROJECT_ROOT / "output" / "training" /
-                "stage2_cleaned" / "weights" / "best.pt")
+WEIGHTS_PATH = (PROJECT_ROOT / "output" / "experiments" / "phase3e" /
+                "detection_training" / "b2_nwd_only_phase3e" / "weights" / "best.pt")
 SEG_WEIGHTS_PATH = (PROJECT_ROOT / "output" / "experiments" /
                     "phase3_segmentation" / "private_finetuned" / "best.pt")
 OUT_DIR      = PROJECT_ROOT / "output" / "pipeline_results"
@@ -125,6 +125,10 @@ def boxes_to_defects(
 
     defects = []
     for cls, x1, y1, x2, y2, conf in boxes:
+        x1 = int(round(float(x1)))
+        y1 = int(round(float(y1)))
+        x2 = int(round(float(x2)))
+        y2 = int(round(float(y2)))
         w = max(x2 - x1, 1)
         h = max(y2 - y1, 1)
         area = w * h
@@ -154,7 +158,7 @@ def boxes_to_defects(
             zone = "edge"
 
         defects.append(BboxDefect(
-            cls=cls, x1=x1, y1=y1, x2=x2, y2=y2, conf=conf,
+            cls=int(cls), x1=x1, y1=y1, x2=x2, y2=y2, conf=float(conf),
             length_px=length, area_px=area,
             scatter_intensity=scatter, zone=zone,
         ))
@@ -350,22 +354,22 @@ def run_sahi(model, img_path: Path, conf: float = CONF_THRESH) -> tuple[list, fl
 
 
 def load_seg_model(seg_weights: Path):
-    """加载分割模型 (LightUNet)，返回 (model, device) 元组。"""
+    """加载分割模型 checkpoint，返回 (model, device) 元组。"""
     import sys
+
     sys.path.insert(0, str(PROJECT_ROOT / "src"))
-    from darkfield_defects.ml.predict import load_model
     import torch
-    # load_model 使用 weights_only=True，但私有检查点需要 False
-    import torch
-    ckpt = torch.load(str(seg_weights), map_location="cpu", weights_only=False)
-    from darkfield_defects.ml.models import LightUNet
-    model = LightUNet(
-        in_channels=ckpt.get("in_channels", 1),
-        num_classes=ckpt.get("num_classes", 4),
-        base_features=ckpt.get("base_features", 64),
+
+    from darkfield_defects.ml.segmentation_factory import (
+        build_segmentation_model,
+        spec_from_checkpoint,
     )
+
+    ckpt = torch.load(str(seg_weights), map_location="cpu", weights_only=False)
+    model_spec = spec_from_checkpoint(ckpt)
+    model = build_segmentation_model(model_spec)
     model.load_state_dict(ckpt["model_state_dict"])
-    device = "cuda" if __import__("torch").cuda.is_available() else "cpu"
+    device = "cuda" if torch.cuda.is_available() else "cpu"
     model.to(device)
     model.eval()
     return model, device

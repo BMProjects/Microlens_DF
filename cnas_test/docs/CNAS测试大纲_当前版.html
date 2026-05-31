@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>智能识别准确率测试大纲</title>
+  <style>
+    body { margin: 0; background: #f5f7fb; color: #0f172a; font-family: "Times New Roman", "宋体", "SimSun", serif; }
+    .page { max-width: 1120px; margin: 28px auto; background: #fff; padding: 36px 42px 56px; border-radius: 18px; box-shadow: 0 8px 24px rgba(15,23,42,.08); }
+    .doc-nav { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; }
+    .doc-nav a { display:inline-block; padding:6px 10px; border-radius:999px; background:#fff; border:1px solid #bfdbfe; color:#1d4ed8; text-decoration:none; }
+    h1 { margin: 0 0 18px; font-size: 2rem; border-bottom: 3px solid #dbeafe; padding-bottom: 12px; }
+    h2 { margin-top: 30px; font-size: 1.35rem; border-left: 5px solid #60a5fa; padding-left: 12px; }
+    h3 { margin-top: 22px; font-size: 1.08rem; color: #0f172a; }
+    h4 { margin-top: 18px; font-size: 1rem; color: #0f172a; }
+    p, li { line-height: 1.82; font-size: 15px; }
+    ul, ol { padding-left: 22px; }
+    code { background: #eff6ff; padding: 1px 6px; border-radius: 6px; }
+    table { width: 100%; border-collapse: collapse; margin: 14px 0 18px; font-size: 14px; }
+    th, td { border: 1px solid #cbd5e1; padding: 10px 12px; text-align: left; vertical-align: top; }
+    th { background: #eff6ff; }
+    .lead { background:#eff6ff; border:1px solid #dbeafe; padding:16px 18px; border-radius:14px; color:#334155; }
+    .cover { text-align:center; padding:40px 12px 32px; border:1px dashed #94a3b8; border-radius:14px; margin-bottom:24px; background:#fafafa; }
+    .cover .proj { font-size:1.0rem; color:#334155; margin:8px 0; }
+    .cover .title { font-size:2.2rem; letter-spacing:0.8rem; margin:24px 0 18px; font-weight:700; }
+    .cover .kv { display:inline-block; text-align:left; margin:6px auto; }
+    .cover .kv div { margin:4px 0; }
+    .formula { margin:14px 0; padding:14px 16px; border-radius:12px; background:#f8fafc; border:1px solid #cbd5e1; font-family:"Times New Roman", "宋体", "SimSun", serif; font-size:1.08rem; text-align:center; }
+    .fig { text-align:center; margin: 14px 0 6px; }
+    .fig img { max-width: 46%; border-radius: 12px; border:1px solid #cbd5e1; margin: 0 10px; background:#fff; }
+    .figline { text-align:center; color:#64748b; font-size:13px; margin:4px 0 16px; }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <nav class="doc-nav">
+      <a href="/home/bm/Dev/Microlens_DF/cnas_test/docs/README.md">测试文档目录说明</a>
+      <a href="/home/bm/Dev/Microlens_DF/cnas_test/docs/CNAS测试大纲_当前版.docx">当前 Word 版大纲</a>
+      <a href="/home/bm/Dev/Microlens_DF/cnas_test/docs/磨损识别准确率测试大纲制定思路说明_当前版.html">制定思路附件</a>
+    </nav>
+
+    <div class="cover">
+      <div class="proj">国家重点研发计划“诊疗装备与生物医用材料”重点专项</div>
+      <div class="title">测 试 大 纲</div>
+      <div class="kv">
+        <div>所属项目：青少年近视防控功能镜片关键参数计量技术研究</div>
+        <div>所属课题：离焦微结构镜片磨损程度检测及关键参数评估研究</div>
+        <div>测试对象：智能磨损识别算法 —— 磨损识别准确率</div>
+        <div>编&nbsp;&nbsp;&nbsp;&nbsp;写：课题研究组</div>
+        <div>审&nbsp;&nbsp;&nbsp;&nbsp;核：课题负责人</div>
+        <div>校&nbsp;&nbsp;&nbsp;&nbsp;对：测试联络人</div>
+        <div>批&nbsp;&nbsp;&nbsp;&nbsp;准：课题负责人</div>
+        <div>编制单位：课题承担单位</div>
+        <div>二〇二六年 四 月</div>
+      </div>
+    </div>
+
+    <h1>智能识别准确率测试大纲</h1>
+    <p class="lead">本大纲保持“磨损识别准确率”作为统一的测试指标名称，以单图像一致性判定 <code>δ<sub>i</sub></code> 为基础进行统计。算法版本与数据集版本的后续更新不改变本大纲的适用性。</p>
+
+    <h2>1 主题内容和适用范围</h2>
+    <h3>1.1 主题内容</h3>
+    <p>本大纲用于指导第三方测试机构对“离焦微结构镜片磨损智能识别任务”中“磨损识别准确率”指标开展测试。大纲规定了测试目的、测试依据、测试组织管理、测试流程、测试用例和测试对象、测试环境、测试方法和步骤以及测试留痕要求，作为委托测试和结果判定的依据性文件。</p>
+    <p>本大纲仅围绕课题任务书中“2.1 磨损识别准确率”相关内容编制，不扩展至其他功能指标、性能指标或研究性分析内容。</p>
+
+    <h3>1.2 适用范围</h3>
+    <p>本大纲适用于项目“青少年近视防控功能镜片关键参数计量技术研究”下，课题“离焦微结构镜片磨损程度检测及关键参数评估研究”中智能识别任务形成的软件产品或算法系统的第三方测试。</p>
+    <p>本大纲适用于对测试图像中磨损识别结果进行准确率测试。智能磨损识别算法只要能够针对磨损镜片图像给出可与基准结果进行对应比较的识别结果，均可依据本大纲开展测试。</p>
+    <p>本大纲规定统一的测试原则、统计要求和结果形成方式。测试所采用的图像数据、基准结果、统计规则和判定阈值，以测试实施阶段经委托测试文件确认的版本为准。算法版本、数据集版本及其更新不改变本大纲的适用性。</p>
+
+    <h2>2 测试目的</h2>
+    <p>测试目的是验证智能磨损识别算法在规定测试图像集上对镜片磨损目标的识别结果，与人工确认并冻结的基准结果之间的一致程度是否达到委托测试文件规定的要求，并形成可供委托方、测试机构及验收使用的客观测试结论。</p>
+    <p>本测试仅针对“磨损识别准确率”指标开展，不涉及缺陷机理分析、缺陷分级评估、复杂区域成因解释及其他扩展性研究内容。</p>
+
+    <h2>3 测试依据和引用文件</h2>
+    <ul>
+      <li><code>GB/T 25000.51-2016《系统与软件工程 系统与软件质量要求与评价（SQuaRE） 第 51 部分：就绪可用软件产品（RUSP）的质量要求和测试细则》</code>；</li>
+      <li><code>GB/T 38634-2020《系统与软件工程 软件测试》</code>系列标准中与测试过程、测试用例设计和测试执行相关的条款；</li>
+      <li><code>GB/T 41864-2022《信息技术 计算机视觉 术语》</code>；</li>
+      <li>《青少年近视防控功能镜片关键参数计量技术研究》项目任务书（项目编号：2024YFC2419500）；</li>
+      <li>《离焦微结构镜片磨损程度检测及关键参数评估研究》课题任务书（课题编号：2024YFC2419504）。</li>
+    </ul>
+    <p>当本大纲与具体委托测试文件、合同要求或任务书明确条款存在差异时，以后者的明确要求为准。</p>
+
+    <h2>4 测试组织管理和流程</h2>
+    <h3>4.1 测试组织管理</h3>
+    <p>测试组织管理应体现独立、客观、可追溯和可重复执行的原则。</p>
+    <ul>
+      <li>委托方负责提交送测算法、测试图像集、基准结果和必要说明。</li>
+      <li>测试机构负责实施测试、核验结果并形成测试结论。</li>
+      <li>技术配合方负责部署支持和问题说明，不参与正式结果判定。</li>
+    </ul>
+    <p>测试资料、运行条件和结果记录应能够相互对应，便于复核。</p>
+
+    <h3>4.2 测试流程</h3>
+    <p>测试一般按以下顺序开展：</p>
+    <ol>
+      <li>确认送测资料；</li>
+      <li>核验测试环境；</li>
+      <li>执行正式测试并保存结果；</li>
+      <li>核验结果，必要时进行重复性核验；</li>
+      <li>归档自动生成的日志、截图、溯源信息和测试报告。</li>
+    </ol>
+    <p>若出现算法无法运行、数据读取失败或结果无法复现等情况，应记录原因和处理情况，并在测试报告中说明。</p>
+
+    <h2>5 测试用例和测试对象</h2>
+    <h3>5.1 磨损镜片图像</h3>
+    <p>本大纲以单张磨损镜片图像作为基本测试单元。正式测试使用的图像应来自经确认的测试图像集，并与基准结果一一对应。</p>
+    <div class="fig">
+      <img src="./assets/outline_examples_full/full_image_example_1.png" alt="磨损镜片图像示例1" />
+      <img src="./assets/outline_examples_full/full_image_example_2.png" alt="磨损镜片图像示例2" />
+    </div>
+    <div class="figline">图 1-2 磨损镜片图像示例（实际正式测试以委托测试文件确认的测试图像集为准）</div>
+    <p>图像清单宜采用结构化文件，记录图像标识、文件路径和对应基准结果版本。正式测试前应完成图像、基准结果和图像清单的一致性核对。</p>
+
+    <h3>5.2 智能磨损识别算法</h3>
+    <p>本次接受测试的对象为智能磨损识别算法。算法应能够读取规定格式的磨损镜片图像，并输出可用于统计和核验的识别结果。</p>
+    <ul>
+      <li>算法名称、版本号及交付形态；</li>
+      <li>运行方式和必要配置；</li>
+      <li>输入输出说明及结果保存方式；</li>
+      <li>必要的运行条件说明。</li>
+    </ul>
+    <p>算法输出结果应与图像标识保持一致，便于逐图像核验。同一次正式测试和重复性核验中，算法版本和配置不得变更。</p>
+
+    <h2>6 性能指标测试</h2>
+    <h3>6.1 测试说明和要求</h3>
+    <p>本次测试项目为“磨损识别准确率测试”。测试时，以识别结果与基准结果的一致程度作为评价依据。</p>
+    <p>表 1 测试项目汇总表</p>
+    <table>
+      <tr><th>测试项目</th><th>测试目的</th><th>结果形式</th><th>评价指标</th></tr>
+      <tr>
+        <td>磨损识别准确率</td>
+        <td>验证识别结果与基准结果的一致程度</td>
+        <td>逐图像比较与统计</td>
+        <td>磨损识别准确率</td>
+      </tr>
+    </table>
+    <p>同一次测试应采用统一的测试图像、基准结果、统计规则和判定方式。正式测试前，应登记测试图像集版本、基准结果版本、图像总数 <code>N</code> 和异常样本处理方式。</p>
+    <p>如需进行重复性核验，应在相同条件下进行，两次结果之间的主指标差值应满足委托测试文件规定的一致性要求。</p>
+
+    <h3>6.2 测试环境及条件</h3>
+    <p>测试环境应满足算法正常运行的要求，并具备稳定、可复现和可重复执行测试的条件。</p>
+    <p>正式测试前，应确认输入输出路径、配置文件和访问权限满足测试要求，并保证结果和日志能够完整保存。正式测试与重复性核验应在一致的运行条件下完成。</p>
+
+    <h3>6.3 测试方法和步骤</h3>
+    <h4>6.3.1 指标统计公式</h4>
+    <p>设纳入本次统计的图像总数为 <code>N</code>。对第 <code>i</code> 张图像，记算法输出结果为 <code>R<sub>i</sub></code>，对应基准结果为 <code>G<sub>i</sub></code>，其单张图像判定结果为 <code>δ<sub>i</sub></code>。</p>
+    <p>当第 <code>i</code> 张图像的识别结果满足本次测试确认的判定规则时：</p>
+    <div class="formula">δ<sub>i</sub> = 1</div>
+    <p>当第 <code>i</code> 张图像的识别结果不满足本次测试确认的判定规则时：</p>
+    <div class="formula">δ<sub>i</sub> = 0</div>
+    <p>则总体磨损识别准确率 <code>A</code> 按下式计算：</p>
+    <div class="formula">A = (1 / N) × ∑<sub>i=1</sub><sup>N</sup> δ<sub>i</sub> × 100%</div>
+    <p>式中：</p>
+    <ul>
+      <li><code>N</code> 为纳入统计的图像总数；</li>
+      <li><code>R<sub>i</sub></code> 为第 <code>i</code> 张图像的算法输出结果；</li>
+      <li><code>G<sub>i</sub></code> 为第 <code>i</code> 张图像对应的基准结果；</li>
+      <li><code>δ<sub>i</sub></code> 为第 <code>i</code> 张图像的单张图像判定结果；</li>
+      <li><code>A</code> 为总体磨损识别准确率。</li>
+    </ul>
+    <p>具体判定规则应由委托测试文件明确。</p>
+
+    <h4>6.3.2 一致性判定规则</h4>
+    <p><code>δ<sub>i</sub></code> 的具体定义应在正式测试前明确，并在同一次测试中保持一致。判定规则宜明确比较方式、对应阈值以及异常样本处理原则。</p>
+
+    <h4>6.3.3 测试实施步骤</h4>
+    <ol>
+      <li>核对测试图像集、基准结果、图像清单以及算法版本和配置文件；</li>
+      <li>确认测试环境满足运行要求，并保持测试条件一致；</li>
+      <li>对全部图像执行正式测试，保存原始结果、统计结果和日志；</li>
+      <li>依据判定规则逐图像计算 <code>δ<sub>i</sub></code>，并按公式计算总体磨损识别准确率 <code>A</code>；</li>
+      <li>必要时在相同条件下进行重复性核验，并比较两次结果差值；</li>
+      <li>归档自动生成的日志、截图、溯源文件和测试报告。</li>
+    </ol>
+
+    <h4>6.3.4 结果输出物清单</h4>
+    <ul>
+      <li>图像清单和基准结果版本登记；</li>
+      <li>算法与配置文件版本登记；</li>
+      <li>正式测试原始结果、统计结果和运行日志；</li>
+      <li>重复性核验结果和日志（如有）；</li>
+      <li>异常样本记录（如有）；</li>
+      <li>自动生成的日志、截图、溯源文件、交付清单和正式测试报告。</li>
+    </ul>
+
+    <h4>6.3.5 判定原则</h4>
+    <p>本大纲规定统一的测试对象、测试内容、测试方法和统计公式框架，不在正文中固化具体达标阈值。是否通过测试，应以磨损识别准确率 <code>A</code> 与任务书、委托测试文件或测试实施细则中规定的阈值比较后确定。</p>
+
+  </main>
+</body>
+</html>

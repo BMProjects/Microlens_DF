@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>背景技术综合研究报告_v1</title>
+  <style>
+body {
+  margin: 0;
+  background: #f5f7fb;
+  color: #1f2937;
+  font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+.page {
+  max-width: 1100px;
+  margin: 32px auto;
+  background: #ffffff;
+  padding: 36px 48px 56px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  border-radius: 18px;
+}
+.doc-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #eff6ff;
+  border: 1px solid #dbeafe;
+}
+.doc-nav a {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+  font-size: 13px;
+}
+h1, h2, h3, h4 {
+  color: #0f172a;
+  line-height: 1.35;
+}
+h1 { font-size: 2rem; border-bottom: 3px solid #dbeafe; padding-bottom: 12px; }
+h2 { font-size: 1.45rem; margin-top: 2rem; border-left: 5px solid #60a5fa; padding-left: 12px; }
+h3 { font-size: 1.15rem; margin-top: 1.4rem; }
+p, li { font-size: 15px; line-height: 1.8; }
+code {
+  background: #eff6ff;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-family: "JetBrains Mono", "Consolas", monospace;
+}
+pre {
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 16px 18px;
+  border-radius: 12px;
+  overflow-x: auto;
+  line-height: 1.55;
+}
+pre code { background: transparent; color: inherit; padding: 0; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 18px 0 24px;
+  font-size: 14px;
+}
+th, td {
+  border: 1px solid #dbe2ea;
+  padding: 10px 12px;
+  vertical-align: top;
+}
+th {
+  background: #eff6ff;
+  font-weight: 700;
+}
+tr:nth-child(even) td {
+  background: #fafcff;
+}
+img {
+  max-width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.10);
+}
+figure {
+  margin: 24px 0;
+}
+figcaption {
+  color: #475569;
+  font-size: 14px;
+  margin-top: 8px;
+}
+a { color: #2563eb; text-decoration: none; }
+a:hover { text-decoration: underline; }
+hr { border: 0; border-top: 1px solid #dbe2ea; margin: 28px 0; }
+.meta {
+  color: #64748b;
+  margin-bottom: 24px;
+  font-size: 14px;
+}
+</style>
+</head>
+<body>
+  <main class="page">
+    <nav class="doc-nav"><a href="index.html">文档总目录</a><a href="背景技术综合研究报告_v1.md">Markdown 源文档</a><a href="GitHub协作同步与大文件管理说明_20260324.html">GitHub协作同步与大文件管理说明_20260324</a><a href="暗场光学图像中眼镜片缺陷（划痕凹坑大面积裂纹）检测与分级的 AI 系统设计深度研究.html">暗场光学图像中眼镜片缺陷（划痕凹坑大面积裂纹）检测与分级的 AI 系统设计深度研究</a><a href="暗场眼镜片缺陷检测中的分割模型选型与集成方案深度研究.html">暗场眼镜片缺陷检测中的分割模型选型与集成方案深度研究</a><a href="暗场眼镜片缺陷检测系统提升方案研究报告.html">暗场眼镜片缺陷检测系统提升方案研究报告</a></nav>
+    <div class="meta">自动渲染的 HTML 研究日志，适合继续补充图片、表格与结果对比图。</div>
+    <h1>暗场镜片缺陷检测系统 — 背景技术综合研究报告</h1>
+<p><strong>文档类型</strong>：技术背景与文献综合 <strong>编写日期</strong>：2026-03-22 <strong>适用场景</strong>：新成员快速入门、科研论文背景章节、方案选型参考</p>
+<hr />
+<h2>一、暗场显微镜成像物理原理</h2>
+<h3>1.1 暗场成像与明场成像的本质区别</h3>
+<p><strong>明场成像（Bright Field）</strong>：光源正面照射样品，光线直接进入物镜，背景为明亮均一的白场，缺陷表现为暗色轮廓。</p>
+<p><strong>暗场成像（Dark Field）</strong>：光源以大角度（通常 &gt; 60°）侧面或斜面照射，无缺陷的平滑镜片表面产生全反射，进入物镜的光极少 → 全暗背景；当镜片表面存在划痕、凹坑、微裂纹等缺陷时，缺陷边缘和沟槽将入射光散射至各方向，部分散射光进入物镜 → 缺陷在暗背景下呈现高亮响应。</p>
+<p><strong>信噪比优势</strong>：暗场成像的信噪比（SNR）远高于明场，细微划痕在明场下几乎不可见，而在暗场下表现为清晰亮线。这是该技术被选用于工业镜片检测的核心原因。</p>
+<h3>1.2 本项目成像系统的物理特性</h3>
+<p>本项目使用的暗场显微镜系统具有以下物理特性：</p>
+<table><thead><tr><th>参数</th><th>值</th><th>物理意义</th></tr></thead><tbody><tr><td>图像分辨率</td><td>4096×3000 px</td><td>高分辨率，可分辨 1-2 px 宽的细划痕</td></tr><tr><td>图像格式</td><td>uint8 灰度（0-255）</td><td>单通道强度图像</td></tr><tr><td>背景图像</td><td>5帧均值</td><td>消除热噪声，获得稳定背景模板</td></tr><tr><td>高光Ring</td><td>镜片边缘高光环</td><td>镜片边框散射引起，非缺陷，需要过滤</td></tr><tr><td>ROI</td><td>圆形镜片有效区域</td><td>直径约 3000px，需精确定位</td></tr><tr><td>中心亮度</td><td>~43（uint8）</td><td>暗场基准，无缺陷区域的背景灰度</td></tr><tr><td>缺陷灰度</td><td>65-255</td><td>散射光强度，与缺陷深度/宽度正相关</td></tr></tbody></table>
+<h3>1.3 缺陷的散射机理与分类</h3>
+<p>不同缺陷类型对应不同的散射机理，在暗场图像中呈现不同的视觉特征：</p>
+<table><thead><tr><th>缺陷类型</th><th>物理机理</th><th>暗场图像特征</th><th>YOLO类别</th></tr></thead><tbody><tr><td>细划痕（细线）</td><td>沟槽状镜面损伤，沟槽侧壁散射</td><td>细长亮线，宽度1-5px，长宽比&gt;5</td><td>scratch</td></tr><tr><td>粗划痕（粗线）</td><td>沟槽+边缘碎裂散射</td><td>宽亮线，边缘不规则，宽度5-30px</td><td>scratch</td></tr><tr><td>凹坑（spot）</td><td>局部点状坑洞，全向散射</td><td>孤立亮点，近圆形，直径5-30px</td><td>spot</td></tr><tr><td>密集磨损</td><td>大面积微裂纹网络，弥散散射</td><td>区域性高亮，边界模糊</td><td>critical</td></tr><tr><td>大面积缺损</td><td>镜片局部破损，面积&gt;0.1mm²</td><td>不规则大面积亮区</td><td>critical</td></tr></tbody></table>
+<h3>1.4 成像噪声来源分析</h3>
+<p>暗场成像的噪声来源与典型图像中的表现：</p>
+<ol>
+<li><strong>背景不均匀性</strong>：即使无缺陷，镜片中心区域因本底散射呈现约5个灰度单位的随机波动。由背景图模板（5帧均值+离焦模糊）进行除法校正后，本底波动降至约2单位。</li>
+</ol>
+<ol>
+<li><strong>灰尘粒子</strong>：镜片表面或光路中的灰尘粒子在暗场下与凹坑（spot）视觉上几乎无法区分。这是spot类别存在误标的主要来源。</li>
+</ol>
+<ol>
+<li><strong>照明非均匀性</strong>：暗场照明在ROI内的光强分布呈轻微梯度（边缘略亮于中心）。背景除法校正可消除大部分非均匀性，但小尺度残留仍影响阈值选取。</li>
+</ol>
+<ol>
+<li><strong>Ring高光区域</strong>：镜片边缘框架产生的高亮环形区域，灰度65-91，是误检的主要来源之一。通过ROI掩膜过滤。</li>
+</ol>
+<hr />
+<h2>二、缺陷检测技术路线综合调研</h2>
+<h3>2.1 传统图像处理方法</h3>
+<h4>2.1.1 Frangi滤波器（血管/线状结构增强）</h4>
+<p>Frangi滤波器（Frangi et al., 1998）基于Hessian矩阵的二阶导数计算图像中"管状/线状结构"的响应。</p>
+<p><strong>数学原理</strong>： 对每个像素 $(x,y)$，计算Hessian矩阵 $H = \begin{bmatrix} I_{xx} &amp; I_{xy} \\ I_{xy} &amp; I_{yy} \end{bmatrix}$ 的两个特征值 $\lambda_1 \leq \lambda_2$。</p>
+<p>线状结构判据：</p>
+<pre><code>R_B = λ1 / λ2     → 接近0表示线状结构（λ1≈0, λ2大）
+S = sqrt(λ1² + λ2²)  → 表示结构强度
+Frangi(x,y) = exp(-R_B²/(2β²)) × (1 - exp(-S²/(2c²)))</code></pre>
+<p><strong>在本项目中的应用</strong>：</p>
+<ul>
+<li>多尺度（σ=1,2,4,8px）Frangi滤波，覆盖不同宽度的划痕</li>
+<li>Frangi响应作为标注验证工具：Frangi响应&lt;0.05的"scratch框"很可能是噪声</li>
+<li>统计发现：44.3%的GT scratch框具有低Frangi响应（验证标注噪声严重）</li>
+</ul>
+<p><strong>局限性</strong>：</p>
+<ul>
+<li>对实心亮块（damage/crash类型）响应极低（Frangi是脊线检测器，不是面积检测器）</li>
+<li>在噪声较高的区域（gamma=0.4增强后），Frangi会将噪声纹理误识别为线状结构</li>
+</ul>
+<h4>2.1.2 Top-hat变换（背景分离）</h4>
+<p>形态学Top-hat变换 $T(f) = f - f \circ B$（其中 $\circ$ 为开运算，$B$ 为结构元素）。</p>
+<p>在本项目中用于提取比背景（由开运算估计的平滑背景）更亮的局部特征，核大小15px覆盖宽度&lt;15px的缺陷。与Frangi滤波的差异：Top-hat对面积较小的亮区（spot类型）响应更好。</p>
+<h4>2.1.3 Otsu阈值分割</h4>
+<p>Otsu算法（Otsu, 1979）自动选取使类间方差最大的阈值，将图像分割为前景（缺陷）和背景。</p>
+<p>在本项目的切片标注生成中：</p>
+<ul>
+<li>对每个640×640切片的候选图（Frangi+TopHat+亮度融合）进行Otsu阈值</li>
+<li><code>otsu_floor=0.08</code>防止纯暗切片阈值过低（设置阈值下限）</li>
+</ul>
+<p><strong>局限性</strong>：全局Otsu对局部背景不均匀的图像效果较差，但在背景校正后的切片上效果可接受。</p>
+<h3>2.2 深度学习目标检测方法</h3>
+<h4>2.2.1 YOLO系列发展脉络</h4>
+<table><thead><tr><th>版本</th><th>关键技术贡献</th><th>适用场景</th></tr></thead><tbody><tr><td>YOLOv1-v3</td><td>统一网络单阶段检测框架</td><td>速度优先</td></tr><tr><td>YOLOv5/v8</td><td>anchor-free，CSP骨干，多尺度FPN</td><td>通用检测</td></tr><tr><td>YOLOv8-OBB</td><td>定向边界框支持</td><td>旋转目标（文本、卫星图）</td></tr><tr><td><strong>YOLOv12m</strong></td><td><strong>Area Attention内置，区域注意力机制</strong></td><td><strong>密集小目标，纹理缺陷</strong></td></tr></tbody></table>
+<p><strong>选型依据</strong>：YOLOv12m的Area Attention特别适合本项目：</p>
+<ul>
+<li>划痕在局部区域内具有高度方向相关性（同一方向的相邻像素高度相关）</li>
+<li>Area Attention通过对局部矩形区域计算注意力，有效捕捉这种各向异性特征</li>
+<li>在缺陷检测基准（MVTec-YOLO等）上优于同规模的YOLOv8m</li>
+</ul>
+<h4>2.2.2 小目标检测技术综述</h4>
+<p>本项目的缺陷目标具有典型的小目标特征：spot类别中位数仅19px，在640×640切片中占比仅 (19/640)² ≈ 0.09%。相关技术：</p>
+<p><strong>多尺度特征融合（FPN/PANet）</strong>：</p>
+<ul>
+<li>FPN (Feature Pyramid Network, Lin et al. 2017)：将高层语义特征向下传递至高分辨率特征图</li>
+<li>PANet：在FPN基础上增加自下而上的路径，强化位置信息传递</li>
+<li>YOLOv12m的neck部分集成了PANet变体，为本项目提供多尺度特征</li>
+</ul>
+<p><strong>SAHI（Slicing Aided Hyper Inference）</strong>（Akyon et al., 2022）：</p>
+<ul>
+<li>将大图切分为重叠子图分别推理，然后合并结果</li>
+<li>专为小目标检测设计，在VisDrone等小目标基准上提升约15-20% mAP</li>
+<li>本项目中的应用：4096×3000原图 → 640×640滑窗切片（stride=480），每张图约113个切片</li>
+</ul>
+<h4>2.2.3 细长目标检测的特殊挑战</h4>
+<p>划痕（scratch）属于"超高长宽比细长目标"（长宽比通常 &gt; 5，最高可达 50:1）。标准YOLO检测框架面临的挑战：</p>
+<p><strong>IoU计算失效</strong>：</p>
+<pre><code>假设真实划痕框：200×8px（面积1600）
+预测框水平偏移4px：196×8px（面积1568）
+实际IoU = 交集面积/并集面积 = 1568/(1600+1600-1568) = 0.980（看起来很高）
+
+但若划痕是垂直的，预测框垂直偏移4px：
+真实: x=[0,8], y=[0,200]
+预测: x=[0,8], y=[4,204]
+IoU = 196*8 / (200*8 + 204*8 - 196*8) = 1568/1664 = 0.942
+
+若预测框比真实框短50px（忽略了划痕末端）：
+真实: 200×8=1600，预测: 150×8=1200
+IoU = 1200/1600 = 0.75 → 只有0.75的IoU，按IoU@0.5算算正样本，但定位差
+
+若换为IoU@0.75，则IoU&lt;0.75 → 算FP！</code></pre>
+<p>这解释了为什么本项目mAP@0.5（0.6765）与mAP@0.5:0.95（0.4541）差距达0.22。</p>
+<p><strong>定向边界框（OBB）的潜在价值</strong>：</p>
+<ul>
+<li>对于斜向划痕，轴对齐bbox面积 ≫ 缺陷真实面积，导致IoU天然偏低</li>
+<li>OBB（旋转框）可以紧贴划痕方向，显著提高IoU</li>
+<li>代价：需要重新标注（角度参数），工作量约为原bbox标注的2倍</li>
+<li>预期收益：mAP@0.5:0.95提升3-5%</li>
+</ul>
+<h3>2.3 工业缺陷检测数据集与基准</h3>
+<h4>2.3.1 MVTec AD数据集</h4>
+<p>MVTec Anomaly Detection（Bergmann et al., 2019）是工业缺陷检测最常用的基准数据集。包含15种工业产品、5354张图像、73种缺陷类型。</p>
+<p>与本项目的关键差异：</p>
+<ul>
+<li>MVTec：多类别工业产品，缺陷清晰，有正常/异常标签</li>
+<li>本项目：单一场景（镜片暗场），缺陷连续分布（无"正常"图像），高分辨率</li>
+</ul>
+<h4>2.3.2 VisDrone数据集（无人机小目标）</h4>
+<p>VisDrone是小目标检测基准，图像尺寸2000×1500+，目标尺寸通常&lt;20px，与本项目的spot类别（中位数19px）特征相近。SAHI在VisDrone上可提升约15% mAP，这为本项目采用SAHI方案提供了参考依据。</p>
+<h4>2.3.3 相关光学缺陷检测工作</h4>
+<table><thead><tr><th>工作</th><th>方法</th><th>指标</th><th>与本项目关联</th></tr></thead><tbody><tr><td>PCB缺陷检测（DeepPCB）</td><td>Faster RCNN</td><td>AP≈0.90</td><td>PCB缺陷无散射特性，对比度高于暗场</td></tr><tr><td>太阳能电池EL缺陷</td><td>U-Net分割</td><td>Dice≈0.85</td><td>相似的高分辨率工业图像</td></tr><tr><td>晶圆表面缺陷</td><td>半监督YOLO</td><td>mAP≈0.72</td><td>与本项目最接近（暗场、小缺陷、半标注）</td></tr><tr><td>光学玻璃划痕</td><td>Frangi+CNN</td><td>Precision≈0.85</td><td>相同缺陷类型，不同成像模式</td></tr></tbody></table>
+<hr />
+<h2>三、标注策略与半监督学习技术综述</h2>
+<h3>3.1 弱监督与半自动标注</h3>
+<h4>3.1.1 传统算法初标 + 人工审核（本项目采用）</h4>
+<p><strong>流程</strong>：传统图像处理（Frangi+TopHat+Otsu）→ 自动生成初始标注 → 人工审核修正</p>
+<p><strong>优势</strong>：</p>
+<ul>
+<li>无需任何先验标注即可产生海量初始标注（247张图→112,929框）</li>
+<li>标注成本远低于纯人工标注</li>
+</ul>
+<p><strong>问题（已量化）</strong>：</p>
+<ul>
+<li>噪声框率：13.6%（15,338框）</li>
+<li>scratch类Frangi弱响应率：44.3%（存疑框）</li>
+<li>漏标率（估计）：10-20%（经伪标签验证补充8,613框）</li>
+</ul>
+<h4>3.1.2 主动学习（Active Learning）</h4>
+<p>主动学习框架：模型对"不确定样本"请求人工标注，使标注成本最小化。</p>
+<p><strong>与本项目的关联</strong>：<code>scripts/audit_stage2_labels.py</code>实现了可疑度排序：</p>
+<pre><code>suspicion = FP数 + FN数 + 2×类别错误数</code></pre>
+<p>这本质上是一种基于模型不确定性的主动学习样本选择策略。</p>
+<h4>3.1.3 伪标签（Pseudo Labels）</h4>
+<p>核心思想（Lee, 2013）：用当前模型对无标注数据推理，将高置信度预测作为伪标签加入训练集。</p>
+<p><strong>本项目的改进版本</strong>：</p>
+<ul>
+<li>多策略推理（6组）代替单次推理，通过一致性筛选过滤低质量伪标签</li>
+<li>仅将与GT不重叠（IoU&lt;0.5）的高置信预测作为"补漏"标注（非替换GT）</li>
+<li>效果：添加8,613框（+11.4%），Stage2 recall从0.50→0.66</li>
+</ul>
+<h3>3.2 标注噪声鲁棒训练</h3>
+<p>Focal Loss（Lin et al., 2017）原本为解决one-stage检测器的前景/背景类别不均衡问题设计，同时对噪声标签具有一定的鲁棒性（难分样本权重高，但噪声通常是"难以置信的简单或困难样本"，权重低）。</p>
+<p>本项目使用 <code>fl_gamma=2.0</code>：</p>
+<ul>
+<li>对 p=0.5 的预测（中等置信度）保持接近正常权重</li>
+<li>对 p≈1.0 的预测（过拟合标志）降低权重</li>
+<li>间接减少了噪声标注对训练的影响</li>
+</ul>
+<hr />
+<h2>四、磨损评分系统的视光学基础</h2>
+<h3>4.1 镜片磨损对人眼视觉的影响机理</h3>
+<p>眼镜镜片是精密光学元件，表面磨损通过以下机理影响佩戴者视觉：</p>
+<p><strong>散射导致的对比度下降（Haze）</strong>：</p>
+<ul>
+<li>密集细划痕形成散射网络，将部分透过光散射至非成像方向</li>
+<li>等效于在视场中叠加一个均匀散射光背景，降低视觉对比度</li>
+<li>在低对比度场景（如雾天、夜晚）下最为明显</li>
+<li>量化指标：Haze Index（与划痕密度×交叉点密度正相关）</li>
+</ul>
+<p><strong>眩光（Glare）</strong>：</p>
+<ul>
+<li>深划痕和大面积缺损将高亮光源（车灯、路灯）散射为放射状光晕</li>
+<li>核心视区（光学中心±10-15mm）的深划痕在夜间驾驶时产生严重眩光</li>
+<li>量化指标：Glare Index（∝ Σ划痕长度×散射强度 × 中心区权重）</li>
+</ul>
+<p><strong>局灶性视觉失真</strong>：</p>
+<ul>
+<li>较大的凹坑（spot，&gt;0.5mm²）可在成像面上产生局部折射异常</li>
+<li>密集缺损区（critical）可能造成局部焦距偏差</li>
+</ul>
+<h3>4.2 视区分级权重设计依据</h3>
+<p>镜片视区分级基于人眼视觉生理学原理：</p>
+<table><thead><tr><th>视区</th><th>定义</th><th>权重依据</th></tr></thead><tbody><tr><td>核心视区</td><td>光学中心半径 ≤40%（≈ROI半径40%）</td><td>正视眼注视时主要使用，缺陷直接影响主视力</td></tr><tr><td>过渡视区</td><td>40%-75%半径</td><td>周边视觉使用，影响余光感知和视场宽度</td></tr><tr><td>边缘视区</td><td>&gt;75%半径</td><td>极偶尔使用，主要影响外观，对功能性视觉影响轻微</td></tr></tbody></table>
+<p><strong>半径阈值设计</strong>（本项目：0.40 / 0.75）：</p>
+<ul>
+<li>40% ROI半径对应镜片"有效光学区"内缘（典型眼镜镜片光学区直径约为镜片直径的75-80%）</li>
+<li>本项目ROI约3000px直径，40%≈600px，对应约15mm（假设镜片直径约37mm）</li>
+</ul>
+<h3>4.3 WearScore公式设计的理论依据</h3>
+<p><strong>对数饱和函数的必要性</strong>：</p>
+<ul>
+<li>线性函数：单一极端缺陷（如1条200px长划痕）会将评分推满</li>
+<li>对数饱和：<code>sat_log(x) = min(scale × log1p(x), 100)</code> 反映了真实视觉影响的边际递减规律</li>
+<li>生理学依据：人眼的主观感知强度与刺激强度呈对数关系（Weber-Fechner定律）</li>
+</ul>
+<p><strong>5分量权重的独立性验证</strong>：</p>
+<ul>
+<li>中心区缺陷密度（f_center）：独立于总缺陷量，捕捉"集中在关键位置"的损伤</li>
+<li>全局密度（f_density）：与f_center互补，捕捉弥漫性磨损</li>
+<li>critical占比（f_critical）：与密度独立，捕捉"虽少但严重"的大面积缺损</li>
+<li>散射强度（f_scatter）：代理深度信息，与数量/面积指标互补</li>
+<li>总量（f_total）：作为全局兜底指标</li>
+</ul>
+<hr />
+<h2>五、项目关键技术决策与方案选型记录</h2>
+<h3>5.1 为何选择YOLOv12m而非分割模型</h3>
+<p>原始规划（《划痕识别整体规划》模块二）提出两阶段方案：</p>
+<ol>
+<li>Frangi/Hessian候选图生成</li>
+<li>UNet/SegFormer精细分割</li>
+</ol>
+<p><strong>放弃分割方案的原因</strong>：</p>
+<ul>
+<li>标注成本：像素级掩码标注需要专业人员，成本约为bbox的5-10倍</li>
+<li>暗场边界不清晰：缺陷散射光的物理边界是渐变的，像素级GT本身具有±5px的固有不确定性</li>
+<li>工程复杂度：YOLOv12m端到端训练，无需两阶段协调</li>
+<li>实际效果：bbox检测+SAHI推理端连接在达到60%mAP目标上已足够</li>
+</ul>
+<p><strong>bbox vs mask的核心权衡</strong>：</p>
+<pre><code>bbox优势：
+  - 标注成本低（自动生成可行）
+  - 训练稳定，无需像素级GT
+  - 推理速度快（无掩码解码）
+
+mask优势：
+  - 划痕真实长度/形态（bbox为近似）
+  - OBB检测可通过mask回投获得
+  - 为WearMetrics提供精确骨架</code></pre>
+<p><strong>结论</strong>：中期目标（60%mAP）阶段选bbox方案性价比最高。长期目标（精确WearMetrics）需要mask支持，可通过SAM（Segment Anything Model）从bbox自动生成，无需重新标注。</p>
+<h3>5.2 为何选择SAHI而非全图检测</h3>
+<p><strong>全图检测的问题</strong>：</p>
+<ol>
+<li>内存：4096×3000图像在YOLOv12m中需要 ~8GB GPU显存（单张，batch=1）</li>
+<li>小目标分辨率：4096×3000 downsampled to 640×640 → 单个缺陷仅3-5px</li>
+<li>划痕碎片问题在全图检测中同样存在（模型在训练切片上学习，推理时分辨率不匹配）</li>
+</ol>
+<p><strong>SAHI方案的参数选择</strong>：</p>
+<pre><code>tile_size = 640px    # 与训练分辨率完全一致
+stride = 480px       # overlap = 160px = 25%
+# 25% overlap确保：
+# - 跨切片划痕在至少1个切片中有足够长度被检出
+# - 推理切片总数：≈(4096/480)×(3000/480) ≈ 9×7 = 63张/图（可接受）</code></pre>
+<h3>5.3 三阶段训练策略的设计逻辑</h3>
+<pre><code>Stage1（基线）: yolo12m.pt → 半自动标注原始数据 → 建立基线，暴露标注问题
+    ↓ 发现：train/val gap=0.73，过拟合，噪声标注是主因
+Stage2（清洗+伪标签）: Stage1 best.pt → 清洗标注+伪标签 → mAP 0.52→0.66
+    ↓ 发现：gap降至0.04，泛化良好，scratch AP=0.41是瓶颈
+Stage3 = Stage2（最优，回滚）: 在Stage2基础上进行人工审核后再训练（Phase 2C）
+    实际：mAP=0.6621（val），0.6765（独立测试集）
+Stage4（失败实验）: Stage3 best.pt → GT连接重标注 → mAP 0.65→0.47（-27.7%）
+    教训：GT连接破坏训练信号</code></pre>
+<p>微调（Fine-tuning）vs 从头训练（Training from scratch）的选择：</p>
+<ul>
+<li>Stage1 → Stage2采用微调：保留已学特征，仅调整标注引起的偏差</li>
+<li>lr0从0.01降至0.002（1/5）：避免破坏Stage1已学的语义特征</li>
+<li>实验验证：微调从Stage1的0.52起步，到Stage2的0.66，证明微调有效</li>
+</ul>
+<hr />
+<h2>六、技术引用与参考文献</h2>
+<p>以下是本项目关键技术的来源文献（按重要性排序）：</p>
+<h3>核心技术</h3>
+<ol>
+<li><strong>YOLOv12</strong>: Tian et al., "YOLOv12: Attention-Centric Real-Time Object Detectors" (2025). YOLOv12m集成了Area Attention机制，对局部纹理相关目标（如划痕）具有天然优势。</li>
+</ol>
+<ol>
+<li><strong>Ultralytics YOLO框架</strong>: https://github.com/ultralytics/ultralytics (v8.4.24). 提供从训练到部署的完整工具链，包括DFL loss、Varifocal loss等先进训练技术。</li>
+</ol>
+<ol>
+<li><strong>SAHI</strong>: Akyon et al., "Slicing Aided Hyper Inference and Fine-tuning for Small Object Detection" (ICIP 2022). 专为大图小目标检测设计的推理框架，无需修改模型结构。</li>
+</ol>
+<ol>
+<li><strong>Frangi滤波器</strong>: Frangi et al., "Multiscale vessel enhancement filtering" (MICCAI 1998). 多尺度Hessian特征提取线状/管状结构，广泛用于医学图像血管增强，本项目用于划痕候选图生成和标注验证。</li>
+</ol>
+<ol>
+<li><strong>Focal Loss</strong>: Lin et al., "Focal Loss for Dense Object Detection" (ICCV 2017). 解决单阶段检测器正负样本极端不均衡问题，本项目fl_gamma=2.0用于缓解background主导的梯度问题。</li>
+</ol>
+<h3>数据增强与标注</h3>
+<ol>
+<li><strong>伪标签</strong>: Lee, "Pseudo-label: The simple and efficient semi-supervised learning method for deep neural networks" (ICML Workshop 2013). 本项目多策略伪标签方案的理论基础。</li>
+</ol>
+<ol>
+<li><strong>Copy-Paste增强</strong>: Ghiasi et al., "Simple Copy-Paste is a Strong Data Augmentation Method for Instance Segmentation" (CVPR 2021). 用于damage类过采样（damage_augment.py）。</li>
+</ol>
+<ol>
+<li><strong>ECC图像配准</strong>: Evangelidis &amp; Psarakis, "Parametric image alignment using enhanced correlation coefficient maximization" (TPAMI 2008). 用于背景模板配准（preprocessing/registration.py）。</li>
+</ol>
+<h3>评估方法</h3>
+<ol>
+<li><strong>COCO AP指标体系</strong>: Lin et al., "Microsoft COCO: Common Objects in Context" (ECCV 2014). 本项目采用mAP@0.5和mAP@0.5:0.95作为主要评估指标。</li>
+</ol>
+<ol>
+<li><strong>Otsu阈值</strong>: Otsu, "A threshold selection method from gray-level histograms" (IEEE Trans. SMC 1979). 用于切片标注自动生成的阈值分割步骤。</li>
+</ol>
+<h3>架构参考</h3>
+<ol>
+<li><strong>FPN</strong>: Lin et al., "Feature Pyramid Networks for Object Detection" (CVPR 2017). YOLOv12m neck中多尺度特征融合的基础。</li>
+</ol>
+<ol>
+<li><strong>PANet</strong>: Liu et al., "Path Aggregation Network for Instance Segmentation" (CVPR 2018). YOLOv12m在FPN基础上增加的自下而上路径增强位置信息。</li>
+</ol>
+<hr />
+<h2>七、领域知识：眼镜镜片的标准化检测要求</h2>
+<h3>7.1 国际标准概况</h3>
+<ul>
+<li><strong>ISO 8980-1</strong>: 眼镜片单光未割边镜片要求（包含外观要求，但未明确划痕容差的量化标准）</li>
+<li><strong>GB 10810.1-2014</strong>: 眼镜镜片第1部分（中国国标），规定镜片"有效区内不应有影响视力的疵点"</li>
+<li><strong>ANSI Z80.1</strong>: 美国眼镜镜片标准</li>
+</ul>
+<p><strong>关键观察</strong>：现行标准对"划痕容差"的描述多为定性（"不影响视力"），缺乏量化阈值。本项目的WearScore体系（A/B/C/D分级）是对这一标准化缺口的填补尝试。</p>
+<h3>7.2 工业检测中的常见实践</h3>
+<table><thead><tr><th>检测方式</th><th>优点</th><th>缺点</th><th>与本项目的关系</th></tr></thead><tbody><tr><td>人工目检（白光背景）</td><td>简单直接</td><td>主观，易疲劳，漏检率高</td><td>本项目的替代目标</td></tr><tr><td>干涉仪（Newton环）</td><td>精确定量（nm级表面形貌）</td><td>价格昂贵，操作复杂，速度慢</td><td>提供参考精度基准</td></tr><tr><td>暗场散射成像（本项目）</td><td>高灵敏度，高分辨率，可自动化</td><td>需要光路设计，图像处理复杂</td><td>核心技术路线</td></tr><tr><td>机器视觉（白光+CNN）</td><td>成熟商业化</td><td>对暗场特有细划痕不灵敏</td><td>对比基线</td></tr></tbody></table>
+<h3>7.3 镜片寿命与磨损速率参考数据</h3>
+<ul>
+<li>典型树脂镜片（1.67折射率，未镀AR膜）：日常使用6个月后出现划痕的概率约70%（根据文献估计）</li>
+<li>镀硬化膜镜片：寿命约延长2-3倍</li>
+<li>运动使用/暴力清洁：加速磨损约5-10倍</li>
+<li>本项目数据集中：247张镜片覆盖"轻度~极重度"全损伤谱系，反映真实使用场景分布</li>
+</ul>
+<hr />
+<p><em>本文档综合了项目规划文档（《划痕识别整体规划》《项目架构与分步测试计划》），深度分析报告（《暗场眼镜片缺陷检测系统提升方案研究报告》《暗场光学图像中眼镜片缺陷检测与分级的AI系统设计深度研究》《眼镜镜片暗场缺陷智能检测技术深度调研》），以及项目开发过程中的技术发现。</em></p>
+  </main>
+</body>
+</html>

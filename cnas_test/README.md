@@ -7,7 +7,8 @@
 ```text
 cnas_test/
   manifests/
-    test_set_v1.json     # 固定留出测试集清单
+    full_dataset_v1.json # 当前完整数据集清单
+    test_set_v1.json     # 20 张留出测试集清单（历史/抽样口径）
   templates/
     cnas_test_outline_template.md
     cnas_test_report_template.md
@@ -16,16 +17,22 @@ cnas_test/
     CNAS测试报告_当前版.md
   runner/
     config.py            # 固定路径与评测参数
-    dataset_loader.py    # 测试集加载与切片列表生成
+    dataset_loader.py    # 测试集加载与样本列表生成
     evaluator.py         # 模型评测与交付产物保存
     report.py            # JSON / Markdown / 交付清单输出
+    report_html.py       # 单页 Web 测试报告
+    report_docx.py       # Word 测试报告
+    provenance.py        # git / 权重 / 测试集 / 环境溯源
+    screenshot.py        # 测试过程截图和结果摘要图
     run_eval.py          # 命令行入口
   outputs/
-    latest/
-      dataset/           # 临时数据集 YAML 与切片清单
+    YYYYMMDD_HHMMSS/
+      dataset/           # 临时数据集 YAML 与样本清单
       metrics/           # JSON 结果
       plots/             # 曲线图、混淆矩阵
-      reports/           # Markdown 测试报告
+      screenshots/       # 测试过程截图
+      provenance/        # 环境与版本溯源
+      reports/           # Markdown / HTML / DOCX 测试报告
       delivery_manifest.json
 ```
 
@@ -43,7 +50,9 @@ cnas_test/
 
 ```bash
 cd /home/bm/Dev/Microlens_DF
-uv run python -m cnas_test.runner.run_eval
+OUT_DIR="cnas_test/outputs/$(date +%Y%m%d_%H%M%S)"
+mkdir -p "$OUT_DIR"
+uv run python -m cnas_test.runner.run_eval --save-dir "$OUT_DIR" 2>&1 | tee "$OUT_DIR/run_console.log"
 ```
 
 兼容旧命令：
@@ -54,20 +63,25 @@ python scripts/run_cnas_eval.py
 
 ## 默认参数与默认输出
 
-- 测试集：`cnas_test/manifests/test_set_v1.json`
-- 测试切片目录：`output/tile_dataset/images/val`
-- 默认权重：`output/training/stage2_cleaned/weights/best.pt`
-- 默认输出目录：`cnas_test/outputs/latest`
+- 测试集：`cnas_test/manifests/full_dataset_v1.json`
+- 测试样本目录：`output/tile_dataset/images/train` 与 `output/tile_dataset/images/val`
+- 默认权重：`output/experiments/phase3e/detection_training/b2_nwd_only_phase3e/weights/best.pt`
+- 默认输出目录：未指定 `--save-dir` 时自动生成 `cnas_test/outputs/YYYYMMDD_HHMMSS`
 - `conf=0.001`
 - `iou=0.6`
-- 通过标准：`mAP@0.5 >= 0.60`
 
 ## 交付物
 
-一次完整执行后，默认会生成以下交付物：
+一次完整执行后，会在本次时间命名目录 `$OUT_DIR` 下生成以下交付物：
 
-- `cnas_test/outputs/latest/dataset/cnas_val.yaml`
-- `cnas_test/outputs/latest/dataset/cnas_val_list.txt`
-- `cnas_test/outputs/latest/metrics/cnas_eval_results.json`
-- `cnas_test/outputs/latest/reports/cnas_test_report.md`
-- `cnas_test/outputs/latest/delivery_manifest.json`
+- `$OUT_DIR/dataset/cnas_val.yaml`
+- `$OUT_DIR/dataset/cnas_val_list.txt`
+- `$OUT_DIR/metrics/cnas_eval_results.json`
+- `$OUT_DIR/reports/cnas_test_report.md`
+- `$OUT_DIR/reports/cnas_test_report.html`
+- `$OUT_DIR/reports/cnas_test_report.docx`
+- `$OUT_DIR/provenance/provenance.json`
+- `$OUT_DIR/screenshots/01_startup_banner.png`
+- `$OUT_DIR/screenshots/02_result_summary.png`
+- `$OUT_DIR/screenshots/03_metrics_chart.png`
+- `$OUT_DIR/delivery_manifest.json`

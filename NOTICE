@@ -1,0 +1,27 @@
+Microlens_DF — 暗场离焦微结构镜片缺陷检测、分析与磨损评估系统
+Copyright 2026 Microlens_DF Project Contributors
+
+本项目代码以 Apache License 2.0 授权（见 LICENSE）。
+
+知识产权与资助说明
+------------------------------------------------------------
+本项目为国家重点研发计划课题相关研究成果的一部分
+（课题编号 2024YFC2419504 / 项目编号 2024YFC2419500）。
+相关原始数据集、官方任务书、科技报告与第三方测试交付件
+（PDF / DOCX 等）不随本仓库公开发布，仅在本地与授权范围内保存。
+
+公开仓库仅包含：源码、配置、测试、轻量级清单/模板，以及
+图文并茂的成果型说明文档。数据集、训练权重、实验产物与运行
+产物默认不纳入版本控制（见 .gitignore 与 output/README.md）。
+
+第三方组件
+------------------------------------------------------------
+本项目使用了以下开源组件（各自遵循其原始许可证）：
+  - Ultralytics YOLO (AGPL-3.0)
+  - PyTorch / TorchVision (BSD)
+  - OpenCV (Apache-2.0)
+  - segmentation-models-pytorch (MIT)
+  - MMSegmentation / MMEngine (Apache-2.0)
+  - Gradio (Apache-2.0)
+注意：Ultralytics YOLO 采用 AGPL-3.0 许可，若将本项目用于
+分发或网络服务，请遵守 AGPL-3.0 的相应义务。

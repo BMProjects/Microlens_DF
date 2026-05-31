@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>镜片磨损智能识别算法 - 测试执行说明</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #1f2933;
+      --muted: #52606d;
+      --line: #d9e2ec;
+      --soft: #f5f7fa;
+      --accent: #1f6feb;
+      --ok: #1f7a4d;
+      --warn: #9a5b00;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Noto Sans CJK SC", "Microsoft YaHei", Arial, sans-serif;
+      color: var(--ink);
+      background: #fff;
+      line-height: 1.58;
+    }
+    main {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 28px 24px 48px;
+    }
+    header {
+      border-bottom: 3px solid var(--accent);
+      padding-bottom: 14px;
+      margin-bottom: 22px;
+    }
+    h1 { margin: 0 0 8px; font-size: 30px; letter-spacing: 0; }
+    h2 {
+      margin: 28px 0 10px;
+      padding-left: 10px;
+      border-left: 4px solid var(--accent);
+      font-size: 20px;
+    }
+    h3 { margin: 18px 0 8px; font-size: 16px; }
+    p { margin: 8px 0; }
+    .lead { color: var(--muted); font-size: 15px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    section { margin-top: 18px; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0;
+      font-size: 14px;
+    }
+    th, td {
+      border: 1px solid var(--line);
+      padding: 8px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { background: var(--soft); }
+    code, pre {
+      font-family: "JetBrains Mono", "Cascadia Mono", Consolas, monospace;
+      background: var(--soft);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+    }
+    code { padding: 1px 4px; }
+    pre {
+      padding: 12px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+    .formula {
+      margin: 10px 0;
+      padding: 10px 12px;
+      text-align: center;
+      background: var(--soft);
+      border: 1px solid var(--line);
+      font-family: "Cambria Math", "Times New Roman", serif;
+      font-size: 15px;
+    }
+    ol, ul { padding-left: 24px; }
+    li { margin: 5px 0; }
+    .pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--soft);
+      color: var(--muted);
+      font-size: 13px;
+      margin-right: 6px;
+    }
+    .ok { color: var(--ok); font-weight: 700; }
+    .warn { color: var(--warn); font-weight: 700; }
+    @media (max-width: 760px) {
+      main { padding: 20px 14px 36px; }
+      .grid { grid-template-columns: 1fr; }
+      h1 { font-size: 24px; }
+      table { font-size: 13px; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>镜片磨损智能识别算法测试执行说明</h1>
+    <p class="lead">
+      面向测试人员的现场参考页。按本页执行即可完成单次测试或训练后测试，并保留日志、截图和报告。
+    </p>
+    <p>
+      <span class="pill">测试版本：LWIA-Det v1.0.0</span>
+      <span class="pill">版本备注：内部训练注释 B2_nwd_only_phase3e</span>
+      <span class="pill">第三方客观测试记录</span>
+    </p>
+  </header>
+
+  <section>
+    <h2>1. 被测对象</h2>
+    <table>
+      <tr><th>项目</th><th>内容</th></tr>
+      <tr><td>被测软件名称</td><td>镜片磨损智能识别算法</td></tr>
+      <tr><td>测试版本</td><td><code>LWIA-Det v1.0.0</code></td></tr>
+      <tr><td>版本备注</td><td>内部训练注释：<code>B2_nwd_only_phase3e</code></td></tr>
+      <tr><td>模型描述</td><td>多尺度深度目标检测网络，结合小目标定位优化策略</td></tr>
+      <tr><td>结果口径</td><td>本说明用于测试执行和结果记录；符合性判定以委托测试文件或测试机构正式规则为准</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>2. 测试数据集</h2>
+    <table>
+      <tr><th>项目</th><th>内容</th></tr>
+      <tr><td>测试集清单</td><td><code>cnas_test/manifests/full_dataset_v1.json</code></td></tr>
+      <tr><td>数据集名称</td><td>离焦微结构镜片磨损识别数据集</td></tr>
+      <tr><td>数据集类型</td><td>标准化图像样本数据集</td></tr>
+      <tr><td>样本构建方法</td><td>由离焦微结构镜片磨损显微图像及人工复核的目标框标注组成；按固定尺度和标注坐标映射规则生成 640 × 640 像素的标准化图像样本，并同步生成三类缺陷目标框标签。</td></tr>
+      <tr><td>样本图像尺寸</td><td>640 × 640 像素</td></tr>
+      <tr><td>样本图像数量</td><td>10621</td></tr>
+      <tr><td>标注缺陷框数量</td><td>90325</td></tr>
+      <tr><td>空背景样本数量</td><td>368</td></tr>
+      <tr><td>类别分布</td><td>scratch=58032，spot=17475，critical=14818</td></tr>
+    </table>
+    <p>训练后测试中的模型训练阶段使用固定划分：训练子集 197 个镜片图像编号、8471 个标准化图像样本、68339 个标注缺陷框；验证子集 50 个镜片图像编号、2150 个标准化图像样本、21986 个标注缺陷框。单次第三方测试使用测试集清单纳入全部 10621 个标准化图像样本重新计算指标。</p>
+  </section>
+
+  <section>
+    <h2>3. 方式一：单次测试</h2>
+    <p>适用于已提供固定模型权重，仅执行第三方测试和报告生成。</p>
+    <pre>cd /home/bm/Dev/Microlens_DF
+OUT_DIR="cnas_test/outputs/$(date +%Y%m%d_%H%M%S)"
+mkdir -p "$OUT_DIR"
+uv run python -m cnas_test.runner.run_eval --save-dir "$OUT_DIR" 2&gt;&amp;1 | tee "$OUT_DIR/run_console.log"</pre>
+    <p>如需指定被测权重，使用：</p>
+    <pre>OUT_DIR="cnas_test/outputs/$(date +%Y%m%d_%H%M%S)"
+mkdir -p "$OUT_DIR"
+uv run python -m cnas_test.runner.run_eval \
+  --weights /path/to/best.pt \
+  --save-dir "$OUT_DIR" \
+  2&gt;&amp;1 | tee "$OUT_DIR/run_console.log"</pre>
+    <p>未指定 <code>--save-dir</code> 时，程序也会自动创建 <code>cnas_test/outputs/YYYYMMDD_HHMMSS/</code> 时间命名目录。为同步保存终端日志，推荐显式设置 <code>OUT_DIR</code>。</p>
+  </section>
+
+  <section>
+    <h2>4. 方式二：训练后测试</h2>
+    <p>适用于需要先按当前数据集重新训练模型，再使用训练得到的 <code>best.pt</code> 执行测试。</p>
+    <pre>cd /home/bm/Dev/Microlens_DF
+mkdir -p output/experiments/cnas_full_retrain/logs
+uv run --no-sync python scripts/train_phase2_sfe_nwd.py \
+  --exp B2 \
+  --device cuda \
+  --epochs 60 \
+  --batch 16 \
+  --workers 8 \
+  --lr0 0.001 \
+  --project /home/bm/Dev/Microlens_DF/output/experiments/cnas_full_retrain/detection_training \
+  --run-name LWIA-Det-v1.0.0-cnas-full-20260520 \
+  --cache disk \
+  --no-countdown \
+  2&gt;&amp;1 | tee output/experiments/cnas_full_retrain/logs/train_full_20260520.log</pre>
+    <p>训练完成后，使用训练输出目录中的 <code>weights/best.pt</code> 执行单次测试命令，并保存到新的时间命名目录。</p>
+  </section>
+
+  <section>
+    <h2>5. 执行步骤</h2>
+    <ol>
+      <li>确认测试主机 GPU 可用，执行 <code>nvidia-smi</code>，记录截图。</li>
+      <li>确认项目根目录、测试集清单、模型权重或训练输出目录均存在。</li>
+      <li>选择“单次测试”或“训练后测试”路径执行命令。</li>
+      <li>测试程序自动生成启动截图、结果截图、指标图、溯源信息和报告。</li>
+      <li>打开 HTML/DOCX 报告，确认测试数据集、权重、指标、截图和日志完整。</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>6. 输出物位置</h2>
+    <table>
+      <tr><th>输出物</th><th>路径</th></tr>
+      <tr><td>统计结果</td><td><code>$OUT_DIR/metrics/cnas_eval_results.json</code></td></tr>
+      <tr><td>Web 报告</td><td><code>$OUT_DIR/reports/cnas_test_report.html</code></td></tr>
+      <tr><td>Word 报告</td><td><code>$OUT_DIR/reports/cnas_test_report.docx</code></td></tr>
+      <tr><td>过程截图</td><td><code>$OUT_DIR/screenshots/</code></td></tr>
+      <tr><td>溯源记录</td><td><code>$OUT_DIR/provenance/provenance.json</code></td></tr>
+      <tr><td>交付清单</td><td><code>$OUT_DIR/delivery_manifest.json</code></td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>7. 本地与远程测试</h2>
+    <div class="grid">
+      <div>
+        <h3>本地测试</h3>
+        <ul>
+          <li>测试人员使用被测主机物理显示器、键盘和鼠标。</li>
+          <li>建议显示分辨率不低于 1920 x 1080，便于截图归档。</li>
+          <li>正式测试期间不切换环境、不修改权重、不修改测试集。</li>
+        </ul>
+      </div>
+      <div>
+        <h3>RustDesk</h3>
+        <ul>
+          <li>当前 RustDesk ID：<code>1 234 691 477</code>。</li>
+          <li>测试人员输入该 ID 发起连接；一次性密码或临时授权由现场技术配合方单独提供。</li>
+          <li>连接成功后由测试人员直接操作终端，技术配合方只协助登录和确认路径。</li>
+          <li>建议远程分辨率不低于 1920 x 1080，并开启本地屏幕录制。</li>
+          <li>如远程会话断开，记录断开时间；测试未完成时重新执行本次测试。</li>
+        </ul>
+      </div>
+    </div>
+    <h3>NoMachine</h3>
+    <table>
+      <tr><th>项目</th><th>内容</th></tr>
+      <tr><td>WAN 连接地址</td><td><code>47.129.30.146</code></td></tr>
+      <tr><td>端口/协议</td><td><code>4000</code> / NoMachine NX</td></tr>
+      <tr><td>公网 IPv6</td><td><code>2406:da18:772:6200:e518:269b:f9c5:e413</code>，端口 <code>4000</code></td></tr>
+      <tr><td>同局域网地址</td><td><code>192.168.2.185:4000</code></td></tr>
+      <tr><td>Tailscale 地址</td><td><code>100.93.23.65:4000</code></td></tr>
+      <tr><td>服务状态</td><td>NoMachine Server 已运行，允许新连接；本机已监听 TCP/UDP <code>4000</code></td></tr>
+      <tr><td>登录凭据</td><td>账号和密码由现场技术配合方单独提供；本机当前用户为 <code>bm</code>，是否作为测试账号以现场确认为准</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>8. 时间参考</h2>
+    <table>
+      <tr><th>任务</th><th>预计耗时</th><th>说明</th></tr>
+      <tr><td>单次测试</td><td>约 1-2 分钟</td><td>10621 个标准化图像样本，只做评测和报告生成</td></tr>
+      <tr><td>模型训练 + 测试</td><td>约 2.5-3 小时</td><td>60 epoch 训练后再执行完整数据集测试</td></tr>
+    </table>
+    <p class="warn">正式结果以本机实际训练日志和测试报告记录为准。</p>
+  </section>
+
+  <section>
+    <h2>9. 指标计算说明</h2>
+    <p>对每个类别 c，预测框按置信度从高到低排序，并在 IoU = 0.5 条件下与同类别标注框进行一对一匹配。</p>
+    <div class="formula">Precision<sub>c</sub>(k) = TP<sub>c</sub>(k) / [TP<sub>c</sub>(k) + FP<sub>c</sub>(k)]</div>
+    <div class="formula">Recall<sub>c</sub>(k) = TP<sub>c</sub>(k) / N<sub>gt,c</sub></div>
+    <div class="formula">AP50<sub>c</sub> = ∫<sub>0</sub><sup>1</sup> P<sub>c</sub>(R)dR，IoU = 0.5</div>
+    <div class="formula">mAP@0.5 = [AP50<sub>scratch</sub> + AP50<sub>spot</sub> + AP50<sub>critical</sub>] / 3</div>
+  </section>
+</main>
+</body>
+</html>

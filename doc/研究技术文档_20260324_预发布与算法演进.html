@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>研究技术文档_20260324_预发布与算法演进</title>
+  <style>
+body {
+  margin: 0;
+  background: #f5f7fb;
+  color: #1f2937;
+  font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+.page {
+  max-width: 1100px;
+  margin: 32px auto;
+  background: #ffffff;
+  padding: 36px 48px 56px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  border-radius: 18px;
+}
+.doc-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #eff6ff;
+  border: 1px solid #dbeafe;
+}
+.doc-nav a {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+  font-size: 13px;
+}
+h1, h2, h3, h4 {
+  color: #0f172a;
+  line-height: 1.35;
+}
+h1 { font-size: 2rem; border-bottom: 3px solid #dbeafe; padding-bottom: 12px; }
+h2 { font-size: 1.45rem; margin-top: 2rem; border-left: 5px solid #60a5fa; padding-left: 12px; }
+h3 { font-size: 1.15rem; margin-top: 1.4rem; }
+p, li { font-size: 15px; line-height: 1.8; }
+code {
+  background: #eff6ff;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-family: "JetBrains Mono", "Consolas", monospace;
+}
+pre {
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 16px 18px;
+  border-radius: 12px;
+  overflow-x: auto;
+  line-height: 1.55;
+}
+pre code { background: transparent; color: inherit; padding: 0; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 18px 0 24px;
+  font-size: 14px;
+}
+th, td {
+  border: 1px solid #dbe2ea;
+  padding: 10px 12px;
+  vertical-align: top;
+}
+th {
+  background: #eff6ff;
+  font-weight: 700;
+}
+tr:nth-child(even) td {
+  background: #fafcff;
+}
+img {
+  max-width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.10);
+}
+figure {
+  margin: 24px 0;
+}
+figcaption {
+  color: #475569;
+  font-size: 14px;
+  margin-top: 8px;
+}
+a { color: #2563eb; text-decoration: none; }
+a:hover { text-decoration: underline; }
+hr { border: 0; border-top: 1px solid #dbe2ea; margin: 28px 0; }
+.meta {
+  color: #64748b;
+  margin-bottom: 24px;
+  font-size: 14px;
+}
+</style>
+</head>
+<body>
+  <main class="page">
+    <nav class="doc-nav"><a href="index.html">文档总目录</a><a href="研究技术文档_20260324_预发布与算法演进.md">Markdown 源文档</a><a href="GitHub协作同步与大文件管理说明_20260324.html">GitHub协作同步与大文件管理说明_20260324</a><a href="暗场光学图像中眼镜片缺陷（划痕凹坑大面积裂纹）检测与分级的 AI 系统设计深度研究.html">暗场光学图像中眼镜片缺陷（划痕凹坑大面积裂纹）检测与分级的 AI 系统设计深度研究</a><a href="暗场眼镜片缺陷检测中的分割模型选型与集成方案深度研究.html">暗场眼镜片缺陷检测中的分割模型选型与集成方案深度研究</a><a href="暗场眼镜片缺陷检测系统提升方案研究报告.html">暗场眼镜片缺陷检测系统提升方案研究报告</a></nav>
+    <div class="meta">自动渲染的 HTML 研究日志，适合继续补充图片、表格与结果对比图。</div>
+    <h1>暗场离焦微结构镜片缺陷检测系统研究技术文档</h1>
+<h2>1. 文档定位</h2>
+<p>本文档面向当前项目的技术接手、阶段汇报与后续研发迭代，聚焦以下三个问题：</p>
+<ol>
+<li>当前预发布系统是否已经形成稳定主线</li>
+<li>当前底层识别算法与分割算法的逻辑关系、实验结论与改进方向</li>
+<li>当前系统在物理量化、评分理论和测试隔离后的整体技术状态</li>
+</ol>
+<h2>2. 当前系统结论</h2>
+<p>当前系统已经具备 <code>v0.1-pre</code> 级别的预发布条件，但仍应明确其边界：</p>
+<ul>
+<li>主体入口已经收敛为 GUI 工作台</li>
+<li>后端主线已经收敛为“全图推理服务 + 统一评分 + 独立 CNAS 测试”</li>
+<li>日常研发与第三方测试已解耦</li>
+<li>物理尺度已经纳入系统，尺寸口径默认切换为 <code>mm</code></li>
+</ul>
+<p>当前不再建议把训练脚本、CNAS 测试脚本和研究性改模逻辑直接视为“正式系统的一部分”。</p>
+<h2>3. 当前预发布架构</h2>
+<h3>3.1 主体功能</h3>
+<p>当前 GUI 预发布主线由五部分构成：</p>
+<ol>
+<li>图像输入</li>
+<li>全图推理</li>
+<li>缺陷可视化</li>
+<li>统一评分与评级</li>
+<li>结果导出</li>
+</ol>
+<h3>3.2 当前主架构</h3>
+<pre><code>flowchart LR
+    A[GUI Web 工作台] --&gt; B[app_services.inference_service]
+    B --&gt; C[切片推理 / NMS / 划痕链合并]
+    C --&gt; D[DetectionResult]
+    D --&gt; E[scoring.quantify]
+    E --&gt; F[wear_score]
+    D --&gt; G[rendering / report]
+    H[CNAS 子系统] -.独立.-&gt; I[固定留出集评测]
+    J[研究实验脚本] -.独立.-&gt; K[识别/分割研发线]</code></pre>
+<h3>3.3 当前界面示意</h3>
+<p>下图为依据当前 GUI 主线和现有实验产物整理的界面快照，用于说明当前预发布版本的结构与信息布局。</p>
+<p><figure><img src="assets/generated/web_ui_snapshot.png" alt="GUI 预发布界面快照" /><figcaption>GUI 预发布界面快照</figcaption></figure></p>
+<h2>4. 物理尺度接入</h2>
+<h3>4.1 当前标定口径</h3>
+<p>当前系统已将图像比例尺纳入统一配置：</p>
+<ul>
+<li><code>6.8 um/pixel</code></li>
+<li>即 <code>0.0068 mm/pixel</code></li>
+</ul>
+<p>因此，系统内所有面对用户的长度、宽度、面积输出，默认切换为：</p>
+<ul>
+<li>长度单位：<code>mm</code></li>
+<li>面积单位：<code>mm²</code></li>
+</ul>
+<h3>4.2 当前实施原则</h3>
+<p>本轮改造没有推翻底层像素级算法，而是采用“内部仍按像素计算、对外统一转物理单位”的策略：</p>
+<ul>
+<li>检测与分割内部逻辑仍使用像素坐标</li>
+<li><code>DetectionResult / DefectInstance</code> 增加物理量属性</li>
+<li>GUI、汇总面板、HTML 报告、JSON/CSV/JSONL 导出默认展示 <code>mm/mm²</code></li>
+<li>原始像素量继续保留在 <code>raw_px</code> 字段中，便于后续实验与审计</li>
+</ul>
+<p>这种改法的好处是：</p>
+<ul>
+<li>不影响现有算法稳定性</li>
+<li>能立即统一系统的业务口径</li>
+<li>方便后续将评分理论与行业尺寸标准直接挂钩</li>
+</ul>
+<h2>5. 识别算法主线与实验结论</h2>
+<h3>5.1 当前正式基线</h3>
+<p>当前识别算法的正式默认模型已升级为：</p>
+<ul>
+<li>权重：<code>output/experiments/phase3e/detection_training/b2_nwd_only_phase3e/weights/best.pt</code></li>
+<li>固定留出集规模：<code>20</code> 张原图，<code>860</code> 个切片</li>
+</ul>
+<p>同时保留说明：</p>
+<ul>
+<li><code>stage2_cleaned</code> 是历史 CNAS 基线</li>
+<li><code>B2_nwd_only_phase3e</code> 是当前正式系统默认检测模型</li>
+</ul>
+<p><code>stage2_cleaned</code> 在训练过程中的主曲线如下。</p>
+<p><figure><img src="assets/references/stage2_cleaned_results.png" alt="Stage2 训练曲线" /><figcaption>Stage2 训练曲线</figcaption></figure></p>
+<p>固定留出集上的总体结果如下：</p>
+<table><thead><tr><th>实验</th><th>mAP@0.5</th><th>mAP@0.5:0.95</th><th>Precision</th><th>Recall</th><th>Scratch AP@0.5</th><th>Spot AP@0.5</th><th>Critical AP@0.5</th></tr></thead><tbody><tr><td>A0_baseline</td><td>0.6765</td><td>0.4541</td><td>0.5997</td><td>0.6735</td><td>0.4525</td><td>0.8180</td><td>0.7589</td></tr><tr><td>C1_ssgd_finetune</td><td>0.6755</td><td>0.4353</td><td>0.5875</td><td>0.6716</td><td>0.4409</td><td>0.8266</td><td>0.7591</td></tr><tr><td>C1_ssgd_freeze10</td><td>0.0000</td><td>0.0000</td><td>0.0000</td><td>0.0000</td><td>0.0000</td><td>0.0000</td><td>0.0000</td></tr><tr><td>B1_sfe_only</td><td>0.6262</td><td>0.4020</td><td>0.5575</td><td>0.6347</td><td>0.4062</td><td>0.7767</td><td>0.6956</td></tr><tr><td>B2_nwd_only</td><td>0.6802</td><td>0.4500</td><td>0.6080</td><td>0.6641</td><td>0.4488</td><td>0.8377</td><td>0.7542</td></tr><tr><td>B3_sfe_nwd</td><td>0.5856</td><td>0.3603</td><td>0.5246</td><td>0.6225</td><td>0.3811</td><td>0.7174</td><td>0.6581</td></tr></tbody></table>
+<h3>5.2 当前识别算法改进结论</h3>
+<p>当前最明确的结论有四点：</p>
+<ol>
+<li><code>B2_nwd_only_phase3e</code> 已可作为当前正式检测默认主线</li>
+<li><code>NWD-only</code> 是当前唯一在固定留出集上证明了稳定正收益的结构改进</li>
+<li><code>SFE-only</code> 和 <code>SFE+NWD</code> 在当前实现下没有形成稳定正收益</li>
+<li><code>SSGD</code> 迁移学习路线目前更像“未打通”，而不是“已被证明有效”</li>
+</ol>
+<p>识别算法对比图如下。</p>
+<p><figure><img src="assets/generated/experiment_comparison.png" alt="识别算法改进对比" /><figcaption>识别算法改进对比</figcaption></figure></p>
+<h3>5.3 当前识别主线的技术判断</h3>
+<p>识别算法当前的真实优势来自：</p>
+<ul>
+<li>标注清洗</li>
+<li>伪标签补漏</li>
+<li>全图后处理链路</li>
+<li>固定留出集评测约束</li>
+</ul>
+<p>而不是来自一次性换更复杂的模型结构。</p>
+<p>这说明当前识别分支更适合采用：</p>
+<ul>
+<li>小步、单变量、固定预算的自动化实验方法</li>
+<li>每次只改一个主变量</li>
+<li>按固定留出集复评决定是否保留</li>
+</ul>
+<h2>6. 分割算法分支与第一阶段实验</h2>
+<h3>6.1 分割分支定位</h3>
+<p>分割分支的目标不是立即替代正式检测系统，而是建立一条独立研发线，用于解决当前 bbox 路线的三个先天短板：</p>
+<ol>
+<li>细长划痕的 IoU 脆弱性</li>
+<li>切片边界导致的碎片化监督</li>
+<li>后续长度、面积、骨架等物理量分析缺少 mask 支撑</li>
+</ol>
+<h3>6.2 当前实现状态</h3>
+<p>当前分割分支已经具备以下基础能力：</p>
+<ul>
+<li><code>LightUNet</code> 轻量基线</li>
+<li>分割模型工厂，可扩展 <code>Unet++ / DeepLabV3+ / FPN</code></li>
+<li><code>MSD</code> 公开数据预训练入口</li>
+<li>私有弱标签微调入口</li>
+<li>全图滑窗分割推理</li>
+<li><code>mask -&gt; DetectionResult</code> 桥接</li>
+</ul>
+<h3>6.3 第一阶段实验结论</h3>
+<p>当前已经完成的第一阶段实验是：</p>
+<ul>
+<li>数据集：<code>MSD</code></li>
+<li>模型：<code>LightUNet</code></li>
+<li>预算：<code>60</code> 分钟</li>
+<li>设备：<code>CUDA / RTX 4090D</code></li>
+</ul>
+<p>实验摘要如下：</p>
+<table><thead><tr><th>项目</th><th>数值</th></tr></thead><tbody><tr><td>训练集 patch 数</td><td>7680</td></tr><tr><td>验证集 patch 数</td><td>960</td></tr><tr><td>参数量</td><td>20.55M</td></tr><tr><td>最佳 <code>val_mIoU</code></td><td>0.5393</td></tr><tr><td>预算结束后快速验证 <code>scratch IoU</code></td><td>0.3837</td></tr><tr><td>预算结束后快速验证 <code>spot IoU</code></td><td>0.5855</td></tr><tr><td>预算结束后快速验证 <code>mIoU</code></td><td>0.3231</td></tr></tbody></table>
+<p>这说明当前分割训练链路已经打通，但第一轮结果仍然只能视为：</p>
+<ul>
+<li><code>MSD</code> 源域基线</li>
+<li>不是最终结论</li>
+<li>更不能直接代表私有数据上的最终效果</li>
+</ul>
+<h3>6.4 与当初改模逻辑的一致性</h3>
+<p>这条实验逻辑与前期改模研究是一致的，但口径比之前更清楚：</p>
+<ul>
+<li><code>MSD</code> 仅用于源域结构预训练与结构排序</li>
+<li>当前私有数据只作为目标域训练验证数据</li>
+<li><code>CNAS</code> 留出 20 图像不再参与日常分割实验决策</li>
+</ul>
+<p>也就是说，分割分支现在已经真正从“测试导向”切换成“研发导向”。</p>
+<h2>7. 评分理论的当前状态</h2>
+<h3>7.1 当前统一口径</h3>
+<p>评分逻辑已经统一到：</p>
+<ul>
+<li>区域逻辑：<code>center / microstructure / edge</code></li>
+<li>主指标框架：<code>L_center / L_total / N / A / S_scatter</code></li>
+</ul>
+<p>其中：</p>
+<ul>
+<li><code>center</code> 对应主视觉中心区</li>
+<li><code>microstructure</code> 对应离焦微结构关键功能区</li>
+<li><code>edge</code> 对应边缘低敏感区域</li>
+</ul>
+<h3>7.2 当前评分实现特点</h3>
+<p>当前评分不是简单按缺陷数量打分，而是体现了功能区域权重：</p>
+<ul>
+<li>中心区优先级最高</li>
+<li>微结构区次高</li>
+<li>边缘区权重最低</li>
+<li>严重缺陷额外惩罚</li>
+</ul>
+<p>在本轮改造后，评分相关长度与面积的对外展示单位也已统一到物理单位，这使后续评分理论能够进一步向行业尺寸标准靠拢。</p>
+<h2>8. 当前预发布系统的完整度判断</h2>
+<h3>8.1 已具备的条件</h3>
+<p>当前系统已经具备第一预发布版本的主体条件：</p>
+<ul>
+<li>GUI 主入口明确</li>
+<li>全图推理闭环稳定</li>
+<li>评分实现统一</li>
+<li>物理尺度口径已统一</li>
+<li>CNAS 测试链路已独立</li>
+<li>日常研发与正式测试已分离</li>
+</ul>
+<h3>8.2 仍需继续补齐的非阻断项</h3>
+<p>以下问题不妨碍当前进入 <code>v0.1-pre</code>，但应在下一轮继续完善：</p>
+<ul>
+<li>GUI 批量导出与批处理服务仍不够完整</li>
+<li>分割分支还未形成正式结构对照结论</li>
+<li><code>LightUNet</code> 训练结束日志出现一次 <code>free(): invalid next size (fast)</code>，需要继续排查训练进程退出阶段的稳定性</li>
+<li>评分理论还可以进一步与行业标准尺寸阈值绑定</li>
+</ul>
+<h2>9. 后续研发建议</h2>
+<h3>9.1 识别算法分支</h3>
+<ul>
+<li>正式系统继续冻结 <code>stage2_cleaned</code></li>
+<li>识别研发线以 <code>NWD-only</code> 为父实验继续推进</li>
+<li>严格采用单变量自动化实验方法</li>
+</ul>
+<h3>9.2 分割算法分支</h3>
+<ul>
+<li>紧接着运行 <code>Unet++</code> 对照实验</li>
+<li>保持与 <code>LightUNet</code> 相同预算、相同数据、相同设备</li>
+<li>第一轮先完成 <code>LightUNet / Unet++ / DeepLabV3+ / FPN</code> 四模型源域排名</li>
+</ul>
+<h3>9.3 系统工程</h3>
+<ul>
+<li>继续把 GUI 导出能力下沉到 <code>app_services</code></li>
+<li>将研究脚本中的剩余产品级逻辑迁回 <code>src/</code></li>
+<li>后续所有用户侧尺寸输出继续保持物理单位优先</li>
+</ul>
+<h2>10. 结论</h2>
+<p>截至 <code>2026-03-24</code>，本项目已经从“多条实验线并行探索”进入“主系统收敛 + 研发分支独立推进”的阶段。 当前最重要的不是再扩展更多入口，而是：</p>
+<ul>
+<li>维持 GUI 预发布主线的稳定性</li>
+<li>保持识别与分割两条研发线的实验纪律</li>
+<li>用统一的物理量和评分口径，逐步把系统从“能检测”推进到“能解释、能量化、能交付”</li>
+</ul>
+  </main>
+</body>
+</html>

@@ -68,6 +68,21 @@ class DefectInstance:
     pixel_size_mm: float = DEFAULT_CALIBRATION.pixel_size_mm
 
     @property
+    def length(self) -> float:
+        """向后兼容旧字段名."""
+        return self.length_px
+
+    @property
+    def area(self) -> int:
+        """向后兼容旧字段名."""
+        return self.area_px
+
+    @property
+    def avg_width(self) -> float:
+        """向后兼容旧字段名."""
+        return self.avg_width_px
+
+    @property
     def length_mm(self) -> float:
         return self.length_px * self.pixel_size_mm
 

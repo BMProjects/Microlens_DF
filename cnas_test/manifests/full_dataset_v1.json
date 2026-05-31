@@ -1,0 +1,3229 @@
+{
+  "description": "CNAS full dataset manifest: all current train and val tiles in output/tile_dataset.",
+  "created": "2026-05-20",
+  "model": "b2_nwd_only_phase3e/weights/best.pt",
+  "selection_criteria": "all available original image stems with tiles under output/tile_dataset/images/train and output/tile_dataset/images/val",
+  "summary": {
+    "images": 247,
+    "tiles": 10621,
+    "boxes": 90325,
+    "class_counts": {
+      "scratch": 58032,
+      "spot": 17475,
+      "critical": 14818
+    }
+  },
+  "images": [
+    {
+      "stem": "100l",
+      "tiles": 43,
+      "boxes": 184,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 94,
+        "spot": 68,
+        "critical": 22
+      }
+    },
+    {
+      "stem": "100r",
+      "tiles": 43,
+      "boxes": 233,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 128,
+        "spot": 82,
+        "critical": 23
+      }
+    },
+    {
+      "stem": "101l",
+      "tiles": 43,
+      "boxes": 194,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 95,
+        "spot": 64,
+        "critical": 35
+      }
+    },
+    {
+      "stem": "101r",
+      "tiles": 43,
+      "boxes": 126,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 84,
+        "spot": 23,
+        "critical": 19
+      }
+    },
+    {
+      "stem": "102l",
+      "tiles": 43,
+      "boxes": 406,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 246,
+        "spot": 99,
+        "critical": 61
+      }
+    },
+    {
+      "stem": "102r",
+      "tiles": 43,
+      "boxes": 259,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 196,
+        "spot": 27,
+        "critical": 36
+      }
+    },
+    {
+      "stem": "103l",
+      "tiles": 43,
+      "boxes": 613,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 448,
+        "spot": 52,
+        "critical": 113
+      }
+    },
+    {
+      "stem": "103r",
+      "tiles": 43,
+      "boxes": 648,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 505,
+        "spot": 27,
+        "critical": 116
+      }
+    },
+    {
+      "stem": "104l",
+      "tiles": 43,
+      "boxes": 350,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 199,
+        "spot": 98,
+        "critical": 53
+      }
+    },
+    {
+      "stem": "104r",
+      "tiles": 43,
+      "boxes": 251,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 111,
+        "spot": 90,
+        "critical": 50
+      }
+    },
+    {
+      "stem": "105l",
+      "tiles": 43,
+      "boxes": 539,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 393,
+        "spot": 55,
+        "critical": 91
+      }
+    },
+    {
+      "stem": "105r",
+      "tiles": 43,
+      "boxes": 574,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 455,
+        "spot": 22,
+        "critical": 97
+      }
+    },
+    {
+      "stem": "106l",
+      "tiles": 43,
+      "boxes": 62,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 22,
+        "spot": 24,
+        "critical": 16
+      }
+    },
+    {
+      "stem": "106r",
+      "tiles": 43,
+      "boxes": 94,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 56,
+        "spot": 18,
+        "critical": 20
+      }
+    },
+    {
+      "stem": "107l",
+      "tiles": 43,
+      "boxes": 256,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 129,
+        "spot": 84,
+        "critical": 43
+      }
+    },
+    {
+      "stem": "107r",
+      "tiles": 43,
+      "boxes": 271,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 147,
+        "spot": 71,
+        "critical": 53
+      }
+    },
+    {
+      "stem": "108l",
+      "tiles": 43,
+      "boxes": 42,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 20,
+        "spot": 22,
+        "critical": 0
+      }
+    },
+    {
+      "stem": "108r",
+      "tiles": 43,
+      "boxes": 76,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 22,
+        "spot": 41,
+        "critical": 13
+      }
+    },
+    {
+      "stem": "109l",
+      "tiles": 43,
+      "boxes": 759,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 476,
+        "spot": 158,
+        "critical": 125
+      }
+    },
+    {
+      "stem": "109r",
+      "tiles": 43,
+      "boxes": 726,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 487,
+        "spot": 129,
+        "critical": 110
+      }
+    },
+    {
+      "stem": "10l",
+      "tiles": 43,
+      "boxes": 614,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 442,
+        "spot": 50,
+        "critical": 122
+      }
+    },
+    {
+      "stem": "10r",
+      "tiles": 43,
+      "boxes": 376,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 270,
+        "spot": 43,
+        "critical": 63
+      }
+    },
+    {
+      "stem": "110l",
+      "tiles": 43,
+      "boxes": 417,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 283,
+        "spot": 77,
+        "critical": 57
+      }
+    },
+    {
+      "stem": "110r",
+      "tiles": 43,
+      "boxes": 339,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 237,
+        "spot": 66,
+        "critical": 36
+      }
+    },
+    {
+      "stem": "111l",
+      "tiles": 43,
+      "boxes": 396,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 221,
+        "spot": 133,
+        "critical": 42
+      }
+    },
+    {
+      "stem": "111r",
+      "tiles": 43,
+      "boxes": 214,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 127,
+        "spot": 50,
+        "critical": 37
+      }
+    },
+    {
+      "stem": "112l",
+      "tiles": 43,
+      "boxes": 299,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 154,
+        "spot": 112,
+        "critical": 33
+      }
+    },
+    {
+      "stem": "112r",
+      "tiles": 43,
+      "boxes": 271,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 175,
+        "spot": 64,
+        "critical": 32
+      }
+    },
+    {
+      "stem": "113l",
+      "tiles": 43,
+      "boxes": 465,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 324,
+        "spot": 74,
+        "critical": 67
+      }
+    },
+    {
+      "stem": "113r",
+      "tiles": 43,
+      "boxes": 287,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 201,
+        "spot": 41,
+        "critical": 45
+      }
+    },
+    {
+      "stem": "114l",
+      "tiles": 43,
+      "boxes": 533,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 342,
+        "spot": 130,
+        "critical": 61
+      }
+    },
+    {
+      "stem": "114r",
+      "tiles": 43,
+      "boxes": 332,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 235,
+        "spot": 51,
+        "critical": 46
+      }
+    },
+    {
+      "stem": "115l",
+      "tiles": 43,
+      "boxes": 117,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 65,
+        "spot": 42,
+        "critical": 10
+      }
+    },
+    {
+      "stem": "115r",
+      "tiles": 43,
+      "boxes": 170,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 54,
+        "spot": 104,
+        "critical": 12
+      }
+    },
+    {
+      "stem": "116l",
+      "tiles": 43,
+      "boxes": 311,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 179,
+        "spot": 91,
+        "critical": 41
+      }
+    },
+    {
+      "stem": "116r",
+      "tiles": 43,
+      "boxes": 283,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 177,
+        "spot": 76,
+        "critical": 30
+      }
+    },
+    {
+      "stem": "117l",
+      "tiles": 43,
+      "boxes": 251,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 96,
+        "spot": 130,
+        "critical": 25
+      }
+    },
+    {
+      "stem": "117r",
+      "tiles": 43,
+      "boxes": 293,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 137,
+        "spot": 115,
+        "critical": 41
+      }
+    },
+    {
+      "stem": "118l",
+      "tiles": 43,
+      "boxes": 547,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 392,
+        "spot": 47,
+        "critical": 108
+      }
+    },
+    {
+      "stem": "118r",
+      "tiles": 43,
+      "boxes": 612,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 446,
+        "spot": 47,
+        "critical": 119
+      }
+    },
+    {
+      "stem": "119l",
+      "tiles": 43,
+      "boxes": 457,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 340,
+        "spot": 57,
+        "critical": 60
+      }
+    },
+    {
+      "stem": "119r",
+      "tiles": 43,
+      "boxes": 322,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 208,
+        "spot": 55,
+        "critical": 59
+      }
+    },
+    {
+      "stem": "11l",
+      "tiles": 43,
+      "boxes": 456,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 337,
+        "spot": 49,
+        "critical": 70
+      }
+    },
+    {
+      "stem": "11r",
+      "tiles": 43,
+      "boxes": 352,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 231,
+        "spot": 49,
+        "critical": 72
+      }
+    },
+    {
+      "stem": "120l",
+      "tiles": 43,
+      "boxes": 68,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 31,
+        "spot": 32,
+        "critical": 5
+      }
+    },
+    {
+      "stem": "120r",
+      "tiles": 43,
+      "boxes": 155,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 67,
+        "spot": 39,
+        "critical": 49
+      }
+    },
+    {
+      "stem": "121l",
+      "tiles": 43,
+      "boxes": 424,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 284,
+        "spot": 84,
+        "critical": 56
+      }
+    },
+    {
+      "stem": "121r",
+      "tiles": 43,
+      "boxes": 364,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 248,
+        "spot": 62,
+        "critical": 54
+      }
+    },
+    {
+      "stem": "122l",
+      "tiles": 43,
+      "boxes": 208,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 90,
+        "spot": 95,
+        "critical": 23
+      }
+    },
+    {
+      "stem": "122r",
+      "tiles": 43,
+      "boxes": 187,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 63,
+        "spot": 91,
+        "critical": 33
+      }
+    },
+    {
+      "stem": "123l",
+      "tiles": 43,
+      "boxes": 136,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 101,
+        "spot": 18,
+        "critical": 17
+      }
+    },
+    {
+      "stem": "123r",
+      "tiles": 43,
+      "boxes": 95,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 48,
+        "spot": 30,
+        "critical": 17
+      }
+    },
+    {
+      "stem": "12l",
+      "tiles": 43,
+      "boxes": 766,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 481,
+        "spot": 149,
+        "critical": 136
+      }
+    },
+    {
+      "stem": "12r",
+      "tiles": 43,
+      "boxes": 704,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 512,
+        "spot": 63,
+        "critical": 129
+      }
+    },
+    {
+      "stem": "13l",
+      "tiles": 43,
+      "boxes": 678,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 419,
+        "spot": 132,
+        "critical": 127
+      }
+    },
+    {
+      "stem": "13r",
+      "tiles": 43,
+      "boxes": 761,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 499,
+        "spot": 149,
+        "critical": 113
+      }
+    },
+    {
+      "stem": "14l",
+      "tiles": 43,
+      "boxes": 453,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 307,
+        "spot": 43,
+        "critical": 103
+      }
+    },
+    {
+      "stem": "14r",
+      "tiles": 43,
+      "boxes": 623,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 439,
+        "spot": 62,
+        "critical": 122
+      }
+    },
+    {
+      "stem": "15l",
+      "tiles": 43,
+      "boxes": 381,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 257,
+        "spot": 46,
+        "critical": 78
+      }
+    },
+    {
+      "stem": "15r",
+      "tiles": 43,
+      "boxes": 254,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 196,
+        "spot": 31,
+        "critical": 27
+      }
+    },
+    {
+      "stem": "16l",
+      "tiles": 43,
+      "boxes": 214,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 69,
+        "spot": 107,
+        "critical": 38
+      }
+    },
+    {
+      "stem": "16r",
+      "tiles": 43,
+      "boxes": 259,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 125,
+        "spot": 67,
+        "critical": 67
+      }
+    },
+    {
+      "stem": "17l",
+      "tiles": 43,
+      "boxes": 439,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 264,
+        "spot": 75,
+        "critical": 100
+      }
+    },
+    {
+      "stem": "17r",
+      "tiles": 43,
+      "boxes": 335,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 210,
+        "spot": 50,
+        "critical": 75
+      }
+    },
+    {
+      "stem": "18l",
+      "tiles": 43,
+      "boxes": 168,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 112,
+        "spot": 28,
+        "critical": 28
+      }
+    },
+    {
+      "stem": "18r",
+      "tiles": 43,
+      "boxes": 141,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 84,
+        "spot": 38,
+        "critical": 19
+      }
+    },
+    {
+      "stem": "19l",
+      "tiles": 43,
+      "boxes": 248,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 153,
+        "spot": 65,
+        "critical": 30
+      }
+    },
+    {
+      "stem": "19r",
+      "tiles": 43,
+      "boxes": 261,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 163,
+        "spot": 54,
+        "critical": 44
+      }
+    },
+    {
+      "stem": "1l",
+      "tiles": 43,
+      "boxes": 316,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 213,
+        "spot": 43,
+        "critical": 60
+      }
+    },
+    {
+      "stem": "1r",
+      "tiles": 43,
+      "boxes": 398,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 233,
+        "spot": 83,
+        "critical": 82
+      }
+    },
+    {
+      "stem": "20l",
+      "tiles": 43,
+      "boxes": 339,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 224,
+        "spot": 60,
+        "critical": 55
+      }
+    },
+    {
+      "stem": "20r",
+      "tiles": 43,
+      "boxes": 340,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 234,
+        "spot": 57,
+        "critical": 49
+      }
+    },
+    {
+      "stem": "21l",
+      "tiles": 43,
+      "boxes": 594,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 418,
+        "spot": 63,
+        "critical": 113
+      }
+    },
+    {
+      "stem": "21r",
+      "tiles": 43,
+      "boxes": 714,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 529,
+        "spot": 48,
+        "critical": 137
+      }
+    },
+    {
+      "stem": "22l",
+      "tiles": 43,
+      "boxes": 233,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 121,
+        "spot": 78,
+        "critical": 34
+      }
+    },
+    {
+      "stem": "22r",
+      "tiles": 43,
+      "boxes": 261,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 143,
+        "spot": 50,
+        "critical": 68
+      }
+    },
+    {
+      "stem": "23l",
+      "tiles": 43,
+      "boxes": 440,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 300,
+        "spot": 63,
+        "critical": 77
+      }
+    },
+    {
+      "stem": "23r",
+      "tiles": 43,
+      "boxes": 421,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 281,
+        "spot": 63,
+        "critical": 77
+      }
+    },
+    {
+      "stem": "24l",
+      "tiles": 43,
+      "boxes": 504,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 362,
+        "spot": 50,
+        "critical": 92
+      }
+    },
+    {
+      "stem": "24r",
+      "tiles": 43,
+      "boxes": 645,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 428,
+        "spot": 94,
+        "critical": 123
+      }
+    },
+    {
+      "stem": "25l",
+      "tiles": 43,
+      "boxes": 542,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 398,
+        "spot": 47,
+        "critical": 97
+      }
+    },
+    {
+      "stem": "25r",
+      "tiles": 43,
+      "boxes": 595,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 443,
+        "spot": 51,
+        "critical": 101
+      }
+    },
+    {
+      "stem": "26l",
+      "tiles": 43,
+      "boxes": 181,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 80,
+        "spot": 70,
+        "critical": 31
+      }
+    },
+    {
+      "stem": "26r",
+      "tiles": 43,
+      "boxes": 137,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 73,
+        "spot": 57,
+        "critical": 7
+      }
+    },
+    {
+      "stem": "27l",
+      "tiles": 43,
+      "boxes": 370,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 223,
+        "spot": 73,
+        "critical": 74
+      }
+    },
+    {
+      "stem": "27r",
+      "tiles": 43,
+      "boxes": 284,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 163,
+        "spot": 98,
+        "critical": 23
+      }
+    },
+    {
+      "stem": "28l",
+      "tiles": 43,
+      "boxes": 468,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 341,
+        "spot": 44,
+        "critical": 83
+      }
+    },
+    {
+      "stem": "28r",
+      "tiles": 43,
+      "boxes": 498,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 358,
+        "spot": 71,
+        "critical": 69
+      }
+    },
+    {
+      "stem": "29l",
+      "tiles": 43,
+      "boxes": 159,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 90,
+        "spot": 56,
+        "critical": 13
+      }
+    },
+    {
+      "stem": "29r",
+      "tiles": 43,
+      "boxes": 163,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 106,
+        "spot": 38,
+        "critical": 19
+      }
+    },
+    {
+      "stem": "2l",
+      "tiles": 43,
+      "boxes": 82,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 32,
+        "spot": 37,
+        "critical": 13
+      }
+    },
+    {
+      "stem": "2r",
+      "tiles": 43,
+      "boxes": 79,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 43,
+        "spot": 35,
+        "critical": 1
+      }
+    },
+    {
+      "stem": "30l",
+      "tiles": 43,
+      "boxes": 249,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 161,
+        "spot": 54,
+        "critical": 34
+      }
+    },
+    {
+      "stem": "30r",
+      "tiles": 43,
+      "boxes": 253,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 123,
+        "spot": 63,
+        "critical": 67
+      }
+    },
+    {
+      "stem": "31l",
+      "tiles": 43,
+      "boxes": 666,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 399,
+        "spot": 135,
+        "critical": 132
+      }
+    },
+    {
+      "stem": "31r",
+      "tiles": 43,
+      "boxes": 645,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 448,
+        "spot": 79,
+        "critical": 118
+      }
+    },
+    {
+      "stem": "32l",
+      "tiles": 43,
+      "boxes": 167,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 90,
+        "spot": 58,
+        "critical": 19
+      }
+    },
+    {
+      "stem": "32r",
+      "tiles": 43,
+      "boxes": 213,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 96,
+        "spot": 77,
+        "critical": 40
+      }
+    },
+    {
+      "stem": "33l",
+      "tiles": 43,
+      "boxes": 263,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 163,
+        "spot": 59,
+        "critical": 41
+      }
+    },
+    {
+      "stem": "33r",
+      "tiles": 43,
+      "boxes": 228,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 128,
+        "spot": 62,
+        "critical": 38
+      }
+    },
+    {
+      "stem": "34l",
+      "tiles": 43,
+      "boxes": 214,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 149,
+        "spot": 30,
+        "critical": 35
+      }
+    },
+    {
+      "stem": "34r",
+      "tiles": 43,
+      "boxes": 248,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 152,
+        "spot": 55,
+        "critical": 41
+      }
+    },
+    {
+      "stem": "35l",
+      "tiles": 43,
+      "boxes": 494,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 349,
+        "spot": 47,
+        "critical": 98
+      }
+    },
+    {
+      "stem": "35r",
+      "tiles": 43,
+      "boxes": 464,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 325,
+        "spot": 72,
+        "critical": 67
+      }
+    },
+    {
+      "stem": "36l",
+      "tiles": 43,
+      "boxes": 320,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 221,
+        "spot": 51,
+        "critical": 48
+      }
+    },
+    {
+      "stem": "36r",
+      "tiles": 43,
+      "boxes": 289,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 210,
+        "spot": 34,
+        "critical": 45
+      }
+    },
+    {
+      "stem": "37l-ljj",
+      "tiles": 43,
+      "boxes": 144,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 35,
+        "spot": 75,
+        "critical": 34
+      }
+    },
+    {
+      "stem": "37r-ljj",
+      "tiles": 43,
+      "boxes": 181,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 63,
+        "spot": 75,
+        "critical": 43
+      }
+    },
+    {
+      "stem": "38l",
+      "tiles": 43,
+      "boxes": 729,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 536,
+        "spot": 66,
+        "critical": 127
+      }
+    },
+    {
+      "stem": "38r",
+      "tiles": 43,
+      "boxes": 580,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 409,
+        "spot": 60,
+        "critical": 111
+      }
+    },
+    {
+      "stem": "39l",
+      "tiles": 43,
+      "boxes": 375,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 254,
+        "spot": 61,
+        "critical": 60
+      }
+    },
+    {
+      "stem": "39r",
+      "tiles": 43,
+      "boxes": 307,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 201,
+        "spot": 61,
+        "critical": 45
+      }
+    },
+    {
+      "stem": "3l",
+      "tiles": 43,
+      "boxes": 451,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 198,
+        "spot": 146,
+        "critical": 107
+      }
+    },
+    {
+      "stem": "3r",
+      "tiles": 43,
+      "boxes": 445,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 265,
+        "spot": 118,
+        "critical": 62
+      }
+    },
+    {
+      "stem": "40l",
+      "tiles": 43,
+      "boxes": 366,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 240,
+        "spot": 66,
+        "critical": 60
+      }
+    },
+    {
+      "stem": "40r",
+      "tiles": 43,
+      "boxes": 207,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 143,
+        "spot": 36,
+        "critical": 28
+      }
+    },
+    {
+      "stem": "41l",
+      "tiles": 43,
+      "boxes": 220,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 135,
+        "spot": 48,
+        "critical": 37
+      }
+    },
+    {
+      "stem": "41r",
+      "tiles": 43,
+      "boxes": 269,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 115,
+        "spot": 100,
+        "critical": 54
+      }
+    },
+    {
+      "stem": "42l",
+      "tiles": 43,
+      "boxes": 163,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 63,
+        "spot": 54,
+        "critical": 46
+      }
+    },
+    {
+      "stem": "42r",
+      "tiles": 43,
+      "boxes": 126,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 72,
+        "spot": 40,
+        "critical": 14
+      }
+    },
+    {
+      "stem": "43l",
+      "tiles": 43,
+      "boxes": 136,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 103,
+        "spot": 14,
+        "critical": 19
+      }
+    },
+    {
+      "stem": "43r",
+      "tiles": 43,
+      "boxes": 189,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 120,
+        "spot": 27,
+        "critical": 42
+      }
+    },
+    {
+      "stem": "44l",
+      "tiles": 43,
+      "boxes": 95,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 58,
+        "spot": 17,
+        "critical": 20
+      }
+    },
+    {
+      "stem": "44r",
+      "tiles": 43,
+      "boxes": 126,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 36,
+        "spot": 67,
+        "critical": 23
+      }
+    },
+    {
+      "stem": "45l",
+      "tiles": 43,
+      "boxes": 261,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 182,
+        "spot": 34,
+        "critical": 45
+      }
+    },
+    {
+      "stem": "45r",
+      "tiles": 43,
+      "boxes": 331,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 222,
+        "spot": 39,
+        "critical": 70
+      }
+    },
+    {
+      "stem": "46l",
+      "tiles": 43,
+      "boxes": 248,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 174,
+        "spot": 48,
+        "critical": 26
+      }
+    },
+    {
+      "stem": "46r",
+      "tiles": 43,
+      "boxes": 138,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 72,
+        "spot": 38,
+        "critical": 28
+      }
+    },
+    {
+      "stem": "47l",
+      "tiles": 43,
+      "boxes": 380,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 261,
+        "spot": 32,
+        "critical": 87
+      }
+    },
+    {
+      "stem": "47r",
+      "tiles": 43,
+      "boxes": 425,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 288,
+        "spot": 44,
+        "critical": 93
+      }
+    },
+    {
+      "stem": "48l",
+      "tiles": 43,
+      "boxes": 276,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 170,
+        "spot": 56,
+        "critical": 50
+      }
+    },
+    {
+      "stem": "48r",
+      "tiles": 43,
+      "boxes": 230,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 122,
+        "spot": 66,
+        "critical": 42
+      }
+    },
+    {
+      "stem": "49l",
+      "tiles": 43,
+      "boxes": 87,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 52,
+        "spot": 29,
+        "critical": 6
+      }
+    },
+    {
+      "stem": "49r",
+      "tiles": 43,
+      "boxes": 176,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 61,
+        "spot": 90,
+        "critical": 25
+      }
+    },
+    {
+      "stem": "4l",
+      "tiles": 43,
+      "boxes": 420,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 293,
+        "spot": 65,
+        "critical": 62
+      }
+    },
+    {
+      "stem": "4r",
+      "tiles": 43,
+      "boxes": 421,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 282,
+        "spot": 77,
+        "critical": 62
+      }
+    },
+    {
+      "stem": "50l",
+      "tiles": 43,
+      "boxes": 172,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 108,
+        "spot": 41,
+        "critical": 23
+      }
+    },
+    {
+      "stem": "50r",
+      "tiles": 43,
+      "boxes": 219,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 64,
+        "spot": 95,
+        "critical": 60
+      }
+    },
+    {
+      "stem": "51l",
+      "tiles": 43,
+      "boxes": 726,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 453,
+        "spot": 154,
+        "critical": 119
+      }
+    },
+    {
+      "stem": "51r",
+      "tiles": 43,
+      "boxes": 835,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 471,
+        "spot": 252,
+        "critical": 112
+      }
+    },
+    {
+      "stem": "52l",
+      "tiles": 43,
+      "boxes": 704,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 466,
+        "spot": 161,
+        "critical": 77
+      }
+    },
+    {
+      "stem": "52r",
+      "tiles": 43,
+      "boxes": 648,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 298,
+        "spot": 258,
+        "critical": 92
+      }
+    },
+    {
+      "stem": "53l",
+      "tiles": 43,
+      "boxes": 230,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 134,
+        "spot": 54,
+        "critical": 42
+      }
+    },
+    {
+      "stem": "53r",
+      "tiles": 43,
+      "boxes": 273,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 169,
+        "spot": 49,
+        "critical": 55
+      }
+    },
+    {
+      "stem": "54l",
+      "tiles": 43,
+      "boxes": 175,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 115,
+        "spot": 34,
+        "critical": 26
+      }
+    },
+    {
+      "stem": "54r",
+      "tiles": 43,
+      "boxes": 168,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 75,
+        "spot": 67,
+        "critical": 26
+      }
+    },
+    {
+      "stem": "55l",
+      "tiles": 43,
+      "boxes": 868,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 585,
+        "spot": 80,
+        "critical": 203
+      }
+    },
+    {
+      "stem": "55r",
+      "tiles": 43,
+      "boxes": 911,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 642,
+        "spot": 94,
+        "critical": 175
+      }
+    },
+    {
+      "stem": "56l",
+      "tiles": 43,
+      "boxes": 253,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 167,
+        "spot": 54,
+        "critical": 32
+      }
+    },
+    {
+      "stem": "56r",
+      "tiles": 43,
+      "boxes": 237,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 155,
+        "spot": 51,
+        "critical": 31
+      }
+    },
+    {
+      "stem": "57l-ljj",
+      "tiles": 43,
+      "boxes": 654,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 478,
+        "spot": 73,
+        "critical": 103
+      }
+    },
+    {
+      "stem": "57r-ljj",
+      "tiles": 43,
+      "boxes": 614,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 471,
+        "spot": 29,
+        "critical": 114
+      }
+    },
+    {
+      "stem": "58l-ljj",
+      "tiles": 43,
+      "boxes": 696,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 489,
+        "spot": 76,
+        "critical": 131
+      }
+    },
+    {
+      "stem": "58r-ljj",
+      "tiles": 43,
+      "boxes": 910,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 565,
+        "spot": 170,
+        "critical": 175
+      }
+    },
+    {
+      "stem": "59l",
+      "tiles": 43,
+      "boxes": 345,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 247,
+        "spot": 47,
+        "critical": 51
+      }
+    },
+    {
+      "stem": "59r",
+      "tiles": 43,
+      "boxes": 302,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 199,
+        "spot": 58,
+        "critical": 45
+      }
+    },
+    {
+      "stem": "5l",
+      "tiles": 43,
+      "boxes": 481,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 357,
+        "spot": 36,
+        "critical": 88
+      }
+    },
+    {
+      "stem": "5r",
+      "tiles": 43,
+      "boxes": 424,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 319,
+        "spot": 26,
+        "critical": 79
+      }
+    },
+    {
+      "stem": "60l",
+      "tiles": 43,
+      "boxes": 304,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 201,
+        "spot": 63,
+        "critical": 40
+      }
+    },
+    {
+      "stem": "60r",
+      "tiles": 43,
+      "boxes": 352,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 239,
+        "spot": 58,
+        "critical": 55
+      }
+    },
+    {
+      "stem": "61l",
+      "tiles": 43,
+      "boxes": 384,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 276,
+        "spot": 51,
+        "critical": 57
+      }
+    },
+    {
+      "stem": "61r",
+      "tiles": 43,
+      "boxes": 461,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 336,
+        "spot": 56,
+        "critical": 69
+      }
+    },
+    {
+      "stem": "62l",
+      "tiles": 43,
+      "boxes": 393,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 233,
+        "spot": 85,
+        "critical": 75
+      }
+    },
+    {
+      "stem": "62r",
+      "tiles": 43,
+      "boxes": 422,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 272,
+        "spot": 96,
+        "critical": 54
+      }
+    },
+    {
+      "stem": "63l",
+      "tiles": 43,
+      "boxes": 131,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 63,
+        "spot": 49,
+        "critical": 19
+      }
+    },
+    {
+      "stem": "63r",
+      "tiles": 43,
+      "boxes": 180,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 90,
+        "spot": 58,
+        "critical": 32
+      }
+    },
+    {
+      "stem": "64l",
+      "tiles": 43,
+      "boxes": 607,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 445,
+        "spot": 63,
+        "critical": 99
+      }
+    },
+    {
+      "stem": "64r",
+      "tiles": 43,
+      "boxes": 479,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 356,
+        "spot": 38,
+        "critical": 85
+      }
+    },
+    {
+      "stem": "65l",
+      "tiles": 43,
+      "boxes": 208,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 134,
+        "spot": 47,
+        "critical": 27
+      }
+    },
+    {
+      "stem": "65r",
+      "tiles": 43,
+      "boxes": 222,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 115,
+        "spot": 93,
+        "critical": 14
+      }
+    },
+    {
+      "stem": "66l",
+      "tiles": 43,
+      "boxes": 153,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 58,
+        "spot": 76,
+        "critical": 19
+      }
+    },
+    {
+      "stem": "66r",
+      "tiles": 43,
+      "boxes": 258,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 127,
+        "spot": 91,
+        "critical": 40
+      }
+    },
+    {
+      "stem": "67l",
+      "tiles": 43,
+      "boxes": 424,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 247,
+        "spot": 97,
+        "critical": 80
+      }
+    },
+    {
+      "stem": "67r",
+      "tiles": 43,
+      "boxes": 341,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 202,
+        "spot": 76,
+        "critical": 63
+      }
+    },
+    {
+      "stem": "68l",
+      "tiles": 43,
+      "boxes": 275,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 138,
+        "spot": 115,
+        "critical": 22
+      }
+    },
+    {
+      "stem": "68r",
+      "tiles": 43,
+      "boxes": 229,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 137,
+        "spot": 65,
+        "critical": 27
+      }
+    },
+    {
+      "stem": "69l",
+      "tiles": 43,
+      "boxes": 648,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 358,
+        "spot": 177,
+        "critical": 113
+      }
+    },
+    {
+      "stem": "69r",
+      "tiles": 43,
+      "boxes": 723,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 447,
+        "spot": 173,
+        "critical": 103
+      }
+    },
+    {
+      "stem": "6l",
+      "tiles": 43,
+      "boxes": 405,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 284,
+        "spot": 56,
+        "critical": 65
+      }
+    },
+    {
+      "stem": "6r",
+      "tiles": 43,
+      "boxes": 428,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 287,
+        "spot": 52,
+        "critical": 89
+      }
+    },
+    {
+      "stem": "70l",
+      "tiles": 43,
+      "boxes": 184,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 98,
+        "spot": 45,
+        "critical": 41
+      }
+    },
+    {
+      "stem": "70r",
+      "tiles": 43,
+      "boxes": 223,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 97,
+        "spot": 97,
+        "critical": 29
+      }
+    },
+    {
+      "stem": "71l",
+      "tiles": 43,
+      "boxes": 384,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 254,
+        "spot": 59,
+        "critical": 71
+      }
+    },
+    {
+      "stem": "71r",
+      "tiles": 43,
+      "boxes": 467,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 332,
+        "spot": 53,
+        "critical": 82
+      }
+    },
+    {
+      "stem": "72l",
+      "tiles": 43,
+      "boxes": 485,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 299,
+        "spot": 110,
+        "critical": 76
+      }
+    },
+    {
+      "stem": "72r",
+      "tiles": 43,
+      "boxes": 670,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 371,
+        "spot": 208,
+        "critical": 91
+      }
+    },
+    {
+      "stem": "73l",
+      "tiles": 43,
+      "boxes": 480,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 308,
+        "spot": 104,
+        "critical": 68
+      }
+    },
+    {
+      "stem": "73r",
+      "tiles": 43,
+      "boxes": 372,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 217,
+        "spot": 91,
+        "critical": 64
+      }
+    },
+    {
+      "stem": "74l",
+      "tiles": 43,
+      "boxes": 698,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 523,
+        "spot": 58,
+        "critical": 117
+      }
+    },
+    {
+      "stem": "74r",
+      "tiles": 43,
+      "boxes": 588,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 464,
+        "spot": 44,
+        "critical": 80
+      }
+    },
+    {
+      "stem": "75l",
+      "tiles": 43,
+      "boxes": 443,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 297,
+        "spot": 87,
+        "critical": 59
+      }
+    },
+    {
+      "stem": "75r",
+      "tiles": 43,
+      "boxes": 448,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 313,
+        "spot": 78,
+        "critical": 57
+      }
+    },
+    {
+      "stem": "76l",
+      "tiles": 43,
+      "boxes": 550,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 342,
+        "spot": 116,
+        "critical": 92
+      }
+    },
+    {
+      "stem": "76r",
+      "tiles": 43,
+      "boxes": 570,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 444,
+        "spot": 21,
+        "critical": 105
+      }
+    },
+    {
+      "stem": "77l",
+      "tiles": 43,
+      "boxes": 588,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 375,
+        "spot": 137,
+        "critical": 76
+      }
+    },
+    {
+      "stem": "77r",
+      "tiles": 43,
+      "boxes": 615,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 428,
+        "spot": 118,
+        "critical": 69
+      }
+    },
+    {
+      "stem": "78l",
+      "tiles": 43,
+      "boxes": 131,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 98,
+        "spot": 27,
+        "critical": 6
+      }
+    },
+    {
+      "stem": "78r",
+      "tiles": 43,
+      "boxes": 141,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 91,
+        "spot": 34,
+        "critical": 16
+      }
+    },
+    {
+      "stem": "79l",
+      "tiles": 43,
+      "boxes": 554,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 356,
+        "spot": 131,
+        "critical": 67
+      }
+    },
+    {
+      "stem": "79r",
+      "tiles": 43,
+      "boxes": 512,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 342,
+        "spot": 96,
+        "critical": 74
+      }
+    },
+    {
+      "stem": "7l",
+      "tiles": 43,
+      "boxes": 429,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 286,
+        "spot": 55,
+        "critical": 88
+      }
+    },
+    {
+      "stem": "7r",
+      "tiles": 43,
+      "boxes": 573,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 361,
+        "spot": 80,
+        "critical": 132
+      }
+    },
+    {
+      "stem": "80l",
+      "tiles": 43,
+      "boxes": 237,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 132,
+        "spot": 65,
+        "critical": 40
+      }
+    },
+    {
+      "stem": "80r",
+      "tiles": 43,
+      "boxes": 215,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 122,
+        "spot": 61,
+        "critical": 32
+      }
+    },
+    {
+      "stem": "81l",
+      "tiles": 43,
+      "boxes": 244,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 164,
+        "spot": 29,
+        "critical": 51
+      }
+    },
+    {
+      "stem": "81r",
+      "tiles": 43,
+      "boxes": 227,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 139,
+        "spot": 52,
+        "critical": 36
+      }
+    },
+    {
+      "stem": "82l",
+      "tiles": 43,
+      "boxes": 372,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 223,
+        "spot": 110,
+        "critical": 39
+      }
+    },
+    {
+      "stem": "82r",
+      "tiles": 43,
+      "boxes": 357,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 219,
+        "spot": 86,
+        "critical": 52
+      }
+    },
+    {
+      "stem": "83l",
+      "tiles": 43,
+      "boxes": 712,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 515,
+        "spot": 66,
+        "critical": 131
+      }
+    },
+    {
+      "stem": "83r",
+      "tiles": 43,
+      "boxes": 792,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 541,
+        "spot": 120,
+        "critical": 131
+      }
+    },
+    {
+      "stem": "84l",
+      "tiles": 43,
+      "boxes": 124,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 25,
+        "spot": 91,
+        "critical": 8
+      }
+    },
+    {
+      "stem": "84r",
+      "tiles": 43,
+      "boxes": 166,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 92,
+        "spot": 64,
+        "critical": 10
+      }
+    },
+    {
+      "stem": "85l",
+      "tiles": 43,
+      "boxes": 553,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 392,
+        "spot": 47,
+        "critical": 114
+      }
+    },
+    {
+      "stem": "85r",
+      "tiles": 43,
+      "boxes": 735,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 537,
+        "spot": 56,
+        "critical": 142
+      }
+    },
+    {
+      "stem": "86l",
+      "tiles": 43,
+      "boxes": 521,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 373,
+        "spot": 53,
+        "critical": 95
+      }
+    },
+    {
+      "stem": "86r",
+      "tiles": 43,
+      "boxes": 548,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 369,
+        "spot": 106,
+        "critical": 73
+      }
+    },
+    {
+      "stem": "87l",
+      "tiles": 43,
+      "boxes": 36,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 16,
+        "spot": 19,
+        "critical": 1
+      }
+    },
+    {
+      "stem": "87r",
+      "tiles": 43,
+      "boxes": 41,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 17,
+        "spot": 24,
+        "critical": 0
+      }
+    },
+    {
+      "stem": "88l",
+      "tiles": 43,
+      "boxes": 106,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 37,
+        "spot": 56,
+        "critical": 13
+      }
+    },
+    {
+      "stem": "88r",
+      "tiles": 43,
+      "boxes": 83,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 29,
+        "spot": 47,
+        "critical": 7
+      }
+    },
+    {
+      "stem": "89l",
+      "tiles": 43,
+      "boxes": 268,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 164,
+        "spot": 65,
+        "critical": 39
+      }
+    },
+    {
+      "stem": "89r",
+      "tiles": 43,
+      "boxes": 238,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 178,
+        "spot": 30,
+        "critical": 30
+      }
+    },
+    {
+      "stem": "8l",
+      "tiles": 43,
+      "boxes": 426,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 296,
+        "spot": 60,
+        "critical": 70
+      }
+    },
+    {
+      "stem": "8r",
+      "tiles": 43,
+      "boxes": 329,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 242,
+        "spot": 30,
+        "critical": 57
+      }
+    },
+    {
+      "stem": "90l",
+      "tiles": 43,
+      "boxes": 333,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 191,
+        "spot": 92,
+        "critical": 50
+      }
+    },
+    {
+      "stem": "90r",
+      "tiles": 43,
+      "boxes": 300,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 185,
+        "spot": 78,
+        "critical": 37
+      }
+    },
+    {
+      "stem": "91l",
+      "tiles": 43,
+      "boxes": 375,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 231,
+        "spot": 95,
+        "critical": 49
+      }
+    },
+    {
+      "stem": "91r",
+      "tiles": 43,
+      "boxes": 256,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 141,
+        "spot": 68,
+        "critical": 47
+      }
+    },
+    {
+      "stem": "92l",
+      "tiles": 43,
+      "boxes": 304,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 201,
+        "spot": 58,
+        "critical": 45
+      }
+    },
+    {
+      "stem": "92r",
+      "tiles": 43,
+      "boxes": 309,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 178,
+        "spot": 83,
+        "critical": 48
+      }
+    },
+    {
+      "stem": "93l",
+      "tiles": 43,
+      "boxes": 332,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 179,
+        "spot": 122,
+        "critical": 31
+      }
+    },
+    {
+      "stem": "93r",
+      "tiles": 43,
+      "boxes": 391,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 153,
+        "spot": 210,
+        "critical": 28
+      }
+    },
+    {
+      "stem": "94l",
+      "tiles": 43,
+      "boxes": 309,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 200,
+        "spot": 72,
+        "critical": 37
+      }
+    },
+    {
+      "stem": "94r",
+      "tiles": 43,
+      "boxes": 348,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 226,
+        "spot": 74,
+        "critical": 48
+      }
+    },
+    {
+      "stem": "95l",
+      "tiles": 43,
+      "boxes": 656,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 488,
+        "spot": 44,
+        "critical": 124
+      }
+    },
+    {
+      "stem": "95r",
+      "tiles": 43,
+      "boxes": 703,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 522,
+        "spot": 54,
+        "critical": 127
+      }
+    },
+    {
+      "stem": "96l",
+      "tiles": 43,
+      "boxes": 461,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 325,
+        "spot": 58,
+        "critical": 78
+      }
+    },
+    {
+      "stem": "96r",
+      "tiles": 43,
+      "boxes": 624,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 433,
+        "spot": 71,
+        "critical": 120
+      }
+    },
+    {
+      "stem": "97l",
+      "tiles": 43,
+      "boxes": 530,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 364,
+        "spot": 66,
+        "critical": 100
+      }
+    },
+    {
+      "stem": "97r",
+      "tiles": 43,
+      "boxes": 482,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 277,
+        "spot": 139,
+        "critical": 66
+      }
+    },
+    {
+      "stem": "98l",
+      "tiles": 43,
+      "boxes": 282,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 185,
+        "spot": 34,
+        "critical": 63
+      }
+    },
+    {
+      "stem": "98r",
+      "tiles": 43,
+      "boxes": 339,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 242,
+        "spot": 48,
+        "critical": 49
+      }
+    },
+    {
+      "stem": "99l",
+      "tiles": 43,
+      "boxes": 240,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 60,
+        "spot": 159,
+        "critical": 21
+      }
+    },
+    {
+      "stem": "99r",
+      "tiles": 43,
+      "boxes": 285,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 144,
+        "spot": 103,
+        "critical": 38
+      }
+    },
+    {
+      "stem": "9l",
+      "tiles": 43,
+      "boxes": 215,
+      "splits": [
+        "val"
+      ],
+      "class_counts": {
+        "scratch": 105,
+        "spot": 94,
+        "critical": 16
+      }
+    },
+    {
+      "stem": "9r",
+      "tiles": 43,
+      "boxes": 176,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 106,
+        "spot": 47,
+        "critical": 23
+      }
+    },
+    {
+      "stem": "单片镜片",
+      "tiles": 43,
+      "boxes": 91,
+      "splits": [
+        "train"
+      ],
+      "class_counts": {
+        "scratch": 23,
+        "spot": 55,
+        "critical": 13
+      }
+    }
+  ]
+}

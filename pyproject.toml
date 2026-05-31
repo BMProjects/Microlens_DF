@@ -17,11 +17,15 @@ dependencies = [
     "typer>=0.9",
     "pyyaml>=6.0",
     "rich>=13.0",
+    "python-docx>=1.2.0",
 ]
 
 [project.optional-dependencies]
 dev = ["pytest>=7.4", "ruff>=0.4", "mypy>=1.8"]
 ml = ["torch>=2.0", "torchvision>=0.15", "segmentation-models-pytorch>=0.3", "ultralytics>=8.0"]
+hfseg = ["transformers>=4.45", "accelerate>=0.33", "safetensors>=0.4", "huggingface-hub>=0.24"]
+hrnet = ["yacs>=0.1.8", "tensorboardX>=2.6", "Cython>=3.0"]
+mmseg = ["mmengine>=0.10,<1.0", "mmcv-lite>=2.1,<2.2.0", "mmsegmentation>=1.2,<1.3", "ftfy>=6.2", "regex>=2024.0.0"]
 viz = ["gradio>=4.0", "ultralytics>=8.0"]
 
 [project.scripts]

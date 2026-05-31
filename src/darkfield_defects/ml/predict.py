@@ -194,8 +194,7 @@ def mask_to_detection_result(
             endpoints = None
 
             if defect_type == DefectType.SCRATCH:
-                skel = cv2.ximgproc.thinning(inst_mask.astype(np.uint8) * 255) \
-                    if hasattr(cv2, 'ximgproc') else _thin_fallback(inst_mask)
+                skel = _thin_mask(inst_mask)
                 skel_coords = np.argwhere(skel > 0)
                 length = float(len(skel_coords))
 
@@ -257,6 +256,14 @@ def mask_to_detection_result(
             "pixel_size_mm": DEFAULT_CALIBRATION.pixel_size_mm,
         },
     )
+
+
+def _thin_mask(binary: np.ndarray) -> np.ndarray:
+    """优先使用 OpenCV thinning，不可用时回退到 skimage."""
+    thinning = getattr(getattr(cv2, "ximgproc", None), "thinning", None)
+    if callable(thinning):
+        return thinning(binary.astype(np.uint8) * 255)
+    return _thin_fallback(binary)
 
 
 def _thin_fallback(binary: np.ndarray) -> np.ndarray:

@@ -183,7 +183,8 @@
 #### 设计约束
 
 - 深度学习推理依赖 NVIDIA GPU（CUDA 12.8+）
-- 模型权重文件固定为 `output/training/stage2_cleaned/weights/best.pt`（CNAS 认证版本）
+- 模型权重文件当前默认使用 `output/experiments/phase3e/detection_training/b2_nwd_only_phase3e/weights/best.pt`
+- `output/training/stage2_cleaned/weights/best.pt` 保留为已验证的 CNAS 历史基线与回退模型
 - 训练框架锁定 Ultralytics 8.4.24，保证实验可复现性
 - 代码包结构遵循 `src/` 布局，不污染系统 Python 环境
 
@@ -1275,7 +1276,7 @@ pip install ultralytics==8.4.24 gradio>=4.0
 | 路径变量 | 值 | 说明 |
 |---------|---|------|
 | `PROJECT_ROOT` | `/home/bm/Dev/Microlens_DF` | 项目根目录，脚本自动推导 |
-| `WEIGHTS_PATH` | `output/training/stage2_cleaned/weights/best.pt` | CNAS 认证权重 |
+| `WEIGHTS_PATH` | `output/experiments/phase3e/detection_training/b2_nwd_only_phase3e/weights/best.pt` | 当前正式默认检测权重 |
 | `IMAGES_DIR` | `output/dataset_v2/images` | 预处理后全图目录 |
 | `TILES_DIR` | `output/tile_dataset/images/val` | 验证集切片目录 |
 | `DEFAULT_TEST_SET` | `output/audit/test_set_v1.json` | CNAS 测试集定义 |
@@ -1523,7 +1524,8 @@ sudo ufw allow 21115:21119/udp
 | 经典检测器 | `src/darkfield_defects/detection/classical.py` |
 | 参数配置 | `src/darkfield_defects/detection/params.py` |
 | WearScore | `src/darkfield_defects/scoring/wear_score.py` |
-| **CNAS 认证权重** | `output/training/stage2_cleaned/weights/best.pt` |
+| **当前正式默认检测权重** | `output/experiments/phase3e/detection_training/b2_nwd_only_phase3e/weights/best.pt` |
+| **CNAS 历史基线权重** | `output/training/stage2_cleaned/weights/best.pt` |
 | 预处理后全图 | `output/dataset_v2/images/` |
 | 切片数据集 | `output/tile_dataset/` |
 | 数据集配置 | `output/tile_dataset/defects.yaml` |

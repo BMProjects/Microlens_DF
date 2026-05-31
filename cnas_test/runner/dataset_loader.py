@@ -1,11 +1,12 @@
-"""CNAS 测试集加载与切片收集."""
+"""CNAS 测试集加载与样本收集."""
 
 from __future__ import annotations
 
 import json
+from collections import Counter
 from pathlib import Path
 
-from cnas_test.runner.config import PROJECT_ROOT, TILES_DIR
+from cnas_test.runner.config import CLASS_NAMES, PROJECT_ROOT, TILE_DATASET_ROOT, TILES_DIRS
 
 
 def load_test_manifest(path: Path) -> dict:
@@ -19,13 +20,50 @@ def load_test_stems(path: Path) -> list[str]:
 
 
 def collect_tile_paths(stems: list[str]) -> list[Path]:
-    all_tiles = sorted(TILES_DIR.glob("*.jpg"))
+    all_tiles: list[Path] = []
+    for tiles_dir in TILES_DIRS:
+        all_tiles.extend(sorted(tiles_dir.glob("*.jpg")))
     selected = [tile for tile in all_tiles if tile.stem.rsplit("_", 2)[0] in stems]
     if not selected:
-        raise FileNotFoundError(
-            f"在 {TILES_DIR} 中未找到匹配切片，请确认测试集清单和切片目录一致。"
-        )
+        dirs = ", ".join(str(path) for path in TILES_DIRS)
+        raise FileNotFoundError(f"在 {dirs} 中未找到匹配样本，请确认测试集清单和样本目录一致。")
     return selected
+
+
+def label_path_for_tile(tile_path: Path) -> Path:
+    relative = tile_path.relative_to(TILE_DATASET_ROOT / "images")
+    return TILE_DATASET_ROOT / "labels" / relative.with_suffix(".txt")
+
+
+def summarize_tiles(tile_paths: list[Path]) -> dict:
+    class_counts: Counter[str] = Counter()
+    n_boxes = 0
+    backgrounds = 0
+    missing_labels: list[str] = []
+
+    for tile_path in tile_paths:
+        label_path = label_path_for_tile(tile_path)
+        if not label_path.exists():
+            missing_labels.append(str(label_path))
+            continue
+        lines = [
+            line for line in label_path.read_text(encoding="utf-8").splitlines() if line.strip()
+        ]
+        if not lines:
+            backgrounds += 1
+        n_boxes += len(lines)
+        for line in lines:
+            cls_idx = int(line.split()[0])
+            class_counts[CLASS_NAMES.get(cls_idx, str(cls_idx))] += 1
+
+    return {
+        "images": len({tile.stem.rsplit("_", 2)[0] for tile in tile_paths}),
+        "tiles": len(tile_paths),
+        "boxes": n_boxes,
+        "background_tiles": backgrounds,
+        "missing_labels": missing_labels,
+        "class_counts": {name: class_counts.get(name, 0) for name in CLASS_NAMES.values()},
+    }
 
 
 def build_val_dataset_yaml(tile_paths: list[Path], save_dir: Path) -> Path:

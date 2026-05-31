@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>智能识别准确率测试报告</title>
+  <style>
+    body { margin: 0; background: #f5f7fb; color: #0f172a; font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
+    .page { max-width: 1120px; margin: 28px auto; background: #fff; padding: 36px 42px 56px; border-radius: 18px; box-shadow: 0 8px 24px rgba(15,23,42,.08); }
+    .doc-nav { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; }
+    .doc-nav a { display:inline-block; padding:6px 10px; border-radius:999px; background:#fff; border:1px solid #bfdbfe; color:#1d4ed8; text-decoration:none; }
+    h1 { margin: 0 0 18px; font-size: 2rem; border-bottom: 3px solid #dbeafe; padding-bottom: 12px; }
+    h2 { margin-top: 30px; font-size: 1.35rem; border-left: 5px solid #60a5fa; padding-left: 12px; }
+    h3 { margin-top: 22px; font-size: 1.08rem; color: #0f172a; }
+    p, li { line-height: 1.82; font-size: 15px; }
+    ul, ol { padding-left: 22px; }
+    code { background: #eff6ff; padding: 1px 6px; border-radius: 6px; }
+    table { width: 100%; border-collapse: collapse; margin: 14px 0 18px; font-size: 14px; }
+    th, td { border: 1px solid #cbd5e1; padding: 10px 12px; text-align: left; vertical-align: top; }
+    th { background: #eff6ff; }
+    .lead { background:#eff6ff; border:1px solid #dbeafe; padding:16px 18px; border-radius:14px; color:#334155; }
+    .formula { margin:14px 0; padding:14px 16px; border-radius:12px; background:#f8fafc; border:1px solid #cbd5e1; font-family:"Times New Roman",serif; font-size:1.08rem; }
+    .shot { margin: 14px 0 22px; }
+    .shot img { max-width: 100%; height: auto; border: 1px solid #cbd5e1; border-radius: 12px; display:block; }
+    .shot figcaption { color:#475569; font-size:14px; margin-top:8px; }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <nav class="doc-nav">
+      <a href="/home/bm/Dev/Microlens_DF/cnas_test/docs/README.md">测试文档目录说明</a>
+      <a href="/home/bm/Dev/Microlens_DF/cnas_test/docs/CNAS测试报告_当前版.md">Markdown 源文档</a>
+      <a href="/home/bm/Dev/Microlens_DF/cnas_test/docs/CNAS测试大纲_当前版.html">测试大纲 Web 版</a>
+      <a href="/home/bm/Dev/Microlens_DF/cnas_test/docs/磨损识别准确率测试大纲制定思路说明_当前版.html">制定思路附件</a>
+    </nav>
+    <h1>智能识别准确率测试报告</h1>
+    <p class="lead">本报告严格依据现行《智能识别准确率测试大纲》编制。大纲将“磨损识别准确率”作为统一指标名称，允许依据被测系统输出形式采用目标级评价方式或区域级评价方式；当前送测版本采用目标级检测输出，因此本次正式测试按 <code>mAP50</code> 计算。</p>
+
+    <h2>1 主题内容和适用范围</h2>
+    <h3>1.1 主题内容</h3>
+    <p>本报告依据《智能识别准确率测试大纲》编制，用于记录“离焦微结构镜片磨损智能识别任务”中“磨损识别准确率”测试的实际执行情况、测试条件、测试方法、测试结果和测试结论。</p>
+    <p>本报告仅围绕课题任务书中“2.1 磨损识别准确率”相关要求形成，不扩展至其他功能指标、性能指标或研究性分析内容。</p>
+    <h3>1.2 适用范围</h3>
+    <p>本报告适用于本任务当前送测软件产品的第三方测试记录与结果说明。当前被测对象为采用目标级检测输出方式的镜片磨损智能识别算法。</p>
+    <p>本报告记录的是测试图像中的缺陷识别准确率测试结果。依据测试大纲，当前送测版本采用目标级评价方式，因此本报告中的“磨损识别准确率”以 <code>mAP50</code> 表示。</p>
+
+    <h2>2 测试目的</h2>
+    <p>本次测试的目的是验证被测软件产品对测试图中缺陷的识别结果是否达到规定的准确率要求，并为委托方、测试机构和验收使用方提供客观、可追溯的测试结果。</p>
+    <p>本次测试仅针对“磨损识别准确率”开展。依据测试大纲中“统一指标名称、按输出形式选择评价方式”的原则，当前被测软件因采用目标级检测输出，测试主指标确定为 <code>mAP50</code>。辅助指标包括 <code>Precision</code>、<code>Recall</code> 和 <code>mAP@0.5:0.95</code>，用于补充说明被测软件的识别性能。</p>
+
+    <h2>3 测试依据和引用文件</h2>
+    <ul>
+      <li><a href="/home/bm/Dev/Microlens_DF/cnas_test/docs/CNAS测试大纲_当前版.md">CNAS测试大纲_当前版.md</a></li>
+      <li><a href="/home/bm/Dev/Microlens_DF/doc/项目任务书2024YFC2419500.pdf">项目任务书2024YFC2419500.pdf</a></li>
+      <li><a href="/home/bm/Dev/Microlens_DF/doc/课题任务书2024YFC2419504.pdf">课题任务书2024YFC2419504.pdf</a></li>
+      <li><code>GB/T 25000.51-2016《系统与软件工程 系统与软件质量要求与评价（SQuaRE）第51部分：就绪可用软件产品（RUSP）的质量要求和测试细则》</code></li>
+      <li><code>/home/bm/Dev/Microlens_DF/cnas_test/outputs/latest/metrics/cnas_eval_results.json</code></li>
+    </ul>
+
+    <h2>4 测试组织管理和流程</h2>
+    <h3>4.1 测试组织管理</h3>
+    <p>本次测试按照第三方软件测试的一般管理要求执行。测试中涉及的主要对象和记录内容如下：</p>
+    <ul>
+      <li>被测软件名称：镜片磨损智能识别算法</li>
+      <li>测试版本：<code>LWIA-Det v1.0.0</code></li>
+      <li>版本备注：内部训练注释 <code>B2_nwd_only_phase3e</code></li>
+      <li>实现方式：目标级检测输出</li>
+      <li>模型描述：多尺度深度目标检测网络，结合小目标定位优化策略</li>
+      <li>模型权重：<code>/home/bm/Dev/Microlens_DF/output/experiments/phase3e/detection_training/b2_nwd_only_phase3e/weights/best.pt</code></li>
+    </ul>
+    <p>本次测试中，测试机构需核对以下信息并予以记录：被测软件版本和模型版本、测试命令和运行环境、测试图像集清单、测试结果文件以及异常信息和日志信息。</p>
+    <h3>4.2 测试流程</h3>
+    <ol>
+      <li>核对被测软件版本、模型权重和运行说明。</li>
+      <li>核对测试图像集清单和基准结果。</li>
+      <li>按规定命令在测试环境中执行识别评测。</li>
+      <li>获取识别结果并进行统计。</li>
+      <li>根据测试大纲规定的指标定义和计算方法形成测试结果。</li>
+      <li>编制测试报告。</li>
+    </ol>
+    <div class="formula">cd /home/bm/Dev/Microlens_DF<br/>uv run python -m cnas_test.runner.run_eval</div>
+    <p>本次测试的实际输出包括：</p>
+    <ul>
+      <li>指标结果文件：<code>/home/bm/Dev/Microlens_DF/cnas_test/outputs/latest/metrics/cnas_eval_results.json</code></li>
+      <li>交付清单：<code>/home/bm/Dev/Microlens_DF/cnas_test/outputs/latest/delivery_manifest.json</code></li>
+      <li>混淆矩阵图：<code>/home/bm/Dev/Microlens_DF/cnas_test/outputs/latest/plots/ultralytics_output/confusion_matrix_normalized.png</code></li>
+      <li>精确率-召回率曲线图：<code>/home/bm/Dev/Microlens_DF/cnas_test/outputs/latest/plots/ultralytics_output/BoxPR_curve.png</code></li>
+      <li>典型预测结果图：<code>val_batch0_pred.jpg</code>、<code>val_batch1_pred.jpg</code>、<code>val_batch2_pred.jpg</code></li>
+    </ul>
+
+    <h2>5 性能指标测试</h2>
+    <h3>5.1 测试说明和要求</h3>
+    <p>本次测试仅设置一个测试项目，即“磨损识别准确率测试”。</p>
+    <p>测试内容为：在固定测试图像集上，对图像中的缺陷进行识别，并将被测软件的识别结果与人工确认的基准结果进行比较，计算磨损识别准确率。</p>
+    <p>本次测试中，“磨损识别准确率”采用目标级评价方式，正式评价指标为 <code>mAP50</code>。其原因是当前送测软件采用目标级检测输出，且在多个识别类别上统一进行评测，因此使用 <code>mAP50</code> 作为总体识别准确率指标，既符合当前项目实现方式，也符合通用目标检测评价标准。</p>
+    <p>本次测试所使用的数据如下：</p>
+    <ul>
+      <li>测试图像集：固定留出测试集</li>
+      <li>原图数量：<code>20</code></li>
+      <li>切片数量：<code>10621</code></li>
+      <li>标注缺陷总数：<code>90325</code></li>
+      <li>测试集清单：<code>/home/bm/Dev/Microlens_DF/cnas_test/manifests/full_dataset_v1.json</code></li>
+    </ul>
+
+    <h3>5.2 测试环境及条件</h3>
+    <p>本次测试环境和条件如下：</p>
+    <ul>
+      <li>操作系统环境：Linux</li>
+      <li>执行目录：<code>/home/bm/Dev/Microlens_DF</code></li>
+      <li>评测命令：<code>uv run python -m cnas_test.runner.run_eval</code></li>
+      <li>置信度阈值：<code>0.001</code></li>
+      <li>评测结果文件：<code>/home/bm/Dev/Microlens_DF/cnas_test/outputs/latest/metrics/cnas_eval_results.json</code></li>
+    </ul>
+    <p>测试环境满足以下条件：能正常加载被测软件和模型权重，能正常读取测试图像集与基准结果，能正常输出识别结果、统计结果和评测日志，并能完整保存测试记录与测试结果文件。</p>
+    <p>测试过程中实际核验的关键输入和输出如下：</p>
+    <table>
+      <thead>
+        <tr><th>类别</th><th>文件或内容</th><th>作用</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>输入</td><td><code>cnas_test/manifests/full_dataset_v1.json</code></td><td>完整测试图像集清单</td></tr>
+        <tr><td>输入</td><td><code>cnas_test/outputs/latest/dataset/cnas_val_list.txt</code></td><td>测试图像列表</td></tr>
+        <tr><td>输入</td><td><code>output/experiments/phase3e/detection_training/b2_nwd_only_phase3e/weights/best.pt</code></td><td>被测模型权重</td></tr>
+        <tr><td>输出</td><td><code>metrics/cnas_eval_results.json</code></td><td>正式统计指标结果</td></tr>
+        <tr><td>输出</td><td><code>plots/ultralytics_output/confusion_matrix_normalized.png</code></td><td>类别混淆情况</td></tr>
+        <tr><td>输出</td><td><code>plots/ultralytics_output/BoxPR_curve.png</code></td><td>精确率-召回率曲线</td></tr>
+        <tr><td>输出</td><td><code>plots/ultralytics_output/val_batch*_pred.jpg</code></td><td>典型预测可视化结果</td></tr>
+      </tbody>
+    </table>
+
+    <h3>5.3 测试方法和步骤</h3>
+    <p>本次测试按测试大纲规定的方法执行。依据测试大纲的统一口径，磨损识别准确率作为统一指标名称，可采用目标级评价方式或区域级评价方式；当前送测版本采用目标级检测输出，因此本次测试采用目标级评价方式，以 <code>mAP50</code> 计算。</p>
+    <p>术语定义统一表述如下：本报告中的“磨损识别准确率”系指被测软件产品在规定测试图像集上，对磨损目标识别结果与基准结果一致程度的评价指标。根据被测软件输出形式不同，磨损识别准确率可采用目标级评价方式或区域级评价方式进行计算。当被测软件输出为目标级识别结果时，磨损识别准确率可采用 <code>mAP50</code> 表示；当被测软件输出为区域级识别结果时，磨损识别准确率可采用区域级重合一致性指标表示。具体评价方式及其计算规则应由委托测试文件或测试实施细则明确，并在同一次正式测试中保持一致。<code>AP50</code> 指单一识别类别在 <code>IoU = 0.5</code> 条件下的平均准确率，<code>mAP50</code> 指全部参与评价类别的 <code>AP50</code> 的算术平均值；<code>Precision</code> 用于表征预测结果中正确识别结果所占比例，<code>Recall</code> 用于表征基准结果中被成功识别出的比例。当前报告仅对应目标级评价方式的测试结果。</p>
+    <p><code>mAP50</code> 的严格定义如下：</p>
+    <p>对每一个识别类别，在 <code>IoU = 0.5</code> 的条件下，将预测结果按置信度从高到低排序，并与对应类别的基准结果进行一对一匹配。对于排序后的前 <code>k</code> 个预测结果，累计精确率和累计召回率分别定义为：</p>
+    <div class="formula">Precision(k) = TP(k) / (TP(k) + FP(k))</div>
+    <div class="formula">Recall(k) = TP(k) / N<sub>gt</sub></div>
+    <p>由不同 <code>k</code> 形成精确率-召回率曲线。该类别的平均准确率 <code>AP50</code> 定义为在 <code>IoU = 0.5</code> 条件下精确率-召回率曲线下面积：</p>
+    <div class="formula">AP50 = ∫<sub>0</sub><sup>1</sup> P(R) dR &nbsp;&nbsp; (IoU = 0.5)</div>
+    <p>对全部参与评价的类别分别计算 <code>AP50</code> 后，取其算术平均值，得到本次测试的主指标 <code>mAP50</code>：</p>
+    <div class="formula">mAP50 = (1 / C) × Σ AP50<sub>i</sub></div>
+    <p>其中：</p>
+    <ul>
+      <li><code>TP</code> 为正确匹配的预测数量</li>
+      <li><code>FP</code> 为错误预测或多余预测数量</li>
+      <li><code>N<sub>gt</sub></code> 为该类别基准目标总数</li>
+      <li><code>C</code> 为参与评价的识别类别总数</li>
+    </ul>
+    <p>辅助指标定义如下：</p>
+    <div class="formula">Precision = TP / (TP + FP)</div>
+    <div class="formula">Recall = TP / (TP + FN)</div>
+    <h3>步骤一：测试准备</h3>
+    <ol>
+      <li>准备固定留出测试集及人工确认基准结果。</li>
+      <li>核对被测模型权重、推理脚本、配置文件和测试图像清单。</li>
+      <li>确认测试环境可正常加载模型并读取全部测试样本。</li>
+    </ol>
+    <h3>步骤二：执行识别评测</h3>
+    <ol>
+      <li>在规定目录下执行评测命令。</li>
+      <li>被测软件对测试图像进行目标级识别，输出预测框、类别和置信度。</li>
+      <li>评测程序按置信度排序全部预测结果，并在 <code>IoU = 0.5</code> 条件下完成逐类别匹配。</li>
+    </ol>
+    <h3>步骤三：统计和计算</h3>
+    <ol>
+      <li>统计各类别 <code>TP</code>、<code>FP</code>、<code>FN</code>。</li>
+      <li>计算各类别的 <code>AP50</code>。</li>
+      <li>对各类别 <code>AP50</code> 取平均，得到 <code>mAP50</code>。</li>
+      <li>同时输出 <code>Precision</code>、<code>Recall</code> 和 <code>mAP@0.5:0.95</code> 作为辅助统计结果。</li>
+    </ol>
+    <h3>步骤四：结果输出与核验</h3>
+    <ol>
+      <li>输出正式指标文件 <code>cnas_eval_results.json</code>。</li>
+      <li>输出混淆矩阵、PR 曲线和典型预测样例图。</li>
+      <li>核对测试图像数量、切片数量、统计值和结果文件是否完整。</li>
+      <li>依据测试大纲和委托测试要求形成测试报告。</li>
+    </ol>
+    <p>本次测试结果如下：</p>
+    <table>
+      <thead>
+        <tr><th>指标</th><th>数值</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>磨损识别准确率（mAP50）</td><td>0.6844</td></tr>
+        <tr><td>精确率（Precision）</td><td>0.6030</td></tr>
+        <tr><td>召回率（Recall）</td><td>0.6725</td></tr>
+        <tr><td>mAP@0.5:0.95</td><td>0.4606</td></tr>
+        <tr><td>测试耗时（秒）</td><td>8.5</td></tr>
+      </tbody>
+    </table>
+    <p>各识别类别的 <code>AP50</code> 结果如下：</p>
+    <table>
+      <thead>
+        <tr><th>类别</th><th>AP50</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>scratch</td><td>0.4671</td></tr>
+        <tr><td>spot</td><td>0.8178</td></tr>
+        <tr><td>critical</td><td>0.7685</td></tr>
+      </tbody>
+    </table>
+    <p>结果说明如下：</p>
+    <ul>
+      <li>本报告中的“磨损识别准确率”采用目标级评价方式，以 <code>mAP50</code> 表示。</li>
+      <li>当前送测软件输出为目标级检测结果，因此 <code>mAP50</code> 与当前评测文件中的 <code>mAP@0.5</code> 对应。</li>
+      <li><code>Precision</code> 和 <code>Recall</code> 反映预测结果的准确程度与检出完整程度。</li>
+      <li><code>mAP@0.5:0.95</code> 用于补充反映在更严格重叠阈值范围下的整体表现。</li>
+    </ul>
+    <p>主要输出文件核验结果如下：</p>
+    <table>
+      <thead>
+        <tr><th>输出项</th><th>文件路径</th><th>核验情况</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>正式指标结果</td><td><code>cnas_test/outputs/latest/metrics/cnas_eval_results.json</code></td><td>已生成</td></tr>
+        <tr><td>混淆矩阵</td><td><code>cnas_test/outputs/latest/plots/ultralytics_output/confusion_matrix_normalized.png</code></td><td>已生成</td></tr>
+        <tr><td>PR 曲线</td><td><code>cnas_test/outputs/latest/plots/ultralytics_output/BoxPR_curve.png</code></td><td>已生成</td></tr>
+        <tr><td>预测样例图</td><td><code>cnas_test/outputs/latest/plots/ultralytics_output/val_batch0_pred.jpg</code></td><td>已生成</td></tr>
+      </tbody>
+    </table>
+    <p>典型结果截图如下。</p>
+    <figure class="shot">
+      <img src="../outputs/latest/plots/ultralytics_output/BoxPR_curve.png" alt="PR Curve" />
+      <figcaption>图 1 精确率-召回率曲线</figcaption>
+    </figure>
+    <figure class="shot">
+      <img src="../outputs/latest/plots/ultralytics_output/confusion_matrix_normalized.png" alt="Confusion Matrix" />
+      <figcaption>图 2 归一化混淆矩阵</figcaption>
+    </figure>
+    <figure class="shot">
+      <img src="../outputs/latest/plots/ultralytics_output/val_batch0_pred.jpg" alt="Prediction Batch0" />
+      <figcaption>图 3 典型预测样例一</figcaption>
+    </figure>
+    <figure class="shot">
+      <img src="../outputs/latest/plots/ultralytics_output/val_batch1_pred.jpg" alt="Prediction Batch1" />
+      <figcaption>图 4 典型预测样例二</figcaption>
+    </figure>
+    <p>根据本次测试结果，被测软件产品在规定测试图像集上的“磨损识别准确率”为：</p>
+    <div class="formula">mAP50 = 0.6844</div>
+    <p>测试机构应将该结果与委托测试文件、任务书或测试实施细则中规定的阈值进行比较后，形成最终判定结论。若后续送测版本采用区域级识别输出，则仍使用同一“磨损识别准确率”指标名称，但按测试大纲规定切换为区域级评价方式并重新形成相应测试报告。</p>
+  </main>
+</body>
+</html>
