@@ -86,8 +86,8 @@ class ClassicalDetector(BaseDetector):
             original_image=original_for_bright,
         )
 
-        # ③ 阈值分割
-        binary = self._threshold(candidate_map)
+        # ③ 阈值分割（bg_anchored 在原始灰度图上做背景锚定）
+        binary = self._threshold(candidate_map, gray=original_for_bright, roi=roi_mask)
 
         # ④ 形态学清理
         binary = self._morphological_clean(binary, roi_mask)
@@ -164,11 +164,26 @@ class ClassicalDetector(BaseDetector):
 
     # ── 阈值 ──────────────────────────────────────────────────
 
-    def _threshold(self, candidate_map: np.ndarray) -> np.ndarray:
-        """对候选图做阈值分割."""
+    def _threshold(
+        self,
+        candidate_map: np.ndarray,
+        gray: np.ndarray | None = None,
+        roi: np.ndarray | None = None,
+    ) -> np.ndarray:
+        """对候选图做阈值分割.
+
+        method="bg_anchored" 时改在灰度图上做背景锚定阈值（需提供 gray + roi），
+        其余方法仍作用于候选图。
+        """
+        method = self.det_params.threshold_method
+        if method == "bg_anchored":
+            if gray is not None and roi is not None:
+                return self._bg_anchored_mask(gray, roi)
+            logger.warning("bg_anchored 缺少 gray/roi，回退 otsu")
+            method = "otsu"
+
         img8 = (candidate_map * 255).astype(np.uint8)
 
-        method = self.det_params.threshold_method
         if method == "otsu":
             otsu_val, binary = cv2.threshold(img8, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
             # tile 模式防噪底限：防止纯暗 tile 无双峰分布导致阈值过低
@@ -192,6 +207,73 @@ class ClassicalDetector(BaseDetector):
             _, binary = cv2.threshold(img8, 30, 255, cv2.THRESH_BINARY)
 
         return binary.astype(bool)
+
+    # ── 背景锚定阈值 ──────────────────────────────────────────
+
+    def _bg_anchored_mask(self, gray: np.ndarray, roi: np.ndarray) -> np.ndarray:
+        """中心ROI + 背景面残差 的背景锚定阈值分割.
+
+        统一背景模型（与预处理背景修正同源）：
+        1. 中心 ROI：ROI 内缩，排除高光环与渐晕边缘；
+        2. 背景面残差 R = I − 背景面（形态学开运算），去缓变雾霾/亮缺陷晕染/ring 残留，
+           残差背景≈0、对称，避开"原始灰度被压到0且左截断、σ 估不准"的问题；
+        3. 噪声 σ_noise 用 Immerkär 拉普拉斯估计（抗缺陷、抗残差全零）；
+        4. 固定双阈值 T_low/T_high = k·σ_noise，迟滞生长保留与确信核连通的淡缺陷。
+        """
+        from darkfield_defects.preprocessing.brightness_correction import (
+            background_surface_residual,
+        )
+
+        g = gray if gray.dtype == np.uint8 else np.clip(gray, 0, 255).astype(np.uint8)
+        if not np.any(roi):
+            return np.zeros(g.shape, dtype=bool)
+
+        p = self.det_params
+        # ① 中心 ROI（内缩排除高光环/边缘）
+        roi_c = roi
+        if p.bg_anchored_roi_erode_px > 0:
+            dist = cv2.distanceTransform(roi.astype(np.uint8), cv2.DIST_L2, 3)
+            roi_c = dist > p.bg_anchored_roi_erode_px
+            if not np.any(roi_c):
+                roi_c = roi
+
+        # ② 背景面残差
+        residual = background_surface_residual(g, roi_c, p.bg_anchored_open_ksize)
+
+        # ③ 噪声 σ（Immerkär 稳健版）
+        sigma = self._noise_sigma(g, roi_c)
+
+        # ④ 残差固定双阈值 + 迟滞
+        t_low = p.bg_anchored_k_low * sigma
+        t_high = p.bg_anchored_k_high * sigma
+        low = (residual >= t_low) & roi_c
+        high = (residual >= t_high) & roi_c
+        logger.debug(
+            f"bg_anchored(residual): σ_noise={sigma:.2f} T_low={t_low:.2f} T_high={t_high:.2f}"
+        )
+        return self._hysteresis_grow(low, high)
+
+    def _noise_sigma(self, gray: np.ndarray, roi: np.ndarray) -> float:
+        """Immerkär 拉普拉斯稳健噪声估计（中位数版，抗亮缺陷与残差全零）."""
+        kernel = np.array([[1, -2, 1], [-2, 4, -2], [1, -2, 1]], dtype=np.float32)
+        lap = np.abs(cv2.filter2D(gray.astype(np.float32), -1, kernel))
+        vals = lap[roi]
+        if vals.size == 0:
+            return self.det_params.bg_anchored_min_sigma
+        # 0.5*sqrt(pi/2)*MAD≈σ；常数把 |Laplacian| 中位数折回高斯 σ
+        sigma = 1.4826 * float(np.median(vals)) * np.sqrt(np.pi / 2) / np.sqrt(2)
+        return max(sigma, self.det_params.bg_anchored_min_sigma)
+
+    @staticmethod
+    def _hysteresis_grow(low: np.ndarray, high: np.ndarray) -> np.ndarray:
+        """迟滞：保留 low 中含有 high 种子的连通域."""
+        num, labels = cv2.connectedComponents(low.astype(np.uint8), connectivity=8)
+        if num <= 1:
+            return np.zeros(low.shape, dtype=bool)
+        keep = np.zeros(num, dtype=bool)
+        seed_labels = np.unique(labels[high])
+        keep[seed_labels[seed_labels > 0]] = True
+        return keep[labels]
 
     # ── 形态学清理 ────────────────────────────────────────────
 

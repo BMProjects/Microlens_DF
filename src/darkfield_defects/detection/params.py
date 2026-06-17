@@ -50,6 +50,14 @@ class DetectionParams:
     # tile 模式下 Otsu 防噪底限：若 Otsu 结果低于此值则提升至此
     # 防止纯暗 tile 因无双峰分布而设出极低阈值导致全图误检
     otsu_floor: float = 0.0        # 默认0=不限制；tile模式建议0.06
+    # 背景锚定阈值（bg_anchored）：中心ROI背景众数 μ_bg + 左半宽弥散 σ_bg → 固定灰度双阈值 + 迟滞
+    # 解决 Otsu 在 L3 密集图中阈值上漂、淡灰缺陷被切掉的问题
+    # 在「中心ROI + 背景面残差」上做：阈值 = k·σ_noise（残差背景≈0），迟滞双阈值
+    bg_anchored_k_low: float = 3.0          # T_low = k_low·σ_noise（淡缺陷延展，迟滞生长边界）
+    bg_anchored_k_high: float = 6.0         # T_high = k_high·σ_noise（确信缺陷核，迟滞种子）
+    bg_anchored_min_sigma: float = 0.5      # σ_noise 下限
+    bg_anchored_open_ksize: int = 41        # 背景面开运算核，应大于最大划痕宽度（吸收雾霾/ring/晕染）
+    bg_anchored_roi_erode_px: float = 12.0  # 中心ROI内缩像素（排除高光环与渐晕边缘）
     # 形态学
     morph_open_kernel: int = 3
     min_area: int = 50
