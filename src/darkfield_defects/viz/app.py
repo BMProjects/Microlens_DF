@@ -35,17 +35,25 @@ except ImportError:
     raise ImportError("pip install darkfield-defects[viz]")
 
 from darkfield_defects.logging import get_logger
+from darkfield_defects.detection.params import ScoringParams
 from darkfield_defects.measurement import DEFAULT_CALIBRATION
 from darkfield_defects.app_services import (
     get_default_weights_path,
+    resolve_weights_path,
     run_full_image_inference,
 )
+from darkfield_defects.app_services import run_records
 
 logger = get_logger(__name__)
 
 # ── 路径 ──────────────────────────────────────────────────────────────
 _PROJECT_ROOT    = Path(__file__).parent.parent.parent.parent
 _DEFAULT_WEIGHTS = get_default_weights_path()
+
+APP_NAME    = "离焦微结构镜片缺陷检测及评价系统"
+APP_VERSION = "V1.0"
+_HISTORY_COLUMNS = ["run_id", "image", "time", "grade", "score", "n_defects",
+                    "scratch", "spot", "critical", "infer_s"]
 
 # ── 视觉常量 ──────────────────────────────────────────────────────────
 _BG       = "#0d1117"
@@ -274,8 +282,11 @@ def _make_topo_map(boxes: list, img_h: int, img_w: int) -> np.ndarray:
 
 # ── WearScore 计算过程图 ──────────────────────────────────────────────
 
-def _make_score_chart(contributors: dict, score: float) -> np.ndarray:
-    """水平条形图（各分量）+ 半圆仪表盘（总分），返回 RGB。"""
+def _make_score_chart(contributors: dict, score: float, grade: str) -> np.ndarray:
+    """水平条形图（各分量）+ 半圆仪表盘（总分），返回 RGB。
+
+    等级由评分模块给出，仪表盘分段取 ScoringParams 阈值，保证与评级卡片一致。
+    """
     fig, (ax_bar, ax_gauge) = plt.subplots(
         1, 2,
         figsize=(7.5, 3.6),
@@ -327,13 +338,13 @@ def _make_score_chart(contributors: dict, score: float) -> np.ndarray:
     # ── 右：半圆仪表盘 ──
     ax_gauge.set_facecolor(_BG)
 
-    # 四段弧：A / B / C / D
-    segs = [
-        (np.pi,         np.pi * 3/4,  "#00c853"),  # A  0-25
-        (np.pi * 3/4,   np.pi / 2,    "#2979ff"),  # B  25-50
-        (np.pi / 2,     np.pi / 5,    "#ff9100"),  # C  50-80
-        (np.pi / 5,     0,            "#d50000"),  # D  80-100
-    ]
+    # 四段弧：A / B / C / D，分界取评分阈值
+    sp = ScoringParams()
+    bounds = [0.0, sp.grade_A_max, sp.grade_B_max, sp.grade_C_max, 100.0]
+    def _ang(v: float) -> float:
+        return np.pi * (1 - v / 100)
+    segs = [(_ang(lo), _ang(hi), GRADE_COLOR[g])
+            for lo, hi, g in zip(bounds[:-1], bounds[1:], "ABCD")]
     r_in, r_out = 0.58, 0.92
     for t0, t1, color in segs:
         t   = np.linspace(t0, t1, 50)
@@ -358,16 +369,14 @@ def _make_score_chart(contributors: dict, score: float) -> np.ndarray:
         ax_gauge.text(1.08 * np.cos(ang), 1.08 * np.sin(ang),
                       lbl, ha="center", va="center",
                       fontsize=6.5, color="#888888")
-    for ang, lbl in [(np.pi * 3/4, "25"), (np.pi / 2, "50"),
-                      (np.pi / 5, "80")]:
+    for v in bounds[1:-1]:
+        ang, lbl = _ang(v), f"{v:g}"
         ax_gauge.text(0.5 * np.cos(ang), 0.5 * np.sin(ang),
                       lbl, ha="center", va="center",
                       fontsize=5.5, color="#888888")
 
     # 总分
-    grade = ("A" if score < 25 else "B" if score < 50
-             else "C" if score < 80 else "D")
-    g_color = GRADE_COLOR[grade]
+    g_color = GRADE_COLOR.get(grade, "#888888")
     ax_gauge.text(0, -0.22, f"{score:.0f}",
                   ha="center", va="center",
                   fontsize=22, fontweight="bold", color="white")
@@ -467,7 +476,7 @@ def _make_grade_html(assessment: dict) -> str:
         <span style="font-size:13px;color:#555;font-weight:400;">&thinsp;/ 100</span>
       </div>
       <div style="font-size:12px;color:{gc};margin-top:3px;
-                  font-weight:500;">{gs} &nbsp;·&nbsp; {label.split('（')[0] if '（' in label else label}</div>
+                  font-weight:500;">{gs}</div>
       <div style="font-size:11px;color:#555;margin-top:1px;">
         {label.split('（')[1].rstrip('）') if '（' in label else ''}</div>
     </div>
@@ -532,7 +541,7 @@ def run_full_detection(
     if image_file is None:
         return (ph("请先上传镜片图像"), ph(),
                 ph(), empty_html,
-                "<div class='status-bar'>⬆️ 请先上传图像</div>")
+                "<div class='status-bar'>⬆️ 请先上传图像</div>", None)
 
     _root = str(_PROJECT_ROOT)
     if _root not in sys.path:
@@ -540,11 +549,8 @@ def run_full_detection(
 
     img_path = Path(image_file)
     try:
-        result = run_full_image_inference(
-            img_path,
-            conf_thresh=conf_thresh,
-            weights_path=weights_path.strip() if weights_path else None,
-        )
+        weights = resolve_weights_path(weights_path.strip() if weights_path else None)
+        result = run_full_image_inference(img_path, conf_thresh=conf_thresh, weights_path=weights)
         img_gray = result.image_gray
         H, W = img_gray.shape
         final_boxes = result.final_boxes
@@ -558,8 +564,11 @@ def run_full_detection(
         chart      = _make_score_chart(
             assessment["contributors"],
             assessment["score"],
+            assessment["grade"],
         )
         grade_html = _make_grade_html(assessment)
+        run_dir    = run_records.save_run(result, img_path, overlay,
+                                          conf=conf_thresh, weights=weights)
 
         # ── 状态栏 ──
         n       = len(final_boxes)
@@ -581,7 +590,7 @@ def run_full_detection(
             f"&nbsp;{score:.1f}/100"
             f"</div>"
         )
-        return overlay, topo, chart, grade_html, status
+        return overlay, topo, chart, grade_html, status, str(run_dir / "report.html")
 
     except Exception as exc:
         logger.error("推理失败: %s", exc, exc_info=True)
@@ -594,7 +603,65 @@ def run_full_detection(
             f"<div class='status-bar' style='color:#f44336;'>"
             f"❌ 推理失败: {exc}</div>"
         )
-        return err, err, err, err_html, status
+        return err, err, err, err_html, status, None
+
+
+# ── 批量检测 ──────────────────────────────────────────────────────────
+
+def run_batch_detection(files, conf_thresh: float, weights_path: str,
+                        progress=gr.Progress()) -> tuple:
+    """逐张推理并落盘记录，返回汇总表、CSV、ZIP 与状态栏。"""
+    if not files:
+        return [], None, None, "<div class='status-bar'>⬆️ 请先选择若干图像</div>"
+    try:
+        weights = resolve_weights_path(weights_path.strip() if weights_path else None)
+    except FileNotFoundError as exc:
+        return [], None, None, f"<div class='status-bar' style='color:#f44336;'>❌ {exc}</div>"
+
+    run_ids, failed = [], []
+    paths = [Path(f if isinstance(f, str) else f.name) for f in files]
+    for path in progress.tqdm(paths, desc="批量检测"):
+        try:
+            result = run_full_image_inference(path, conf_thresh=conf_thresh, weights_path=weights)
+            overlay = _make_overlay(result.final_boxes, result.image_gray)
+            run_ids.append(run_records.save_run(result, path, overlay,
+                                                conf=conf_thresh, weights=weights).name)
+        except Exception as exc:  # 单张失败不中断整批，汇总后报告
+            logger.error("批量检测失败 %s: %s", path.name, exc, exc_info=True)
+            failed.append(f"{path.name}（{exc}）")
+
+    if not run_ids:
+        return [], None, None, ("<div class='status-bar' style='color:#f44336;'>"
+                                f"❌ 全部失败：{'；'.join(failed)}</div>")
+    csv_path, zip_path = run_records.export_runs(run_ids, run_records.runs_dir() / "_exports")
+    rows = [r for r in run_records.list_runs(limit=len(run_ids) + 50) if r["run_id"] in run_ids]
+    grades = {g: sum(r["grade"] == g for r in rows) for g in "ABCD"}
+    status = (f"<div class='status-bar' style='color:#ccc;'>✅ 完成 {len(run_ids)} 张"
+              f"&nbsp;|&nbsp; A {grades['A']} · B {grades['B']} · C {grades['C']} · D {grades['D']}"
+              + (f"<br><span style='color:#f44336;'>失败 {len(failed)} 张：{'；'.join(failed)}</span>"
+                 if failed else "") + "</div>")
+    table = [[r[c] for c in _HISTORY_COLUMNS] for r in rows]
+    return table, str(csv_path), str(zip_path), status
+
+
+# ── 检测记录 ──────────────────────────────────────────────────────────
+
+def refresh_history() -> tuple:
+    rows = run_records.list_runs()
+    table = [[r[c] for c in _HISTORY_COLUMNS] for r in rows]
+    return table, gr.update(choices=[r["run_id"] for r in rows], value=None)
+
+
+def view_history(run_id: str | None) -> tuple:
+    if not run_id:
+        return _placeholder("选择一条记录"), "", None
+    try:
+        report, overlay_path, html_path = run_records.load_run(run_id)
+    except (FileNotFoundError, ValueError) as exc:
+        return _placeholder("记录读取失败"), f"<div class='status-bar'>❌ {exc}</div>", None
+    overlay = cv2.cvtColor(cv2.imread(str(overlay_path)), cv2.COLOR_BGR2RGB) \
+        if overlay_path.exists() else _placeholder("叠加图缺失")
+    return overlay, _make_grade_html(report["assessment"]), str(html_path)
 
 
 # ── 图像上传时更新信息 ─────────────────────────────────────────────────
@@ -756,7 +823,18 @@ _THEME = gr.themes.Base(
     font_mono=[gr.themes.GoogleFont("JetBrains Mono"), "monospace"],
 ).set(
     body_background_fill="#0d1117",
+    background_fill_primary="#0d1117",      # 标签页、表格、文件组件底色
+    background_fill_secondary="#10151f",
+    body_text_color="#c8d0de",
+    body_text_color_subdued="#8a95a3",
+    border_color_primary="#1e2535",
+    table_even_background_fill="#10151f",
+    table_odd_background_fill="#161b27",
     block_background_fill="#161b27",
+    button_secondary_background_fill="#1a2030",
+    button_secondary_background_fill_hover="#232b3d",
+    button_secondary_text_color="#c8d0de",
+    button_secondary_border_color="#2a2f3e",
     block_border_color="#1e2535",
     block_label_text_color="#4a5568",
     input_background_fill="#0d1117",
@@ -767,121 +845,173 @@ _THEME = gr.themes.Base(
 
 
 def create_app() -> gr.Blocks:
-    with gr.Blocks(title="离焦微结构镜片缺陷检测及评价系统") as app:
+    with gr.Blocks(title=APP_NAME) as app:
 
         # ── 顶栏 ─────────────────────────────────────────────────────
-        gr.HTML("""
+        gr.HTML(f"""
 <div class="app-header">
   <span style="font-size:24px;line-height:1;">🔬</span>
   <div>
-    <p class="app-header-title">离焦微结构镜片缺陷检测及评价系统</p>
+    <p class="app-header-title">{APP_NAME}</p>
     <p class="app-header-sub">全图切片推理 &nbsp;·&nbsp; IOS 跨片合并 &nbsp;·&nbsp; 微结构区优先评分</p>
   </div>
-  <span class="app-header-badge">操作员工作台 v2.1</span>
+  <span class="app-header-badge">操作员工作台 {APP_VERSION}</span>
 </div>""")
 
-        with gr.Row(equal_height=False, variant="panel"):
+        with gr.Tabs():
+            with gr.Tab("单张检测"):
+                with gr.Row(equal_height=False, variant="panel"):
+
+                    # ════════════════════════════════════════════════════════
+                    # 左：控制面板
+                    # ════════════════════════════════════════════════════════
+                    with gr.Column(scale=1, min_width=270,
+                                   elem_classes="left-panel", elem_id="single-left"):
+
+                        gr.HTML('<span class="section-title">① 导入图像</span>')
+
+                        image_input = gr.Image(
+                            label="选择镜片图像（PNG / BMP / TIFF）",
+                            type="filepath",
+                            height=195,
+                            show_label=True,
+                            buttons=["download"],
+                        )
+                        image_info = gr.HTML(
+                            "<p style='font-size:13px;color:#555;margin:4px 0;'>"
+                            "尚未选择图像</p>"
+                        )
+
+                        gr.HTML('<hr class="divider">'
+                                '<span class="section-title">② 检测设置</span>')
+
+                        conf_slider = gr.Slider(
+                            label="置信度阈值",
+                            minimum=0.05, maximum=0.50,
+                            value=0.20, step=0.05,
+                            info="↓ 低阈值：召回更多 &nbsp;|&nbsp; ↑ 高阈值：精度更高",
+                        )
+
+                        with gr.Accordion("高级设置", open=False):
+                            weights_input = gr.Textbox(
+                                label="模型权重路径（留空使用默认）",
+                                placeholder=(str(_DEFAULT_WEIGHTS.relative_to(_PROJECT_ROOT))
+                                         if _DEFAULT_WEIGHTS.is_relative_to(_PROJECT_ROOT)
+                                         else str(_DEFAULT_WEIGHTS)),
+                                lines=1,
+                            )
+
+                        gr.HTML('<hr class="divider">'
+                                '<span class="section-title">③ 执行检测</span>')
+
+                        detect_btn = gr.Button(
+                            "🚀  开始检测",
+                            variant="primary",
+                            elem_classes="detect-btn",
+                            size="lg",
+                        )
+
+                        status_out = gr.HTML(
+                            "<div class='status-bar'>"
+                            "⬆️ 上传图像后点击「开始检测」"
+                            "</div>"
+                        )
+
+                    # ════════════════════════════════════════════════════════
+                    # 右：结果面板  2 × 2
+                    # ════════════════════════════════════════════════════════
+                    with gr.Column(scale=3):
+
+                        # ── 上行：叠加图 + 地形图 ──────────────────────────
+                        with gr.Row(equal_height=True):
+                            with gr.Column():
+                                gr.HTML('<p class="result-label">检测结果</p>')
+                                overlay_out = gr.Image(
+                                    label="缺陷标注叠加图",
+                                    elem_id="overlay-panel",
+                                    show_label=False,
+                                    elem_classes="result-img",
+                                    height=390,
+                                    value=_placeholder("上传图像后开始检测"),
+                                    buttons=["download"],
+                                )
+                            with gr.Column():
+                                gr.HTML('<p class="result-label">缺陷地形图</p>')
+                                topo_out = gr.Image(
+                                    label="缺陷密度分布",
+                                    elem_id="topo-panel",
+                                    show_label=False,
+                                    elem_classes="result-img",
+                                    height=390,
+                                    value=_placeholder("缺陷密度热力图"),
+                                    buttons=["download"],
+                                )
+
+                        # ── 下行：评分过程 + 评级卡片 ──────────────────────
+                        with gr.Row(equal_height=True):
+                            with gr.Column():
+                                gr.HTML('<p class="result-label">WearScore 计算过程</p>')
+                                chart_out = gr.Image(
+                                    label="各因素贡献",
+                                    elem_id="chart-panel",
+                                    show_label=False,
+                                    elem_classes="result-img",
+                                    height=310,
+                                    value=_placeholder("检测后显示评分分解"),
+                                    buttons=["download"],
+                                )
+                            with gr.Column():
+                                gr.HTML('<p class="result-label">磨损评级</p>')
+                                grade_out = gr.HTML(
+                                    elem_id="grade-panel",
+                                    value="<div style='padding:28px 24px;color:#333;"
+                                          "font-size:13px;text-align:center;'>"
+                                          "等待检测...</div>",
+                                )
+
+                report_file = gr.File(label="检测报告（HTML，可下载）", interactive=False)
 
             # ════════════════════════════════════════════════════════
-            # 左：控制面板
+            # 批量检测
             # ════════════════════════════════════════════════════════
-            with gr.Column(scale=1, min_width=270,
-                           elem_classes="left-panel"):
-
-                gr.HTML('<span class="section-title">① 导入图像</span>')
-
-                image_input = gr.Image(
-                    label="选择镜片图像（PNG / BMP / TIFF）",
-                    type="filepath",
-                    height=195,
-                    show_label=True,
-                    buttons=["download"],
-                )
-                image_info = gr.HTML(
-                    "<p style='font-size:13px;color:#555;margin:4px 0;'>"
-                    "尚未选择图像</p>"
-                )
-
-                gr.HTML('<hr class="divider">'
-                        '<span class="section-title">② 检测设置</span>')
-
-                conf_slider = gr.Slider(
-                    label="置信度阈值",
-                    minimum=0.05, maximum=0.50,
-                    value=0.20, step=0.05,
-                    info="↓ 低阈值：召回更多 &nbsp;|&nbsp; ↑ 高阈值：精度更高",
-                )
-
-                with gr.Accordion("高级设置", open=False):
-                    weights_input = gr.Textbox(
-                        label="模型权重路径（留空使用默认）",
-                        placeholder=str(_DEFAULT_WEIGHTS),
-                        lines=1,
-                    )
-
-                gr.HTML('<hr class="divider">'
-                        '<span class="section-title">③ 执行检测</span>')
-
-                detect_btn = gr.Button(
-                    "🚀  开始检测",
-                    variant="primary",
-                    elem_classes="detect-btn",
-                    size="lg",
-                )
-
-                status_out = gr.HTML(
-                    "<div class='status-bar'>"
-                    "⬆️ 上传图像后点击「开始检测」"
-                    "</div>"
-                )
+            with gr.Tab("批量检测"):
+                with gr.Row(equal_height=False, variant="panel"):
+                    with gr.Column(scale=1, min_width=270, elem_classes="left-panel"):
+                        gr.HTML('<span class="section-title">① 选择多张图像</span>')
+                        batch_files = gr.File(label="镜片图像（可多选）", file_count="multiple",
+                                              file_types=["image"], type="filepath")
+                        gr.HTML('<span class="section-title">② 检测设置</span>')
+                        batch_conf = gr.Slider(label="置信度阈值", minimum=0.05, maximum=0.50,
+                                               value=0.20, step=0.05)
+                        batch_btn = gr.Button("🚀  批量检测", variant="primary",
+                                              elem_classes="detect-btn", size="lg")
+                        batch_status = gr.HTML("<div class='status-bar'>"
+                                               "选择图像后点击「批量检测」</div>")
+                    with gr.Column(scale=3):
+                        gr.HTML('<p class="result-label">批量结果汇总</p>')
+                        batch_table = gr.Dataframe(headers=_HISTORY_COLUMNS, interactive=False,
+                                                   wrap=True)
+                        with gr.Row():
+                            batch_csv = gr.File(label="汇总表（CSV）", interactive=False)
+                            batch_zip = gr.File(label="全部报告（ZIP）", interactive=False)
 
             # ════════════════════════════════════════════════════════
-            # 右：结果面板  2 × 2
+            # 检测记录
             # ════════════════════════════════════════════════════════
-            with gr.Column(scale=3):
-
-                # ── 上行：叠加图 + 地形图 ──────────────────────────
+            with gr.Tab("检测记录"):
+                with gr.Row():
+                    history_refresh = gr.Button("🔄  刷新记录", size="sm")
+                    history_pick = gr.Dropdown(label="查看记录", choices=[], interactive=True)
+                history_table = gr.Dataframe(headers=_HISTORY_COLUMNS, interactive=False,
+                                             wrap=True)
                 with gr.Row(equal_height=True):
-                    with gr.Column():
-                        gr.HTML('<p class="result-label">检测结果</p>')
-                        overlay_out = gr.Image(
-                            label="缺陷标注叠加图",
-                            show_label=False,
-                            elem_classes="result-img",
-                            height=390,
-                            value=_placeholder("上传图像后开始检测"),
-                            buttons=["download"],
-                        )
-                    with gr.Column():
-                        gr.HTML('<p class="result-label">缺陷地形图</p>')
-                        topo_out = gr.Image(
-                            label="缺陷密度分布",
-                            show_label=False,
-                            elem_classes="result-img",
-                            height=390,
-                            value=_placeholder("缺陷密度热力图"),
-                            buttons=["download"],
-                        )
-
-                # ── 下行：评分过程 + 评级卡片 ──────────────────────
-                with gr.Row(equal_height=True):
-                    with gr.Column():
-                        gr.HTML('<p class="result-label">WearScore 计算过程</p>')
-                        chart_out = gr.Image(
-                            label="各因素贡献",
-                            show_label=False,
-                            elem_classes="result-img",
-                            height=310,
-                            value=_placeholder("检测后显示评分分解"),
-                            buttons=["download"],
-                        )
-                    with gr.Column():
-                        gr.HTML('<p class="result-label">磨损评级</p>')
-                        grade_out = gr.HTML(
-                            "<div style='padding:28px 24px;color:#333;"
-                            "font-size:13px;text-align:center;'>"
-                            "等待检测...</div>"
-                        )
+                    with gr.Column(scale=3):
+                        history_overlay = gr.Image(show_label=False, elem_classes="result-img",
+                                                   height=420,
+                                                   value=_placeholder("选择一条记录"))
+                    with gr.Column(scale=2):
+                        history_grade = gr.HTML("")
+                        history_report = gr.File(label="检测报告（HTML）", interactive=False)
 
         # ── 事件绑定 ──────────────────────────────────────────────
         image_input.upload(
@@ -897,8 +1027,17 @@ def create_app() -> gr.Blocks:
         detect_btn.click(
             fn=run_full_detection,
             inputs=[image_input, conf_slider, weights_input],
-            outputs=[overlay_out, topo_out, chart_out, grade_out, status_out],
+            outputs=[overlay_out, topo_out, chart_out, grade_out, status_out, report_file],
         )
+        batch_btn.click(
+            fn=run_batch_detection,
+            inputs=[batch_files, batch_conf, weights_input],
+            outputs=[batch_table, batch_csv, batch_zip, batch_status],
+        )
+        history_refresh.click(fn=refresh_history, outputs=[history_table, history_pick])
+        history_pick.change(fn=view_history, inputs=[history_pick],
+                            outputs=[history_overlay, history_grade, history_report])
+        app.load(fn=refresh_history, outputs=[history_table, history_pick])
 
     return app
 

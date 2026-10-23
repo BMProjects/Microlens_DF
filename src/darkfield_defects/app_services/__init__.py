@@ -3,11 +3,13 @@
 from darkfield_defects.app_services.inference_service import (
     FullImageInferenceResult,
     get_default_weights_path,
+    resolve_weights_path,
     run_full_image_inference,
 )
 
 __all__ = [
     "FullImageInferenceResult",
     "get_default_weights_path",
+    "resolve_weights_path",
     "run_full_image_inference",
 ]

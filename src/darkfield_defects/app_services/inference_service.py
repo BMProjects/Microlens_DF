@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
@@ -28,6 +29,9 @@ DEFAULT_WEIGHTS = (
     / "weights"
     / "best.pt"
 )
+# 研发机未同步 phase3e 权重时的回退：CNAS 一期基线权重
+FALLBACK_WEIGHTS = PROJECT_ROOT / "output" / "training" / "stage2_cleaned" / "weights" / "best.pt"
+WEIGHTS_ENV = "DARKFIELD_WEIGHTS"
 
 TILE_SIZE = 640
 STRIDE = 480
@@ -52,7 +56,25 @@ class FullImageInferenceResult:
 
 
 def get_default_weights_path() -> Path:
+    """默认权重：环境变量 DARKFIELD_WEIGHTS > phase3e 主线权重 > stage2_cleaned 基线权重。"""
+    env = os.environ.get(WEIGHTS_ENV)
+    if env:
+        return Path(env)
+    for candidate in (DEFAULT_WEIGHTS, FALLBACK_WEIGHTS):
+        if candidate.exists():
+            return candidate
     return DEFAULT_WEIGHTS
+
+
+def resolve_weights_path(weights_path: str | Path | None = None) -> Path:
+    """解析并校验权重路径；不存在时给出可操作的错误信息。"""
+    path = Path(weights_path) if weights_path else get_default_weights_path()
+    if not path.is_file():
+        raise FileNotFoundError(
+            f"模型权重不存在: {path}。请在“高级设置”中填写权重路径，"
+            f"或设置环境变量 {WEIGHTS_ENV}。"
+        )
+    return path
 
 
 @lru_cache(maxsize=4)
@@ -70,8 +92,7 @@ def run_full_image_inference(
     weights_path: str | Path | None = None,
 ) -> FullImageInferenceResult:
     img_path = Path(image_path)
-    resolved_weights = str(Path(weights_path) if weights_path else DEFAULT_WEIGHTS)
-    model = _load_model(resolved_weights)
+    model = _load_model(str(resolve_weights_path(weights_path)))
 
     raw_boxes, infer_time, img_gray = _run_sahi(model, img_path, conf=conf_thresh)
     nms_boxes = nms_ios(raw_boxes, ios_thresh=NMS_IOS)
