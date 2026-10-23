@@ -306,3 +306,24 @@
   - `scratch_length_mm / scratch_area_mm2 / scratch_components`
   - `spot_area_mm2 / damage_area_mm2`
   - 20~30 张私有图像并列可视化结果
+
+## 阶段二进展记录
+
+### 2026-10-19：评估口径与 P0/P1
+
+- **准确率口径**：阶段二“识别准确率 ≥ 90%”按 CNAS 大纲 A = Σδᵢ/N 统计。正式 δᵢ 为**镜片级 WearScore 等级一致**（预测框与基准标注框经同一拼接 → IOS-NMS → 划痕链接 → 评分链路）；内部同时跟踪**切片级框 F1 ≥ 0.5（IoU 0.3）**，防止只靠边界调参达标。工具：`scripts/eval_image_level.py`（`src/darkfield_defects/eval/image_level.py`，不依赖 torch）。
+- **基线**（stage2_cleaned，conf 0.2，CNAS 20 镜 / 860 切片）：镜片等级一致 **85%**（17/20，全 50 张 val 镜片 78%）；切片 F1 规则 **72.9%**。提高 conf 各指标单调下降，主要短板是召回。11 个不一致全部是基准分在 70（C/D 界）附近、预测因漏检划痕偏低。val 镜片基准等级只有 C/D（最低 48.5 分），测试集需补充 A/B 镜片；conf 与阈值只在 val 上确定。
+- **P0 分层**：`build_segmentation_complexity_manifest.py` 产出 L1/L2/L3 = 49/82/66（基于旧弱标签，P2 可靠 mask 完成后需复核）。
+- **P1 传统前景**（`scripts/seg_p1_classical_baselines.py`，L1+L2 20 张 + L3 6 张，seed 0，结果 `output/experiments/seg_p1_classical/`）：
+
+| 方法 (L1+L2) | 框命中召回 | scratch 召回 | 框内精度* | 划痕碎片数 | 耗时/张 |
+|---|---|---|---|---|---|
+| adaptive_mean / sauvola / niblack | 0.987 | 0.98 | 0.50–0.55 | 2.9–3.0 | 0.1–0.8 s |
+| gabor（8 方向） | 0.873 | 0.880 | 0.738 | 1.78 | 1.6 s |
+| sato | 0.830 | 0.812 | 0.784 | 1.95 | 20 s |
+| tophat / otsu | 0.77 / 0.76 | 0.70 / 0.69 | 0.85 / 0.84 | 2.1 | <0.5 s |
+| frangi（Otsu 阈值） | 0.514 | 0.423 | 0.799 | 2.29 | 23 s |
+
+  \* 标注框存在明显漏标（叠加图可见大量未标划痕），框内精度系统性偏低，只作相对比较。高光环邻近带误检除 L3 局部阈值法外均可忽略。
+
+- **结论与下一步**：局部阈值法可作第一层高召回前景；Gabor 是召回/碎片化最均衡的线状增强；Frangi 当前阈值过保守，需单独调阈值再比较。P2 用 `votes/` 投票图（8 种基础方法）的高票像素作种子，再人工核查 L1/L2 各 20–30 张。标注漏标同时影响检测指标与镜片级基准等级，P2 应同步修订框标注。
