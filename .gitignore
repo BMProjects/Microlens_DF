@@ -30,8 +30,11 @@ output/**
 
 # Sensitive / binary deliverables — never publish
 *.pdf
+*.doc
 *.docx
 *.odt
+# 软著申请人联系方式等本地字段（覆盖 doc/软著/申请表字段.yaml）
+doc/软著/*.local.yaml
 # CNAS run products (kept locally, archived)
 cnas_test/outputs/
 # Build/package metadata
