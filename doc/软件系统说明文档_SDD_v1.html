@@ -614,8 +614,8 @@ class BboxDefect:
 <p>默认权重（来自 <code>ScoringParams</code>）：</p>
 <table><thead><tr><th>因子</th><th>变量</th><th>权重</th><th>说明</th></tr></thead><tbody><tr><td>中心区划痕长度</td><td>L_center</td><td><strong>0.35</strong></td><td>最高权重，中心视区最影响视力</td></tr><tr><td>总划痕长度</td><td>L_total</td><td>0.15</td><td></td></tr><tr><td>划痕总条数</td><td>N_total</td><td>0.10</td><td></td></tr><tr><td>划痕总面积</td><td>A_total</td><td>0.15</td><td></td></tr><tr><td>散射强度</td><td>S_scatter</td><td>0.25</td><td>与眩光直接相关</td></tr></tbody></table>
 <h4>4.5.3 等级映射</h4>
-<table><thead><tr><th>等级</th><th>WearScore 范围</th><th>中文描述</th></tr></thead><tbody><tr><td>A</td><td>&lt; 15</td><td>极佳 — 无划痕或仅边缘微小划痕</td></tr><tr><td>B</td><td>15 ~ 40</td><td>良好 — 核心区外少量划痕，特定光线下偶有感知</td></tr><tr><td>C</td><td>40 ~ 70</td><td>警告 — 核心区有轻/中度划痕，夜间驾驶谨慎</td></tr><tr><td>D</td><td>≥ 70</td><td>报废 — 核心区严重磨损，强烈建议更换</td></tr></tbody></table>
-<p>&gt; <strong>注意</strong>：当前 WearScore 参数基于定性调参，未经过大规模标准样品的统计标定。等级边界数值（15/40/70）为工程估计值，应在量产前通过标准磨损样品集重新标定。</p>
+<table><thead><tr><th>等级</th><th>WearScore 范围</th><th>中文描述</th></tr></thead><tbody><tr><td>A</td><td>≤ 20</td><td>极佳 — 无划痕或仅边缘微小划痕</td></tr><tr><td>B</td><td>20 ~ 45</td><td>良好 — 核心区外少量划痕，特定光线下偶有感知</td></tr><tr><td>C</td><td>45 ~ 70</td><td>警告 — 核心区有轻/中度划痕，夜间驾驶谨慎</td></tr><tr><td>D</td><td>&gt; 70</td><td>报废 — 核心区严重磨损，强烈建议更换</td></tr></tbody></table>
+<p>&gt; <strong>注意</strong>：当前 WearScore 参数基于定性调参，未经过大规模标准样品的统计标定。等级边界数值（20/45/70，见 <code>detection/params.py</code>）为工程估计值，应在量产前通过标准磨损样品集重新标定。</p>
 <h4>4.5.4 场景风险指数</h4>
 <p><strong>眩光指数</strong>（Night Glare Index）：</p>
 <pre><code>glare_index = sat_log(L_center × S_scatter_center × 0.01, 15.0)</code></pre>
