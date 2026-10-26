@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import argparse
 import html
 import subprocess
 from pathlib import Path
@@ -143,6 +144,11 @@ def build_index(md_docs: list[Path], html_from_docx: list[Path]) -> str:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--no-docx", action="store_true",
+                        help="不转换 doc/*.docx（Word 原件不入库，发布到 Git 时应跳过）")
+    args = parser.parse_args()
+
     md_docs = sorted(DOC_DIR.glob("*.md"))
     rendered = []
     for doc in md_docs:
@@ -150,7 +156,7 @@ def main() -> None:
         rendered.append(render_file(doc, nav_html=nav_html))
 
     html_from_docx: list[Path] = []
-    for docx in sorted(DOC_DIR.glob("*.docx")):
+    for docx in [] if args.no_docx else sorted(DOC_DIR.glob("*.docx")):
         converted = try_convert_docx(docx)
         if converted is not None:
             html_from_docx.append(converted)
