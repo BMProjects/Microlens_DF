@@ -77,6 +77,14 @@ uv run pytest -q
 
 > **Note:** datasets and training weights are not shipped in this repository. The GUI's default weight
 > path is `output/experiments/phase3e/.../weights/best.pt`; provide weights locally before running inference.
+>
+> **Note:** `uv sync` uninstalls packages from extras that are not listed on the command line. On the
+> training machine (segmentation experiments use the `hfseg`, `hrnet` and `mmseg` extras as well), run
+> `uv sync --all-extras` instead of a plain `uv sync`.
+>
+> **Phase-2 data:** everything under `output/` is local. The standard input `output/dataset_v3` is built
+> from the raw images with `uv run python scripts/preprocess_standard.py --raw-dir <raw image dir>`;
+> base annotations come from `scripts/annot_build.py`, and the iteration report from `scripts/annot_ablation.py`.
 
 ### Other entry points
 
