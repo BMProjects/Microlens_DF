@@ -40,7 +40,7 @@ FORM_TEMPLATE = (PROJECT_ROOT / "doc" / "软著" / "软件著作权所需材料"
 
 SOFTWARE_NAME = "离焦微结构镜片缺陷检测及评价系统"
 VERSION = "V1.0"
-LINES_PER_PAGE = 50
+LINES_PER_PAGE = 51  # 代理要求每页不少于 50 行；取 51 行使 60 页合计 3060 行，超过 3000 行
 WRAP_COLS = 76  # 模板页边距下 8pt 等宽约 86 列；留余量以容纳字体回退造成的宽度差
 HALF_PAGES = 30
 
@@ -209,10 +209,18 @@ def _new_document(title_suffix: str) -> Document:
     return doc
 
 
-def build_source_doc(lines: list[str], out_path: Path) -> int:
-    pages = [lines[i:i + LINES_PER_PAGE] for i in range(0, len(lines), LINES_PER_PAGE)]
-    if len(pages) > 2 * HALF_PAGES:
-        pages = pages[:HALF_PAGES] + pages[-HALF_PAGES:]
+def paginate(lines: list[str]) -> list[list[str]]:
+    """前 30 页取开头、后 30 页从末尾倒着对齐，保证 60 页每页都排满。"""
+    half = HALF_PAGES * LINES_PER_PAGE
+    if len(lines) <= 2 * half:
+        chunks = [lines]
+    else:
+        chunks = [lines[:half], lines[-half:]]
+    return [c[i:i + LINES_PER_PAGE] for c in chunks for i in range(0, len(c), LINES_PER_PAGE)]
+
+
+def build_source_doc(lines: list[str], out_path: Path) -> tuple[int, int]:
+    pages = paginate(lines)
     doc = _new_document("源程序")
     for pi, page in enumerate(pages):
         for li, line in enumerate(page):
@@ -227,7 +235,7 @@ def build_source_doc(lines: list[str], out_path: Path) -> int:
                 run.add_break(WD_BREAK.PAGE)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     doc.save(out_path)
-    return len(pages)
+    return len(pages), sum(len(pg) for pg in pages)
 
 
 # ── Markdown → docx（只覆盖手册用到的语法）────────────────────────────
@@ -493,9 +501,9 @@ def main() -> None:
 
     lines, stats = collect_source()
     src_doc = OUT / f"{SOFTWARE_NAME}{VERSION}_源程序.docx"
-    n_pages = build_source_doc(lines, src_doc)
+    n_pages, n_submitted = build_source_doc(lines, src_doc)
     print(f"源程序: {stats['files']} 个文件, 有效代码行 {stats['code_lines']}, "
-          f"物理行 {stats['physical_lines']} → 输出 {n_pages} 页: {src_doc}")
+          f"物理行 {stats['physical_lines']} → 输出 {n_pages} 页、提交 {n_submitted} 行: {src_doc}")
     outputs = [src_doc]
     stats_doc = OUT / f"{SOFTWARE_NAME}{VERSION}_源程序行数统计.docx"
     line_stats = build_line_stats(stats_doc)
