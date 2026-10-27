@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>暗场缺陷标注</title>
+<style>
+:root{--bg:#14161a;--panel:#1d2026;--fg:#e8e8e8;--muted:#9aa0a6;--acc:#ffc800;--line:#3a3f47}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 system-ui,"Noto Sans CJK SC","Microsoft YaHei",sans-serif;overflow:hidden}
+header{display:flex;gap:10px;align-items:center;padding:6px 12px;background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap}
+header b{color:var(--acc)}
+header select,header input,button{background:#262a31;color:var(--fg);border:1px solid var(--line);border-radius:5px;padding:4px 9px;font-size:14px}
+button{cursor:pointer}button:hover{border-color:var(--acc)}
+#tools button.on{border-color:var(--acc);color:var(--acc)}
+#wrap{display:flex;height:calc(100vh - 46px)}
+#stage{flex:1;display:flex;gap:6px;padding:6px;min-width:0;position:relative}
+.pane{flex:1;position:relative;min-width:0;background:#0b0c0e;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.pane canvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair}
+.tag{position:absolute;top:4px;left:8px;font-size:12px;color:var(--muted);pointer-events:none;background:rgba(0,0,0,.5);padding:0 6px;border-radius:3px}
+#toast{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.8);padding:5px 14px;border-radius:5px;display:none;z-index:5}
+aside{width:290px;background:var(--panel);border-left:1px solid var(--line);padding:10px;overflow-y:auto;flex-shrink:0}
+aside h3{font-size:13px;color:var(--muted);margin:10px 0 4px;font-weight:600}
+#loupe,#ctx{width:100%;image-rendering:pixelated;background:#000;display:block}
+.k{display:inline-block;min-width:20px;padding:0 5px;border:1px solid var(--line);border-radius:3px;background:#262a31;text-align:center;font-size:12px;margin-right:3px}
+.sw{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+.muted{color:var(--muted);font-size:12px}
+</style></head><body>
+<header>
+ <span>暗场缺陷标注</span><b id="wid">—</b><span id="info" class="muted"></span>
+ <span id="tools"><button data-t="scratch">1 划痕</button> <button data-t="spot">2 斑点</button> <button data-t="fragment">3 碎裂</button> <button data-t="ignore">4 不计</button> <button data-t="line">5 直线</button></span>
+ <span style="flex:1"></span>
+ <label class="muted">集合 <select id="split"><option value="">全部启用</option><option value="val">调参（锚点）</option><option value="train">训练</option><option value="test">测试</option></select></label>
+ <label class="muted">标注人 <input id="who" size="6" placeholder="姓名"></label>
+ <span id="prog" class="muted"></span>
+ <button id="bPrev" title="B">← 上一个</button><button id="bSkip" title="K">跳过</button><button id="bNext" title="Enter">提交并下一窗 ⏎</button>
+</header>
+<div id="wrap">
+ <div id="stage">
+  <div class="pane"><canvas id="cvL"></canvas><span class="tag">原图（可在此直接标注）</span></div>
+  <div class="pane"><canvas id="cvR"></canvas><span class="tag">标注结果（黄框为本窗评价范围）</span></div>
+  <div id="toast"></div>
+ </div>
+ <aside>
+  <canvas id="loupe" width="240" height="240"></canvas>
+  <div class="muted">放大镜：光标处 4 倍原图</div>
+  <h3>按缺陷产生方式标注</h3>
+  <div><span class="k">1</span><b>划痕</b>：沿脊线按住拖动，松开后自动吸附脊线、按剖面定宽</div>
+  <div><span class="k">2</span><b>斑点</b>：单击斑点中心，自动生长</div>
+  <div><span class="k">3</span><b>碎裂</b>：按住圈出区域，取其中亮像素</div>
+  <div><span class="k">4</span><b>不计</b>：拉框（看不清的区域，尽量少用）</div>
+  <div><span class="k">5</span><b>直线划痕</b>：单击起点、单击终点即完成；<span class="k">⇧</span>+单击加折点，双击或 <span class="k">⏎</span> 结束，<span class="k">Esc</span> 取消</div>
+  <div class="muted">黄框内要“应标尽标”，未标的像素按背景计。</div>
+  <h3>算法建议（虚线）</h3>
+  <div>划痕/斑点工具下<b>单击</b>虚线或圆圈即采纳 <span class="k">G</span>显隐 <span class="k">⇧A</span>采纳本窗全部</div>
+  <h3>长划痕</h3>
+  <div><span class="k">E</span>光标下（或最近画）的划痕沿走向向两端追踪，可穿过交叉点与窗口</div>
+  <div><span class="k">T</span>在光标处截断追踪多出的部分</div>
+  <h3>编辑与查看</h3>
+  <div><span class="k">X</span>删除光标下的标注 <span class="k">Z</span>撤销</div>
+  <div>滚轮缩放，右键拖动平移 <span class="k">F</span>复位</div>
+  <div><span class="k">空格</span>按住隐藏叠色 <span class="k">V</span>切换拉伸 <span class="k">O</span>左图也叠色</div>
+  <div><span class="k">⏎</span>提交下一窗 <span class="k">B</span>上一个 <span class="k">K</span>跳过</div>
+  <h3>图例</h3>
+  <div><span class="sw" style="background:#3cdc5a"></span>划痕 <span class="sw" style="background:#ffa000"></span>斑点 <span class="sw" style="background:#e63ce6"></span>碎裂 <span class="sw" style="background:#9a9a9a"></span>不计</div>
+  <h3>整镜位置（绿线为已标划痕）</h3>
+  <canvas id="ctx"></canvas>
+  <h3>本窗统计</h3>
+  <div id="stats" class="muted"></div>
+  <h3>备注</h3>
+  <input id="note" style="width:100%" placeholder="可选：本窗的疑问或说明">
+ </aside>
+</div>
+<script>
+"use strict";
+const COL = {1:[60,220,90], 2:[255,160,0], 3:[230,60,230]};
+const $ = s => document.querySelector(s);
+const cvL = $("#cvL"), cvR = $("#cvR"), cxL = cvL.getContext("2d"), cxR = cvR.getContext("2d");
+const loupe = $("#loupe").getContext("2d"), ctxC = $("#ctx"), ctxX = ctxC.getContext("2d");
+const base = document.createElement("canvas"), over = document.createElement("canvas");
+let ctxImg = null;
+let cur = null, imap = null, RW = 0, RH = 0;
+let view = {s: 1, vx: 0, vy: 0};
+let tool = "scratch", drawing = null, pan = null, mouse = null, hover = 0, hoverBox = -1, lineDraft = null;
+let showSugg = true, hideOv = false, ovLeft = false, stretch = "a", busy = false, t0 = 0, hist = [];
+try { $("#who").value = localStorage.getItem("annot_who") || ""; $("#split").value = localStorage.getItem("annot_split") || ""; } catch (e) {}
+$("#who").onchange = () => { try { localStorage.setItem("annot_who", $("#who").value); } catch (e) {} };
+$("#split").onchange = () => { try { localStorage.setItem("annot_split", $("#split").value); } catch (e) {} gotoNext(cur ? cur.wid : ""); };
+document.querySelectorAll("#tools button").forEach(b => b.onclick = () => setTool(b.dataset.t));
+
+function toast(m, ms = 1600){ const t = $("#toast"); t.textContent = m; t.style.display = "block"; clearTimeout(toast.h); toast.h = setTimeout(() => t.style.display = "none", ms); }
+function setTool(t){ tool = t; lineDraft = null; document.querySelectorAll("#tools button").forEach(b => b.classList.toggle("on", b.dataset.t === t)); if (cur) draw(); }
+setTool("scratch");
+async function api(path, opt){ const r = await fetch(path, opt); if (!r.ok) throw new Error(`${r.status} ${await r.text()}`); return r; }
+async function post(path, body){ return (await api(path, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)})).json(); }
+function loadImg(u){ return new Promise((ok, no) => { const im = new Image(); im.onload = () => ok(im); im.onerror = no; im.src = u; }); }
+
+// ── 坐标：整镜坐标 (x, y) ⇄ 区域坐标 ⇄ 屏幕 ──
+function toRegion(x, y){ return [x - cur.region.x0, y - cur.region.y0]; }
+function screenToLens(cv, ev){ const r = cv.getBoundingClientRect(); return [(ev.clientX - r.left) / view.s + view.vx + cur.region.x0, (ev.clientY - r.top) / view.s + view.vy + cur.region.y0]; }
+function sizeCanvases(){ for (const cv of [cvL, cvR]) { const r = cv.getBoundingClientRect(); cv.width = Math.max(1, Math.round(r.width)); cv.height = Math.max(1, Math.round(r.height)); } }
+function fitView(){
+  sizeCanvases();
+  const W = cvL.width, H = cvL.height, win = cur.win;
+  view.s = Math.min(W, H) / (win * 1.06);
+  const [wx, wy] = toRegion(cur.task.x0, cur.task.y0);
+  view.vx = wx + win / 2 - W / 2 / view.s; view.vy = wy + win / 2 - H / 2 / view.s; draw();
+}
+window.addEventListener("resize", () => { if (cur) { sizeCanvases(); draw(); } });
+
+// ── 载入窗口 ──
+async function open(wid){
+  if (!wid) { toast("当前集合没有待标注窗口", 2500); return; }
+  busy = true;
+  try {
+    const meta = await (await api(`/api/window/${wid}`)).json();
+    const [img, ci] = await Promise.all([loadImg(`/api/window/${wid}/img.png?mode=${stretch}`), loadImg(`/api/window/${wid}/ctx.png`)]);
+    RW = meta.region.w; RH = meta.region.h;
+    base.width = over.width = RW; base.height = over.height = RH;
+    base.getContext("2d").drawImage(img, 0, 0); ctxImg = ci;
+    ctxC.width = ci.width; ctxC.height = ci.height;
+    const st = meta.state || {};
+    cur = {wid, task: meta.task, win: meta.win, region: meta.region, sugg: meta.suggestions, sigma: meta.sigma,
+           items: st.items || [], boxes: st.boxes || [], nextId: 1};
+    for (const it of cur.items) cur.nextId = Math.max(cur.nextId, it.id + 1);
+    $("#note").value = st.note || ""; hist = []; hover = 0; drawing = null;
+    const t = meta.task;
+    $("#wid").textContent = wid;
+    $("#info").textContent = `${t.lens} · ${({val:"调参",train:"训练",test:"测试"})[t.split]} · ${({central:"中央区",inner:"内环",outer:"外环"})[t.zone]}` + (st.status ? ` · 已${st.status === "done" ? "提交" : "跳过"}` : "");
+    history.replaceState(null, "", `#${wid}`);
+    rebuild(); fitView(); t0 = performance.now(); progress();
+  } catch (e) { toast("载入失败：" + e.message, 4000); }
+  busy = false;
+}
+async function progress(){
+  try { const p = await (await api("/api/progress")).json(); const n = {val:"调参",train:"训练",test:"测试"};
+    $("#prog").textContent = Object.entries(p.splits).map(([k, v]) => `${n[k]} ${v.done}/${v.total}${v.enabled ? "" : "（未启用）"}`).join(" · ") + (p.median_seconds ? ` · 中位 ${Math.round(p.median_seconds)} 秒/窗` : ""); } catch (e) {}
+}
+async function gotoNext(after){ const r = await (await api(`/api/next?after=${encodeURIComponent(after || "")}&split=${$("#split").value}`)).json(); open(r.wid); }
+
+// ── 标注项与叠色 ──
+function snapshot(){ hist.push(JSON.stringify({i: cur.items, b: cur.boxes})); if (hist.length > 60) hist.shift(); }
+function undo(){ const h = hist.pop(); if (!h) return toast("没有可撤销的操作"); const o = JSON.parse(h); cur.items = o.i; cur.boxes = o.b; rebuild(); }
+function rebuild(){
+  imap = new Int32Array(RW * RH);
+  const od = over.getContext("2d"), im = od.createImageData(RW, RH), a = im.data;
+  const order = {3: 0, 1: 1, 2: 2};
+  for (const it of [...cur.items].sort((p, q) => order[p.cls] - order[q.cls])) {
+    const c = COL[it.cls];
+    for (const [x, y] of it.pixels) {
+      const u = x - cur.region.x0, v = y - cur.region.y0; if (u < 0 || v < 0 || u >= RW || v >= RH) continue;
+      const i = v * RW + u; imap[i] = it.id; a[4*i] = c[0]; a[4*i+1] = c[1]; a[4*i+2] = c[2]; a[4*i+3] = 120;
+    }
+  }
+  od.putImageData(im, 0, 0); draw();
+}
+function itemById(id){ return cur.items.find(i => i.id === id); }
+function addItem(it){ it.id = cur.nextId++; cur.items.push(it); return it; }
+
+// ── 绘制 ──
+function drawPane(cx, cv, right){
+  cx.setTransform(1, 0, 0, 1, 0, 0); cx.fillStyle = "#0b0c0e"; cx.fillRect(0, 0, cv.width, cv.height);
+  cx.setTransform(view.s, 0, 0, view.s, -view.vx * view.s, -view.vy * view.s);
+  cx.imageSmoothingEnabled = false; cx.drawImage(base, 0, 0);
+  const [wx, wy] = toRegion(cur.task.x0, cur.task.y0), W = cur.win, lw = 1 / view.s;
+  const showOv = !hideOv && (right || ovLeft);
+  if (showOv) {
+    cx.drawImage(over, 0, 0);
+    cx.fillStyle = "rgba(0,0,0,.35)";                         // 窗口外压暗
+    cx.fillRect(0, 0, RW, wy); cx.fillRect(0, wy + W, RW, RH - wy - W); cx.fillRect(0, wy, wx, W); cx.fillRect(wx + W, wy, RW - wx - W, W);
+    for (const it of cur.items) if (it.kind === "scratch" && it.path) {   // 划痕脊线
+      cx.strokeStyle = it.id === hover ? "#fff" : "rgba(255,255,255,.55)"; cx.lineWidth = (it.id === hover ? 2 : 1) * lw;
+      cx.beginPath(); it.path.forEach(([x, y], k) => { const [u, v] = toRegion(x, y); k ? cx.lineTo(u + .5, v + .5) : cx.moveTo(u + .5, v + .5); }); cx.stroke();
+    }
+    if (hover) { const it = itemById(hover); if (it && it.kind !== "scratch") { cx.fillStyle = "rgba(255,255,255,.55)"; for (const [x, y] of it.pixels) { const [u, v] = toRegion(x, y); cx.fillRect(u, v, 1, 1); } } }
+    cur.boxes.forEach((b, k) => { const [u0, v0] = toRegion(b[0], b[1]); cx.fillStyle = k === hoverBox ? "rgba(154,154,154,.6)" : "rgba(154,154,154,.4)"; cx.fillRect(u0, v0, b[2] - b[0], b[3] - b[1]); });
+    if (showSugg && right) drawSugg(cx, lw);
+  }
+  cx.strokeStyle = "#ffc800"; cx.lineWidth = 1.5 * lw; cx.strokeRect(wx, wy, W, W);
+  if (drawing) {                                               // 正在画的轨迹
+    cx.strokeStyle = "#ffc800"; cx.lineWidth = 1.5 * lw; cx.beginPath();
+    if (drawing.tool === "ignore") { const [a0, b0] = toRegion(...drawing.pts[0]), [a1, b1] = toRegion(...drawing.pts[drawing.pts.length - 1]); cx.rect(a0, b0, a1 - a0, b1 - b0); }
+    else { drawing.pts.forEach(([x, y], k) => { const [u, v] = toRegion(x, y); k ? cx.lineTo(u, v) : cx.moveTo(u, v); }); if (drawing.tool === "fragment") cx.closePath(); }
+    cx.stroke();
+  }
+  if (lineDraft) {                                             // 直线工具：已定折点 + 到光标的橡皮筋
+    const pts = mouse ? [...lineDraft.pts, mouse] : lineDraft.pts;
+    cx.strokeStyle = "#ffc800"; cx.lineWidth = 1.5 * lw; cx.setLineDash([6 * lw, 4 * lw]); cx.beginPath();
+    pts.forEach(([x, y], k) => { const [u, v] = toRegion(x, y); k ? cx.lineTo(u + .5, v + .5) : cx.moveTo(u + .5, v + .5); }); cx.stroke(); cx.setLineDash([]);
+    cx.fillStyle = "#ffc800"; for (const [x, y] of lineDraft.pts) { const [u, v] = toRegion(x, y); cx.fillRect(u - 2 * lw, v - 2 * lw, 4 * lw, 4 * lw); }
+  }
+  if (mouse) {                                                 // 同步十字光标
+    const [u, v] = toRegion(...mouse); const r = 8 * lw;
+    cx.strokeStyle = "rgba(0,220,255,.9)"; cx.lineWidth = lw; cx.beginPath();
+    cx.moveTo(u - 2*r, v); cx.lineTo(u - r/2, v); cx.moveTo(u + r/2, v); cx.lineTo(u + 2*r, v);
+    cx.moveTo(u, v - 2*r); cx.lineTo(u, v - r/2); cx.moveTo(u, v + r/2); cx.lineTo(u, v + 2*r); cx.stroke();
+  }
+}
+function drawSugg(cx, lw){
+  const taken = new Set(cur.items.filter(i => i.sid).map(i => i.sid));
+  cx.setLineDash([4 * lw, 3 * lw]); cx.lineWidth = lw;
+  for (const s of cur.sugg) {
+    if (taken.has(s.sid)) continue;
+    if (s.kind === "scratch") { cx.strokeStyle = "rgba(120,255,140,.8)"; for (const ln of s.lines) { cx.beginPath(); ln.forEach(([x, y], k) => { const [u, v] = toRegion(x, y); k ? cx.lineTo(u + .5, v + .5) : cx.moveTo(u + .5, v + .5); }); cx.stroke(); } }
+    else { cx.strokeStyle = "rgba(255,180,40,.85)"; const [u, v] = toRegion(...s.c); cx.beginPath(); cx.arc(u + .5, v + .5, s.r + 3, 0, 2 * Math.PI); cx.stroke(); }
+  }
+  cx.setLineDash([]);
+}
+function drawCtx(){
+  if (!ctxImg) return;
+  const k = 0.125; ctxX.setTransform(1, 0, 0, 1, 0, 0); ctxX.drawImage(ctxImg, 0, 0);
+  ctxX.strokeStyle = "#ffc800"; ctxX.lineWidth = 1.5; ctxX.strokeRect(cur.task.x0 * k, cur.task.y0 * k, cur.win * k, cur.win * k);
+  for (const it of cur.items) if (it.kind === "scratch" && it.path) {
+    ctxX.strokeStyle = it.id === hover ? "#ffffff" : "#3cdc5a"; ctxX.lineWidth = it.id === hover ? 2 : 1.2; ctxX.beginPath();
+    it.path.forEach(([x, y], j) => j ? ctxX.lineTo(x * k, y * k) : ctxX.moveTo(x * k, y * k)); ctxX.stroke();
+  }
+}
+function draw(){ if (!cur) return; drawPane(cxL, cvL, false); drawPane(cxR, cvR, true); drawCtx(); stats(); }
+function drawLoupe(){
+  if (!mouse) return; const [u, v] = toRegion(...mouse), r = 30;
+  loupe.imageSmoothingEnabled = false; loupe.fillStyle = "#000"; loupe.fillRect(0, 0, 240, 240);
+  loupe.drawImage(base, u - r, v - r, 2 * r, 2 * r, 0, 0, 240, 240);
+  loupe.strokeStyle = "rgba(0,220,255,.7)"; loupe.strokeRect(116, 116, 8, 8);
+}
+function stats(){
+  const n = {1: 0, 2: 0, 3: 0}; for (const it of cur.items) n[it.cls]++;
+  const ext = cur.items.filter(i => i.extended).length;
+  $("#stats").innerHTML = `划痕 ${n[1]}（其中追踪延长 ${ext}）· 斑点 ${n[2]} · 碎裂 ${n[3]} · 不计框 ${cur.boxes.length}<br>建议：划痕 ${cur.sugg.filter(s => s.kind === "scratch").length}、斑点 ${cur.sugg.filter(s => s.kind === "spot").length}，已采纳 ${new Set(cur.items.filter(i => i.sid).map(i => i.sid)).size}`;
+}
+
+// ── 拾取 ──
+function pickItem(x, y){
+  const [u0, v0] = toRegion(x, y), r = Math.max(2, Math.round(4 / view.s));
+  let best = 0, bd = 1e9;
+  for (let dv = -r; dv <= r; dv++) for (let du = -r; du <= r; du++) {
+    const u = Math.round(u0) + du, v = Math.round(v0) + dv; if (u < 0 || v < 0 || u >= RW || v >= RH) continue;
+    const id = imap[v * RW + u], d = du*du + dv*dv; if (id && d < bd) { bd = d; best = id; }
+  }
+  return best;
+}
+function pickBox(x, y){ return cur.boxes.findIndex(b => x >= b[0] && x <= b[2] && y >= b[1] && y <= b[3]); }
+function distSeg(p, a, b){ const dx = b[0]-a[0], dy = b[1]-a[1], L = dx*dx + dy*dy; let t = L ? ((p[0]-a[0])*dx + (p[1]-a[1])*dy) / L : 0; t = Math.max(0, Math.min(1, t)); return Math.hypot(p[0]-a[0]-t*dx, p[1]-a[1]-t*dy); }
+function pickSugg(x, y, kind){
+  const taken = new Set(cur.items.filter(i => i.sid).map(i => i.sid)), tol = Math.max(3, 7 / view.s);
+  let best = null, bd = 1e9;
+  for (const s of cur.sugg) {
+    if (s.kind !== kind || taken.has(s.sid)) continue;
+    let d = 1e9;
+    if (kind === "scratch") { for (const ln of s.lines) for (let k = 1; k < ln.length; k++) d = Math.min(d, distSeg([x, y], ln[k-1], ln[k])); }
+    else d = Math.max(0, Math.hypot(x - s.c[0], y - s.c[1]) - s.r);
+    if (d < tol && d < bd) { bd = d; best = s; }
+  }
+  return best;
+}
+
+// ── 生成标注 ──
+async function ridgeItem(pts, src, sid){
+  const r = await post("/api/ridge", {wid: cur.wid, pts});
+  return {cls: 1, kind: "scratch", src, sid, input: pts.map(p => p.map(v => Math.round(v * 10) / 10)), path: r.path, core: [0, r.path.length - 1], pixels: r.pixels};
+}
+async function acceptSugg(s){
+  if (s.kind === "scratch") { const its = await Promise.all(s.lines.filter(l => l.length >= 2).map(l => ridgeItem(l, "suggest", s.sid))); return its; }
+  const r = await post("/api/spot", {wid: cur.wid, x: s.c[0], y: s.c[1]});
+  return [{cls: 2, kind: "spot", src: "suggest", sid: s.sid, input: s.c, pixels: r.pixels}];
+}
+async function finishDrawing(d){
+  const pts = d.pts, first = pts[0], last = pts[pts.length - 1];
+  const len = pts.reduce((a, p, k) => k ? a + Math.hypot(p[0] - pts[k-1][0], p[1] - pts[k-1][1]) : 0, 0);
+  const click = len * view.s < 5;
+  busy = true;
+  try {
+    if (d.tool === "scratch") {
+      if (click) { const s = pickSugg(first[0], first[1], "scratch"); if (!s) { toast("划痕：请按住鼠标沿脊线拖动；单击只用于采纳虚线建议"); } else { const its = await acceptSugg(s); snapshot(); its.forEach(addItem); } }
+      else { const it = await ridgeItem(pts.filter((p, k) => k % 2 === 0 || k === pts.length - 1), "human"); snapshot(); addItem(it); }
+    } else if (d.tool === "spot") {
+      const s = pickSugg(first[0], first[1], "spot"), c = s ? s.c : last;
+      const r = await post("/api/spot", {wid: cur.wid, x: c[0], y: c[1]}); snapshot();
+      addItem({cls: 2, kind: "spot", src: s ? "suggest" : "human", sid: s ? s.sid : undefined, input: c.map(v => Math.round(v * 10) / 10), pixels: r.pixels});
+    } else if (d.tool === "fragment") {
+      if (pts.length < 3 || click) toast("碎裂：请按住鼠标圈出区域");
+      else { const r = await post("/api/fragment", {wid: cur.wid, poly: pts}); snapshot(); addItem({cls: 3, kind: "fragment", src: "human", input: pts.map(p => p.map(Math.round)), pixels: r.pixels}); }
+    } else if (d.tool === "ignore") {
+      if (click) toast("不计：请拉框");
+      else { snapshot(); cur.boxes.push([Math.min(first[0], last[0]), Math.min(first[1], last[1]), Math.max(first[0], last[0]), Math.max(first[1], last[1])].map(Math.round)); }
+    }
+  } catch (e) { toast("失败：" + e.message, 3500); }
+  busy = false; rebuild();
+}
+async function finishLine(){
+  const d = lineDraft; lineDraft = null;
+  if (!d || d.pts.length < 2) { draw(); return toast("直线至少需要起点和终点"); }
+  busy = true;
+  try {
+    const r = await post("/api/ridge", {wid: cur.wid, pts: d.pts, mode: "line"});
+    snapshot();
+    addItem({cls: 1, kind: "scratch", src: "human", mode: "line", input: d.pts.map(p => p.map(v => Math.round(v * 10) / 10)),
+             path: r.path, core: [0, r.path.length - 1], pixels: r.pixels});
+  } catch (e) { toast("直线失败：" + e.message, 3500); }
+  busy = false; rebuild();
+}
+async function acceptAll(){
+  const W = cur.win, x0 = cur.task.x0, y0 = cur.task.y0;
+  const taken = new Set(cur.items.filter(i => i.sid).map(i => i.sid));
+  const todo = cur.sugg.filter(s => !taken.has(s.sid) && s.bbox[2] >= x0 && s.bbox[0] <= x0 + W && s.bbox[3] >= y0 && s.bbox[1] <= y0 + W);
+  if (!todo.length) return toast("本窗没有未采纳的建议");
+  busy = true; toast(`正在采纳 ${todo.length} 条建议…`, 10000); snapshot();
+  try { for (let k = 0; k < todo.length; k += 8) { const res = await Promise.all(todo.slice(k, k + 8).map(acceptSugg)); res.flat().forEach(addItem); } toast(`已采纳 ${todo.length} 条建议，请逐一核对`, 2500); }
+  catch (e) { toast("采纳失败：" + e.message, 3500); }
+  busy = false; rebuild();
+}
+function nearestIdx(path, p){ let bi = 0, bd = 1e18; path.forEach((q, k) => { const d = (q[0]-p[0])**2 + (q[1]-p[1])**2; if (d < bd) { bd = d; bi = k; } }); return bi; }
+async function extend(it){
+  if (!it || it.kind !== "scratch") return toast("请把光标放在一条划痕上再按 E");
+  busy = true; toast("沿走向追踪中…", 5000);
+  try {
+    const old = it.path, r = await post("/api/extend", {wid: cur.wid, path: old});
+    snapshot();
+    const a = nearestIdx(r.path, old[it.core[0]]), b = nearestIdx(r.path, old[it.core[1]]);
+    it.path = r.path; it.pixels = r.pixels; it.core = [Math.min(a, b), Math.max(a, b)]; it.extended = true;
+    toast(r.added_px ? `延长约 ${r.added_px} 像素（${(r.added_px * 0.0068).toFixed(1)} mm），见右下整镜图；走错处按 T 截断` : "两端没有可追踪的延续", 3500);
+  } catch (e) { toast("追踪失败：" + e.message, 3500); }
+  busy = false; rebuild();
+}
+async function trim(it, p){
+  if (!it || it.kind !== "scratch") return toast("请把光标放在要截断的划痕位置再按 T");
+  const k = nearestIdx(it.path, p), [c0, c1] = it.core; let path, core;
+  if (k < c0) { path = it.path.slice(k); core = [c0 - k, c1 - k]; }
+  else if (k > c1) { path = it.path.slice(0, k + 1); core = [c0, c1]; }
+  else if (k - c0 < c1 - k) { path = it.path.slice(k); core = [0, c1 - k]; }
+  else { path = it.path.slice(0, k + 1); core = [c0, k]; }
+  if (path.length < 3) return toast("截断后太短");
+  busy = true;
+  try { const r = await post("/api/path_region", {wid: cur.wid, path}); snapshot(); it.path = r.path; it.pixels = r.pixels; it.core = [Math.min(core[0], r.path.length - 1), Math.min(core[1], r.path.length - 1)]; }
+  catch (e) { toast("截断失败：" + e.message, 3500); }
+  busy = false; rebuild();
+}
+
+// ── 鼠标 ──
+for (const cv of [cvL, cvR]) {
+  cv.addEventListener("contextmenu", ev => ev.preventDefault());
+  cv.addEventListener("mousedown", ev => {
+    if (!cur || busy) return;
+    if (ev.button === 2 || ev.button === 1) { pan = {x: ev.clientX, y: ev.clientY, vx: view.vx, vy: view.vy}; return; }
+    if (ev.button === 0 && tool !== "line") drawing = {tool, pts: [screenToLens(cv, ev)], cv};
+  });
+  cv.addEventListener("mousemove", ev => {
+    if (!cur) return;
+    mouse = screenToLens(cv, ev);
+    if (pan) { view.vx = pan.vx - (ev.clientX - pan.x) / view.s; view.vy = pan.vy - (ev.clientY - pan.y) / view.s; draw(); return; }
+    if (drawing) { const q = drawing.pts[drawing.pts.length - 1]; if (Math.hypot(mouse[0] - q[0], mouse[1] - q[1]) * view.s >= 3) drawing.pts.push(mouse); }
+    else { const h = pickItem(...mouse), hb = h ? -1 : pickBox(...mouse); if (h !== hover || hb !== hoverBox) { hover = h; hoverBox = hb; } }
+    draw(); drawLoupe();
+  });
+  cv.addEventListener("mouseleave", () => { mouse = null; draw(); });
+  cv.addEventListener("dblclick", ev => { if (tool === "line" && lineDraft) { ev.preventDefault(); finishLine(); } });
+  cv.addEventListener("wheel", ev => {
+    if (!cur) return; ev.preventDefault();
+    const r = cv.getBoundingClientRect(), sx = ev.clientX - r.left, sy = ev.clientY - r.top;
+    const ux = sx / view.s + view.vx, uy = sy / view.s + view.vy;
+    view.s = Math.min(16, Math.max(0.3, view.s * (ev.deltaY < 0 ? 1.2 : 1 / 1.2)));
+    view.vx = ux - sx / view.s; view.vy = uy - sy / view.s; draw();
+  }, {passive: false});
+}
+window.addEventListener("mouseup", ev => {
+  if (pan) { pan = null; return; }
+  if (tool === "line" && cur && !busy && ev.button === 0 && (ev.target === cvL || ev.target === cvR)) {
+    const p = screenToLens(ev.target, ev);
+    if (!lineDraft) { lineDraft = {pts: [p]}; draw(); return; }
+    const q = lineDraft.pts[lineDraft.pts.length - 1];
+    if (Math.hypot(p[0] - q[0], p[1] - q[1]) * view.s < 4) return;       // 双击的第二下不重复加点
+    lineDraft.pts.push(p);
+    if (!ev.shiftKey) finishLine(); else draw();
+    return;
+  }
+  if (!drawing || !cur) return;
+  const d = drawing; drawing = null;
+  if (ev.target === d.cv) d.pts.push(screenToLens(d.cv, ev));
+  finishDrawing(d);
+});
+
+// ── 键盘 ──
+async function save(status){
+  if (!cur || busy) return; busy = true;
+  const body = {status, items: cur.items, boxes: cur.boxes, reviewer: $("#who").value, note: $("#note").value,
+                seconds: Math.min((performance.now() - t0) / 1000, 1800)};
+  try { await api(`/api/window/${cur.wid}/save`, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)}); }
+  catch (e) { busy = false; toast("保存失败：" + e.message, 4000); return; }
+  busy = false; toast(status === "done" ? "已提交" : "已跳过", 800); gotoNext(cur.wid);
+}
+async function prev(){ const r = await (await api(`/api/prev?before=${cur ? cur.wid : ""}`)).json(); if (r.wid) open(r.wid); else toast("没有更早的已提交窗口"); }
+window.addEventListener("keydown", async ev => {
+  if (!cur || busy || ev.target.tagName === "INPUT" || ev.target.tagName === "SELECT") return;
+  const k = ev.key.toLowerCase();
+  if (k === " ") { ev.preventDefault(); if (!hideOv) { hideOv = true; draw(); } return; }
+  if (k === "1") return setTool("scratch");
+  if (k === "2") return setTool("spot");
+  if (k === "3") return setTool("fragment");
+  if (k === "4") return setTool("ignore");
+  if (k === "5") return setTool("line");
+  if (k === "escape") { drawing = null; lineDraft = null; draw(); return; }
+  if (k === "enter") { ev.preventDefault(); return lineDraft ? finishLine() : save("done"); }
+  if (k === "z") { ev.preventDefault(); return undo(); }
+  if (k === "x" || k === "delete" || k === "backspace") {
+    if (hover) { snapshot(); cur.items = cur.items.filter(i => i.id !== hover); hover = 0; rebuild(); }
+    else if (hoverBox >= 0) { snapshot(); cur.boxes.splice(hoverBox, 1); hoverBox = -1; draw(); }
+    return;
+  }
+  if (k === "e") { const it = itemById(hover) || [...cur.items].reverse().find(i => i.kind === "scratch"); return extend(it); }
+  if (k === "t") return trim(itemById(hover), mouse);
+  if (k === "a" && ev.shiftKey) return acceptAll();
+  if (k === "g") { showSugg = !showSugg; draw(); return toast(showSugg ? "显示算法建议" : "隐藏算法建议", 800); }
+  if (k === "o") { ovLeft = !ovLeft; draw(); return; }
+  if (k === "f") return fitView();
+  if (k === "v") { stretch = stretch === "a" ? "g" : "a"; const im = await loadImg(`/api/window/${cur.wid}/img.png?mode=${stretch}`); base.getContext("2d").drawImage(im, 0, 0); draw(); return toast(stretch === "a" ? "区域自适应拉伸" : "全局平方根拉伸", 900); }
+  if (k === "b") return prev();
+  if (k === "k") return save("skip");
+});
+window.addEventListener("keyup", ev => { if (ev.key === " " && hideOv) { hideOv = false; draw(); } });
+$("#bNext").onclick = () => save("done");
+$("#bSkip").onclick = () => save("skip");
+$("#bPrev").onclick = prev;
+const start = location.hash.slice(1);
+if (start) open(start).catch(() => gotoNext("")); else gotoNext("");
+</script></body></html>
