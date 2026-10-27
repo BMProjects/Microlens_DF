@@ -104,17 +104,20 @@ hr { border: 0; border-top: 1px solid #dbe2ea; margin: 28px 0; }
 </head>
 <body>
   <main class="page">
-    <nav class="doc-nav"><a href="index.html">文档总目录</a><a href="第二阶段分割算法开发与实验计划_20261025.md">Markdown 源文档</a><a href="deep-research-report.html">deep-research-report</a><a href="系统架构_模块化梳理_20260531.html">系统架构_模块化梳理_20260531</a></nav>
+    <nav class="doc-nav"><a href="index.html">文档总目录</a><a href="第二阶段分割算法开发与实验计划_20261025.md">Markdown 源文档</a><a href="deep-research-report.html">deep-research-report</a><a href="损伤区定义_光学功能依据_20261026.html">损伤区定义_光学功能依据_20261026</a><a href="系统架构_模块化梳理_20260531.html">系统架构_模块化梳理_20260531</a></nav>
     <div class="meta">自动渲染的 HTML 研究日志，适合继续补充图片、表格与结果对比图。</div>
     <h1>第二阶段智能识别开发与实验计划</h1>
-<p><strong>版本：</strong> v3.0（2026-10-25）　|　适用：离焦微结构镜片暗场缺陷识别第二阶段　|　目标：磨损识别准确率 ≥ 90%，并系统对比机器学习与传统图像算法</p>
-<p><strong>修订说明：</strong> v3.0 以“机器学习在复杂场景中的优势与根本逻辑”为第二阶段的基本逻辑，重写全部计划：系统流程统一为“导入图像 → 预处理 → 智能识别 → 几何/光学分析 → 综合评定”五部分；第二阶段的实验与开发集中在<strong>机器学习智能分割识别</strong>与<strong>几何/光学分析</strong>两部分，并对前期系统作相应改进；预处理问题已直接修正，生成标准输入图像 <code>output/dataset_v3</code>；取消信噪比图（Z 图），只做背景补偿，保留原始光强；五图试点结果见独立报告 <code>output/review/pilot5/pilot_report.html</code>。</p>
+<p><strong>版本：</strong> v3.3（2026-10-26）　|　适用：离焦微结构镜片暗场缺陷识别第二阶段　|　目标：分割识别准确率（像素准确率 PA）≥ 90%，并系统对比机器学习与传统图像算法</p>
+<p><strong>v3.3 修订说明（2026-10-26，开发者决定）：</strong> ① 选模不只看 mIoU，而按 PA、MPA、mIoU、FWIoU、缺陷类 Dice 的平均名次综合选择，并设缺陷类 IoU 否决条件（2.4 节）。② 模型选型改为“多个 SOTA 候选同协议复现 + 相互印证 + 在 nnU-Net 骨架上逐项叠加有效环节”的改进路线，并以公开玻璃划痕数据 MSD 作为第二基准（5.5 节）。③ 开发者开始人工审核。</p>
+<p><strong>v3.2 修订说明（2026-10-26，开发者决定）：</strong> ① 90% 指标采用语义分割通用定义（FCN 的像素准确率 PA，并必报 MPA、mIoU、FWIoU、分类别 IoU/Dice），取代 v3.1 的区域单元口径（2.4 节）。② 机器学习不限于完全无监督：出发点是数据少、多样性不足、标注繁杂，目标是在“方便的人工审核”下把识别准确率做到最高；路线 U 降为辅助（候选来源、预训练与自训练），主模型为以审核窗口稀疏标签 + trad_v2 伪标签训练的监督分割网络，选型见 5.5 节。③ 人工审核已开始：局域网标注服务 <code>scripts/annot_server.py</code>，划分 <code>output/annotation/splits_v1.json</code> 已冻结。</p>
+<p><strong>v3.1 修订说明（2026-10-26，开发者决定）：</strong> ① 90% 指标改为<strong>智能识别准确率</strong>，即分割算法正确识别的磨损缺陷区域占比，口径见 2.4 节；镜片等级评定降为系统的物理延伸功能，不再是 90% 指标的依据。② 原始数据无标注、人工标注成本高，第二阶段以“传统算法辅助人工审核”同时产出<strong>基准数据集</strong>和<strong>训练标签</strong>，并在同一数据上开发<strong>真正的无监督机器学习路线 U</strong>（训练不使用任何人工标签），工作逻辑与顺序重排见第九、十章，路线 U 见 5.4 节。③ 损伤区阈值 <em>f</em>&lt;sub&gt;min&lt;/sub&gt; = 0.35、<em>a</em>&lt;sub&gt;min&lt;/sub&gt; = 10% 暂按当前值执行，物理意义与待补论证见 <code>doc/损伤区定义_光学功能依据_20261026.md</code> 第 7 节；损伤区作为第④部分的分析输出，不进入识别指标。④ 雾度计标定暂不开展。⑤ 交叉续接的人工判读改为“两段是否同一条划痕”的盲判，工具为 <code>scripts/review_links.py</code>。</p>
+<p><strong>v3.0 修订说明：</strong> v3.0 以“机器学习在复杂场景中的优势与根本逻辑”为第二阶段的基本逻辑，重写全部计划：系统流程统一为“导入图像 → 预处理 → 智能识别 → 几何/光学分析 → 综合评定”五部分；第二阶段的实验与开发集中在<strong>机器学习智能分割识别</strong>与<strong>几何/光学分析</strong>两部分，并对前期系统作相应改进；预处理问题已直接修正，生成标准输入图像 <code>output/dataset_v3</code>；取消信噪比图（Z 图），只做背景补偿，保留原始光强；五图试点结果见独立报告 <code>output/review/pilot5/pilot_report.html</code>。</p>
 <p><strong>标注约定：</strong> 方括号编号 <code>[n]</code> 为文献来源；“项目实测”指本仓库已运行的统计或实验结果；“推断”或“工作假设”为尚待本计划实验验证的判断。</p>
 <hr />
 <h2>摘要</h2>
 <ol>
 <li><strong>基本逻辑。</strong> 磨损评级要测的是“缺陷个体”（每条划痕、每个斑点、每片碎裂区）的几何与分布，而暗场图像记录的是所有缺陷散射光的叠加。稀疏区里，物理规则就能把个体分开；交叠区里，只看局部亮度无法判断交叉点处是两条划痕还是一条分叉、一团亮区是碎裂还是密集划痕，这一逆问题在局部是不适定的，必须借助从数据中学到的形状先验与上下文。因此，机器学习放在“个体分解与语义判定”这一环，标准化、几何测量、分布统计与光学代理量由确定性算法完成，并以实体级指标证明机器学习优于传统方法。</li>
-<li><strong>两个并列目标。</strong> 一是镜片级磨损识别准确率 ≥ 90%（CNAS 公式 A = Σδᵢ/N，δᵢ 为镜片等级与基准一致）；二是在同一标准输入、同一评价基准上，系统测试与对比机器学习和传统算法在单条划痕完整性、交叉连续性、密集区斑点检出、碎裂界定、宽度与边缘形态、方向分布和光学代理量上的差异。</li>
+<li><strong>两个并列目标。</strong> 一是分割识别准确率 ≥ 90%（语义分割通用的像素准确率 PA，即 CNAS 公式 A = Σδᵢ/N 中 i 取像素；同时报告 MPA、mIoU 与分类别 IoU，见 2.4 节；镜片等级一致率为物理延伸功能的报告指标）；二是在同一标准输入、同一评价基准上，系统测试与对比机器学习和传统算法在单条划痕完整性、交叉连续性、密集区斑点检出、碎裂界定、宽度与边缘形态、方向分布和光学代理量上的差异。</li>
 <li><strong>系统五部分与第二阶段重点。</strong> 导入图像与综合评定沿用并改进前期系统；预处理已直接修正为标准输入图像；第二阶段的实验与开发集中在智能识别（机器学习分割）与几何/光学分析。</li>
 <li><strong>预处理已修正。</strong> 原 7/247 的“合格率”源于质检把缺陷像素算作背景。新流程逐图把背景补偿到 0、把离焦晕斑/宽模糊条纹/雾状底光分离为独立的弥散层、剔除沿边界的宽亮带（如 101l 的镜片边缘亮带），输出 dataset_v3；经核查，101l 的亮带并非配准偏差，配准结果与原流程一致。</li>
 <li><strong>评价可信。</strong> 以眼镜为单位划分（247 张来自 124 副眼镜，原划分存在左右片泄漏）；三个独立智能助手盲评分级、用户仲裁；实体级指标依靠合成交叠真值；测试集只用一次。</li>
@@ -132,7 +135,7 @@ hr { border: 0; border-top: 1px solid #dbe2ea; margin: 28px 0; }
 <hr />
 <h2>二、第二阶段目标与基本逻辑</h2>
 <h3>2.1 目标</h3>
-<table><thead><tr><th>目标</th><th>内容</th><th>衡量</th></tr></thead><tbody><tr><td>识别准确率</td><td>镜片级磨损等级与基准一致率 ≥ 90%</td><td>A = Σδᵢ/N 及 95% 置信区间（测试集约 60 张）</td></tr><tr><td>方法对比</td><td>在同一标准输入与基准上，系统测试机器学习与传统算法的差异</td><td>实体级、几何级、光学代理量与镜片级指标（第八章）</td></tr><tr><td>系统改进</td><td>前期系统与第二阶段分割、几何/光学分析对接</td><td>端到端流程可运行、可追溯（第十一章）</td></tr></tbody></table>
+<table><thead><tr><th>目标</th><th>内容</th><th>衡量</th></tr></thead><tbody><tr><td>识别准确率</td><td>测试窗口像素准确率 PA ≥ 90%</td><td>PA 及按眼镜分组自助法 95% 置信区间；MPA、mIoU、FWIoU、分类别 IoU/Dice 必报（2.4 节）</td></tr><tr><td>物理延伸</td><td>镜片等级、损伤区、分布与光学代理量</td><td>等级一致率等作为报告指标，不作为 90% 判据</td></tr><tr><td>方法对比</td><td>在同一标准输入与基准上，系统测试机器学习与传统算法的差异</td><td>实体级、几何级、光学代理量与镜片级指标（第八章）</td></tr><tr><td>系统改进</td><td>前期系统与第二阶段分割、几何/光学分析对接</td><td>端到端流程可运行、可追溯（第十一章）</td></tr></tbody></table>
 <h3>2.2 基本逻辑</h3>
 <ol>
 <li><strong>测量对象是缺陷个体，图像是散射光的叠加。</strong> 从叠加的亮度恢复个体是逆问题。</li>
@@ -142,8 +145,20 @@ hr { border: 0; border-top: 1px solid #dbe2ea; margin: 28px 0; }
 <li><strong>结论：</strong> 机器学习只放在局部规则不适定的位置，并在同一基准上证明其优于传统方法；在规则已足够的环节保留传统方法。</li>
 </ol>
 <h3>2.3 评价口径</h3>
-<table><thead><tr><th>层级</th><th>指标</th><th>参考来源</th></tr></thead><tbody><tr><td>镜片级（正式）</td><td>等级一致率 A 与 95% 置信区间</td><td>三助手盲评共识 + 用户仲裁（第九章）</td></tr><tr><td>实体级</td><td>单条划痕完整率、交叉连续率、密集区斑点召回、碎裂边界一致性、缺陷单元 F1</td><td>合成交叠真值（逐条已知）+ 评审锚点单元</td></tr><tr><td>几何级</td><td>长度、宽度、面积相对误差；方向分布误差；clDice</td><td>合成真值 + 锚点</td></tr><tr><td>光学代理量</td><td>散射积分、定向眩光指数、碎裂面积占比等的稳定性与等级相关性</td><td>共识等级（第六章）</td></tr></tbody></table>
-<p>现有基准的四个缺陷及对策：① N = 20 时 18/20 的 95% 区间为 68.3%–98.8%，扩为约 60 张后为 79.5%–96.2%；② 全库无 A 级、B 级仅 12 张，报告如实说明 A 级未验证；③ 原基准由带漏标的框推得，改用独立评审基准；④ 247 张来自 124 副眼镜，原划分把 30 副拆到 train/val 两侧（CNAS 20 张中 13 张的另一片在训练集），改为按眼镜分组划分。</p>
+<table><thead><tr><th>层级</th><th>指标</th><th>参考来源</th></tr></thead><tbody><tr><td>像素级（正式，v3.2）</td><td>PA（达标判据）、MPA、mIoU、FWIoU、分类别 IoU/Dice</td><td>冻结的人工审核窗口基准（第九章）</td></tr><tr><td>镜片级（物理延伸）</td><td>等级一致率与 95% 置信区间</td><td>评审共识等级（可后置）</td></tr><tr><td>实体级</td><td>单条划痕完整率、交叉连续率、密集区斑点召回、碎裂边界一致性、缺陷单元 F1</td><td>合成交叠真值（逐条已知）+ 评审锚点单元</td></tr><tr><td>几何级</td><td>长度、宽度、面积相对误差；方向分布误差；clDice</td><td>合成真值 + 锚点</td></tr><tr><td>光学代理量</td><td>散射积分、定向眩光指数、碎裂面积占比等的稳定性与等级相关性</td><td>共识等级（第六章）</td></tr></tbody></table>
+<h3>2.4 分割识别准确率的定义（v3.2，采用语义分割通用定义）</h3>
+<p>开发者决定（2026-10-26）：90% 指标采用机器学习论文中语义分割的通用定义，以满足 GB/T 25000.51（ISO/IEC 25051）测试对指标可追溯、无歧义的要求，不自定义区域单元。</p>
+<p><strong>定义（Long, Shelhamer, Darrell, FCN [47]，语义分割评测的标准写法）：</strong> 设 <em>n</em>&lt;sub&gt;ij&lt;/sub&gt; 为基准类别 <em>i</em>、预测为类别 <em>j</em> 的像素数，<em>n</em>&lt;sub&gt;cl&lt;/sub&gt; 为类别数，<em>t</em>&lt;sub&gt;i&lt;/sub&gt; = Σ&lt;sub&gt;j&lt;/sub&gt; <em>n</em>&lt;sub&gt;ij&lt;/sub&gt; 为类别 <em>i</em> 的像素总数，则</p>
+<table><thead><tr><th>指标</th><th>公式</th><th>在本项目中的角色</th></tr></thead><tbody><tr><td>像素准确率 PA</td><td>Σ&lt;sub&gt;i&lt;/sub&gt; <em>n</em>&lt;sub&gt;ii&lt;/sub&gt; / Σ&lt;sub&gt;i&lt;/sub&gt; <em>t</em>&lt;sub&gt;i&lt;/sub&gt;</td><td><strong>正式指标“分割识别准确率”，阈值 90%</strong></td></tr><tr><td>平均像素准确率 MPA</td><td>(1/<em>n</em>&lt;sub&gt;cl&lt;/sub&gt;) Σ&lt;sub&gt;i&lt;/sub&gt; <em>n</em>&lt;sub&gt;ii&lt;/sub&gt; / <em>t</em>&lt;sub&gt;i&lt;/sub&gt;</td><td>必报，反映各类召回</td></tr><tr><td>平均交并比 mIoU</td><td>(1/<em>n</em>&lt;sub&gt;cl&lt;/sub&gt;) Σ&lt;sub&gt;i&lt;/sub&gt; <em>n</em>&lt;sub&gt;ii&lt;/sub&gt; / (<em>t</em>&lt;sub&gt;i&lt;/sub&gt; + Σ&lt;sub&gt;j&lt;/sub&gt; <em>n</em>&lt;sub&gt;ji&lt;/sub&gt; − <em>n</em>&lt;sub&gt;ii&lt;/sub&gt;)</td><td>必报，选模型的主排序指标</td></tr><tr><td>频率加权交并比 FWIoU</td><td>(Σ&lt;sub&gt;k&lt;/sub&gt; <em>t</em>&lt;sub&gt;k&lt;/sub&gt;)&lt;sup&gt;−1&lt;/sup&gt; Σ&lt;sub&gt;i&lt;/sub&gt; <em>t</em>&lt;sub&gt;i&lt;/sub&gt; <em>n</em>&lt;sub&gt;ii&lt;/sub&gt; / (<em>t</em>&lt;sub&gt;i&lt;/sub&gt; + Σ&lt;sub&gt;j&lt;/sub&gt; <em>n</em>&lt;sub&gt;ji&lt;/sub&gt; − <em>n</em>&lt;sub&gt;ii&lt;/sub&gt;)</td><td>必报</td></tr><tr><td>分类别 IoU、Dice</td><td>同上，逐类</td><td>必报（划痕、斑点、碎裂）</td></tr></tbody></table>
+<ul>
+<li><strong>类别</strong>：背景、划痕、斑点、碎裂（<em>n</em>&lt;sub&gt;cl&lt;/sub&gt; = 4）。“不计”像素（标签 255，含有效区外、审核标为不计的区域与“待确认”像素）不参与统计，与 Cityscapes 等基准的 ignore 约定一致 [48]。</li>
+<li><strong>与 CNAS 公式的对应</strong>：PA 正是大纲 6.3.1 的 A = Σδᵢ/N，其中 i 为测试集中参与统计的像素，δᵢ = 1 当且仅当预测类别等于基准类别，N 为参与统计的像素总数。附录 B.2 写入上表公式即可，无需自定义规则。</li>
+<li><strong>测试单元</strong>：测试集由冻结的审核窗口（512×512，每片测试镜片 6 个，按中央区/内环/外环分层随机抽取）组成；窗口位置在审核前生成并冻结。</li>
+<li><strong>必须同时报告其余指标的原因</strong>：暗场图像中背景像素占绝大多数，PA 受类别不平衡影响，全部预测为背景也能得到很高的 PA。图像分析指标共识（Metrics Reloaded [49]、指标陷阱 [50]）明确把“忽视类别不平衡”列为主要陷阱。因此正式报告中 PA 与 MPA、mIoU、FWIoU、分类别 IoU/Dice 并列，并给出“全部预测为背景”时的 PA 作为参照，防止验收时被质疑指标虚高。</li>
+<li><strong>综合选模规则（开发者决定）</strong>：在调参集上，PA、MPA、mIoU、FWIoU、缺陷类平均 Dice 五项分别排名，取平均名次最优者；平均名次相同时比较 mIoU。另设否决条件：任一缺陷类别（划痕、斑点、碎裂）的 IoU 比当前基线低 2 个百分点以上的方案不入选。名次差异是否显著，用按眼镜分组的配对自助法检验。</li>
+<li>2.4 节 v3.1 的“区域单元”口径作废。</li>
+</ul>
+<p>现有基准的四个缺陷及对策（v3.0 镜片级口径，保留供物理延伸功能使用）：① N = 20 时 18/20 的 95% 区间为 68.3%–98.8%，扩为约 60 张后为 79.5%–96.2%；② 全库无 A 级、B 级仅 12 张，报告如实说明 A 级未验证；③ 原基准由带漏标的框推得，改用独立评审基准；④ 247 张来自 124 副眼镜，原划分把 30 副拆到 train/val 两侧（CNAS 20 张中 13 张的另一片在训练集），改为按眼镜分组划分。</p>
 <hr />
 <h2>三、系统总体流程</h2>
 <pre><code>① 导入图像 ─→ ② 预处理 ─→ ③ 智能识别 ─→ ④ 几何/光学分析 ─→ ⑤ 综合评定
@@ -187,11 +202,53 @@ hr { border: 0; border-top: 1px solid #dbe2ea; margin: 28px 0; }
 <li><strong>通用局限。</strong> 召回与精度不可兼得，Hessian 类滤波在交叉与分叉处响应弱 [7]，传统方法在复杂纹理、噪声与光照变化下不稳定 [8]，暗场弱划痕与背景在灰度上重叠，单靠阈值无法分离 [9]，裂缝分割研究亦以传统方法难以跨场景泛化为引入深度学习的动机 [12]。</li>
 </ol>
 <h3>5.2 三条识别路线</h3>
-<table><thead><tr><th>路线</th><th>组成</th><th>定位</th></tr></thead><tbody><tr><td>R0 传统</td><td>以 k·σ 为阈值的迟滞分割、多尺度线状/斑状增强与方向场、形态规则分类、骨架交叉配对</td><td>完整基线；可解释、无需训练</td></tr><tr><td>R1 传统候选 + 机器学习判别</td><td>R0 候选单元 + 多尺度上下文补丁 → 分类器（DINOv2 冻结特征 [20] + 轻量分类头）判定“拒绝/划痕/斑点/碎裂”</td><td>度量机器学习在语义判别（剔除背景结构与误检、定类）上的贡献</td></tr><tr><td>R2 物理先验分割</td><td>输入 [标准图, 线状响应, cos2θ, sin2θ, 斑状响应, r/R]；三个输出头：多标签语义、K 方向中心线（K = 12）、碎裂区域概率</td><td>度量机器学习在个体分解（穿越交叉、密集区斑点、碎裂界定、弱段连续）上的贡献</td></tr><tr><td>U 无监督（辅助）</td><td>正常块建模的异常热图（PatchCore [21]、EfficientAD [22]、Dinomaly [23]、AnomalyDINO [24]）</td><td>自动标注的独立证据；“大图小缺陷”场景仍困难 [25]</td></tr></tbody></table>
+<table><thead><tr><th>路线</th><th>组成</th><th>定位</th></tr></thead><tbody><tr><td>R0 传统</td><td>以 k·σ 为阈值的迟滞分割、多尺度线状/斑状增强与方向场、形态规则分类、骨架交叉配对</td><td>完整基线；可解释、无需训练</td></tr><tr><td>R1 传统候选 + 机器学习判别</td><td>R0 候选单元 + 多尺度上下文补丁 → 分类器（DINOv2 冻结特征 [20] + 轻量分类头）判定“拒绝/划痕/斑点/碎裂”</td><td>度量机器学习在语义判别（剔除背景结构与误检、定类）上的贡献</td></tr><tr><td>R2 物理先验分割</td><td>输入 [标准图, 线状响应, cos2θ, sin2θ, 斑状响应, r/R]；三个输出头：多标签语义、K 方向中心线（K = 12）、碎裂区域概率</td><td>度量机器学习在个体分解（穿越交叉、密集区斑点、碎裂界定、弱段连续）上的贡献</td></tr><tr><td>U 无监督机器学习（v3.1 升为主线之一）</td><td>训练不使用任何人工标签：物理合成监督 + 真实图像自训练 + 免训练异常热图（5.4 节）</td><td>度量“不付人工标注成本”时机器学习能达到的识别准确率；与 R0、R2 同基准对比</td></tr></tbody></table>
 <p>R2 的关键设计是<strong>多方向分解</strong>：交叉点处两个方向通道同时为高，后处理在各方向通道内分别追踪，划痕可连续穿过交叉点；多标签语义允许同一位置既是划痕又是斑点；碎裂作为区域级类别，由评审共识标定，并给出局部方向熵、碎片长度分布、填充率等可解释描述子。网络族选 U-Net/FPN 与 HRNet 类结构，对照 SegFormer；中心线头加入 clDice [13]。暗场光学元件缺陷研究普遍采用 U-Net、注意力融合网络与改进检测网络处理弱划痕 [9][10][11]。</p>
 <h3>5.3 标签构建（不依赖第一阶段检测框）</h3>
 <table><thead><tr><th>步骤</th><th>做法</th></tr></thead><tbody><tr><td>候选与评审单元</td><td>R0 输出候选单元，三助手核查（第九章 T2），用户仲裁</td></tr><tr><td>基础模型精修</td><td>以候选点与外接框提示 SAM 2/SAM 3 [14][15][16]；其对细、低对比划痕易给出偏移或偏大的 mask [17][18]，先做参数高效微调 [19]，mask 须有图像证据支持</td></tr><tr><td>概率融合</td><td>STAPLE 融合 R0、SAM、R2 迭代输出与异常热图，估计各来源可靠度 [27]；不确定像素训练时忽略</td></tr><tr><td>自训练</td><td>教师-学生 [28] 与弱-强一致性 [29]，含噪标签策略 [26]；每轮以锚点集为门槛</td></tr><tr><td>合成交叠真值</td><td>在真实图像无缺陷背景区，以原始计数尺度渲染多条长划痕交叠、碎裂区叠加小斑点等场景，逐条、逐个已知</td></tr></tbody></table>
 <p>框监督方法 BoxInst [30] 依赖第一阶段框标注，不作主线。</p>
+<h3>5.4 无监督机器学习路线 U（v3.1）</h3>
+<p><strong>定义。</strong> 路线 U 的模型训练不使用任何人工标签；监督信号只来自三处：图像自身（自监督特征、样本间互评）、物理合成（已知真值的合成缺陷）、传统算法输出（作为含噪伪标签）。人工审核基准只用于评价与模型选择（锚点/调参集），测试集只用一次。</p>
+<p><strong>从前期实验得到的约束（项目实测）：</strong></p>
+<table><thead><tr><th>前期结果</th><th>对路线 U 的含义</th></tr></thead><tbody><tr><td>第一阶段分割（FPN/HRNet-OCR/SegFormer，以 YOLO 框内弱掩膜训练）只能给出损失值，无可信评价；框内弱标签漏标严重</td><td>伪标签来源的质量决定上限；不使用检测框派生标签</td></tr><tr><td>Phase 3B 漏检分析：漏检集中在低对比图像（像素标准差 2.4 对正常 8.9），属域偏移，改检测头无效</td><td>合成数据须覆盖低对比、低信噪比范围；网络输入保留原始计数（÷255），另以 k·σ 归一化通道作消融</td></tr><tr><td>trad_v2 消融：最大收益来自去误检（斑点各向同性、两半线检测）与长尺度弱划痕层；剩余问题是交叉处错拆（目视约 8/12）、待确认碎片 4%–8%、碎裂定义对阈值敏感</td><td>机器学习的预期收益正好在这三处：交叉连续性、弱线连续性、斑点/亮交叉点/碎裂的语义判别</td></tr><tr><td>三助手试点：划痕网格一致性高（Jaccard 0.97），斑点、碎裂两两 Jaccard 仅 0.36、0.12</td><td>斑点、碎裂的语义本身定义不稳，须给出像素级可操作定义；无监督语义发现（U4）可辅助定义</td></tr><tr><td>dataset_v3：背景 ≈ 0、原始计数、σ 中位 0.91；前景占 ROI 0.8%–22%</td><td>在“图块”层面背景始终占多数，样本间互评、记忆库类方法的前提成立；但单张镜片并不存在“无缺陷正常样本”</td></tr></tbody></table>
+<p><strong>数据特点带来的关键条件 [推断，U2 第一步验证]：</strong> 暗场成像只收集散射光，宽带照明下不同缺陷的散射近似非相干叠加，相机在饱和以下近似线性，因此交叠处的像素值 ≈ 各缺陷单独成像值之和 + 噪声。若成立，把真实孤立划痕的像素“加”到真实无缺陷背景上，得到的交叉、密集场景在物理上是逼真的，并且逐条真值已知。验证方法：在孤立交叉处比较交叉点亮度与两条线剖面之和，统计饱和像素占比。</p>
+<p><strong>四个组成部分：</strong></p>
+<table><thead><tr><th>编号</th><th>方法</th><th>输入/监督</th><th>产出与用途</th><th>文献依据</th></tr></thead><tbody><tr><td>U1 免训练异常热图</td><td>记忆库/样本互评：训练集全部图块构建记忆库，按 FUN-AD/SoftPatch 思路剔除受污染图块；DINOv3 或宽残差网络浅层特征，图块 2–4 倍上采样以适应 2–5 像素宽的划痕</td><td>无标签</td><td>与 trad_v2 <strong>独立</strong>的候选证据；用于基准候选并集（第九章）、发现离焦残余/边缘结构等干扰</td><td>MuSc [33]、MuSc-V2 [34]、FUN-AD [35]、SuperADD [36]、DINOv3 [37]、PatchCore [21]</td></tr><tr><td>U2 物理合成监督</td><td>① 从 trad_v2 高置信孤立实例中“剪”下真实划痕/斑点（保留原始剖面），按非相干叠加贴到真实背景区；② 程序化生成（长度、宽度、曲率、走向、亮度、模糊的分布取自 trad_v2 训练集统计，含低对比段）；③ 场景：长划痕多重交叉、平行密集族、碎裂区 + 斑点、划痕上的亮点；④ 干扰负样本：弥散层残余、边缘亮带</td><td>合成真值（逐条、逐个已知）</td><td>训练 R2 结构网络（多标签语义 + K 方向中心线 + 碎裂），并作为实体级评价（单条完整率、交叉连续率）的真值</td><td>DRAEM [38]、异常合成综述 [39]、合成裂缝训练 [41][42]、程序化划痕合成 [44]</td></tr><tr><td>U3 真实图像自训练</td><td>以 U2 模型为教师，在训练集真实图像上生成伪标签；与 trad_v2 一致的像素作为确信标签，不一致像素忽略；学生加强增广（弱-强一致性、Noisy Student），中心线头用 clDice/骨架召回损失；迭代 2–3 轮，每轮用锚点集把关</td><td>无人工标签</td><td>消除合成-真实域差；路线 U 的最终模型</td><td>Mean Teacher [28]、UniMatch [29]、Noisy Student [43]、clDice [13]、Skeleton Recall [40]</td></tr><tr><td>U4 无监督语义发现（可选）</td><td>对候选单元（trad_v2 实例、U1 高分区）提取 DINOv3 多尺度特征，层次聚类</td><td>无标签</td><td>发现斑点/亮交叉点/碎片/干扰等自然类别；人工只需给聚类命名，用于完善类别定义与审核分组</td><td>INSID3（DINOv3 聚类）[45]</td></tr></tbody></table>
+<p><strong>评价与对比。</strong> U1、U3 与 R0（trad_v2）、R2（人工修正标签参与训练的版本）在同一基准上报告 A、P、分类别 A 与实体级指标。若路线 U 达到 R2 的水平，说明人工标注主要用于评价而非训练；若差距明显，差距即为人工标注的价值，如实报告。文献 [46] 采用加权多尺度线检测加断裂重连处理暗场弱划痕，与 trad_v2 思路相近，可作为 R0 的外部参照。</p>
+<h3>5.5 分割模型选型与改进路线（v3.3）</h3>
+<p><strong>出发点（开发者决定）：</strong> 数据量小（247 片 / 124 副眼镜）、多样性有限、逐像素标注繁杂，目标是在方便的人工审核下把分割识别准确率做到最高。选型原则：① 同时纳入若干当前 SOTA 方法作为候选，在<strong>同一划分、同一训练预算、同一指标</strong>下复现；② 候选覆盖不同的设计假设，使结果可以相互印证；③ 从有效的环节中组合出改进方法，要求它在本项目数据和公开玻璃划痕数据（MSD）上都达到或超过复现的最强基线。</p>
+<h4>5.5.1 本数据对模型的要求</h4>
+<table><thead><tr><th>数据特点</th><th>对模型的要求</th></tr></thead><tbody><tr><td>划痕宽 2–5 像素、弱段接近噪声，交叉密集</td><td>全分辨率输入，解码器保留 1/1–1/2 尺度；对细长、弯曲结构有利的感受野；连通性损失</td></tr><tr><td>单张 3000×4096，镜片数少但像素多</td><td>图块训练、强几何增广；按眼镜分组交叉验证</td></tr><tr><td>人工标签只覆盖审核窗口，其余为含噪伪标签</td><td>支持“不计”标签的部分损失</td></tr><tr><td>输入保留原始计数（背景 ≈ 0，÷255 固定缩放）</td><td>归一化方式可设为固定缩放</td></tr><tr><td>斑点/碎裂/干扰的语义区分依赖上下文，样本少</td><td>大规模预训练特征有潜在收益</td></tr><tr><td>结果须送第三方测试</td><td>开源、可复现、推理确定</td></tr></tbody></table>
+<h4>5.5.2 候选方法（均有公开代码）</h4>
+<table><thead><tr><th>组</th><th>方法</th><th>设计假设</th><th>证据</th><th>角色</th></tr></thead><tbody><tr><td>A 强基线</td><td><strong>nnU-Net v2 ResEnc-L</strong> [51]</td><td>训练配方与高分辨率 CNN 已足够</td><td>MICCAI 2024 复核：严格验证下优于近年 Transformer/Mamba 方法；原生 ignore 标签 [52]</td><td>主基线、改进方法的骨架</td></tr><tr><td>B 细长结构</td><td><strong>DSCNet</strong>（动态蛇形卷积，ICCV 2023）[56]</td><td>沿结构弯曲的可变形卷积更利于细长、弯曲目标</td><td>视网膜血管、道路上连续性优于对比方法</td><td>候选</td></tr><tr><td>B 细长结构</td><td><strong>CSWinUNETR</strong>（MICCAI 2026）[57]</td><td>十字条带注意力 + 蛇形卷积捕捉长程细结构</td><td>四个细结构基准上不用拓扑损失即优于前人</td><td>候选</td></tr><tr><td>C 裂缝专用</td><td><strong>SCSegamba</strong>（CVPR 2025）[53]</td><td>结构感知扫描的视觉 Mamba，轻量</td><td>细裂缝数据集 F1/mIoU 领先；跨域研究中监督方法平均最优之一 [55]</td><td>候选</td></tr><tr><td>D 预训练大模型</td><td><strong>SAM2-UNet</strong> [58]</td><td>SAM2 Hiera 编码器 + U 形解码器 + 适配器，小样本下迁移好</td><td>18 个数据集上优于专门方法（自然、医学图像）</td><td>候选</td></tr><tr><td>D 预训练大模型</td><td><strong>DINOv3 + 高分辨率细节分支</strong> [37]</td><td>冻结 DINOv3 提供语义，全分辨率 CNN 分支补细节</td><td>冻结 DINOv3 + 轻量可训练适配器已用于少标注血管分割 [59]；DINOv3 图块 16 像素，因此另加全分辨率细节分支（本项目设计，属推断）</td><td>候选（需自行组装）</td></tr><tr><td>E 工业缺陷轻量</td><td><strong>DSGNet</strong> [60]</td><td>极轻量（0.49M）工业表面缺陷分割</td><td>MSD 上报告 mIoU 91.61%</td><td>MSD 对照基准</td></tr><tr><td>F 前期方法</td><td>FPN-R34、HRNet-OCR-W18</td><td>—</td><td>前期源域 MSD：0.879、0.866（自定划分与类别合并，不可与论文直接比较）</td><td>对照</td></tr><tr><td>—</td><td>SegFormer-B2、SAM 交互式分割、无监督异常分割</td><td>—</td><td>前期 0.731；细线偏移；MVTec AD 2 分割 F1 约 0.55–0.63</td><td>不作候选</td></tr></tbody></table>
+<p>各组相互印证的方式：若 B、C 组在划痕 IoU 和连通性上稳定优于 A，说明“细长感受野”是有效环节；若 D 组在斑点/碎裂 IoU 上占优，说明“预训练语义”有效；若 A 加骨架召回损失就追平 B、C，说明收益主要来自损失而非结构。每个结论都在本项目数据与 MSD 上分别检验，两处一致才采纳。</p>
+<h4>5.5.3 改进方法（暂名 DF-Seg）：在 A 骨架上逐项叠加经验证有效的环节</h4>
+<table><thead><tr><th>编号</th><th>环节</th><th>来源</th><th>是否依赖暗场物理</th></tr></thead><tbody><tr><td>M0</td><td>nnU-Net ResEnc-L 骨架与训练配方，ignore 标签，5 折集成</td><td>[51][52]</td><td>否</td></tr><tr><td>M1</td><td>骨架召回损失（划痕类）</td><td>[40][54]</td><td>否</td></tr><tr><td>M2</td><td>高分辨率解码段换为蛇形/条带卷积块</td><td>[56][57]，SCSegamba 扫描思想 [53]</td><td>否</td></tr><tr><td>M3</td><td>低分辨率段融合冻结的 DINOv3 或 SAM2 Hiera 特征</td><td>[37][58][59]</td><td>否</td></tr><tr><td>M4</td><td>物理先验输入通道：多方向线响应、走向场 cos2θ/sin2θ、k·σ 归一化强度（来自 trad_v2 前端）</td><td>本项目 R2 设计</td><td>部分（线响应、走向场通用；σ 归一化依赖背景 ≈ 0）</td></tr><tr><td>M5</td><td>训练数据：审核窗口标签 + trad_v2 伪标签（待确认为 ignore）+ 非相干叠加合成交叉（U2）</td><td>本项目</td><td>是</td></tr></tbody></table>
+<p>逐项消融：每加一项，在调参集与 MSD 验证集上按 2.4 节综合规则比较，显著才保留。最终方法在两个数据集的测试集上各评估一次。</p>
+<h4>5.5.4 公开数据基准（MSD）</h4>
+<ul>
+<li><strong>数据</strong>：MSD（北大，手机玻璃盖板，1920×1080，油污/划痕/污渍各 400 张，像素级标注）[61]；本地 <code>/home/bm/Data/MSD</code>。前期使用的是自定的 960/240 划分，并且把油污和污渍合并成了一类，与论文口径不同，<strong>不能用于与论文比较</strong>。</li>
+<li><strong>协议</strong>：官方只说明按 6:2:2 随机划分，未提供划分文件。本项目按固定随机种子生成 6:2:2 划分并公开划分文件，保留原始四类（背景、油污、划痕、污渍），报告 2.4 节全部指标。</li>
+<li><strong>SOTA 判定</strong>：以<strong>同一划分下复现</strong>的各候选为准，论文报告值（如 DSGNet 91.61% mIoU）只作参照并注明划分不同。另报告划痕类 IoU/Dice，因为它最接近本项目任务。</li>
+<li><strong>可选的细结构泛化检验</strong>：DeepCrack 或 CrackTree260 等公开裂缝数据集（SCSegamba、DSCNet 的常用基准），用于检验 M1–M2 的收益是否具有普遍性。</li>
+</ul>
+<h4>5.5.4b 公开数据与权重的实际情况（2026-10-26 核实）</h4>
+<ul>
+<li><strong>MSD</strong>：已按 p622 划分（每类 240/80/80，种子 20261026）转换，保留四类；缺陷像素占比中位数：油污 1.3%、划痕 0.33%、污渍 0.06%，PA 天然接近 99.5%，比较以 mIoU 与分类别 IoU 为主。数据与划分：<code>output/segbench/data/msd/</code>。</li>
+<li><strong>DSGNet 报告值的协议</strong>：官方代码将图像缩放到 640×640、90/10 随机划分、取验证集最佳 epoch 的 mIoU（无独立测试集）。因此其 91.61% 与本项目“全分辨率、测试集只评一次”的协议不可直接比较；两种协议都会复现并分别报告。</li>
+<li><strong>SSGD</strong>：本地 2504 张、3914 个标注，<strong>全部为轴对齐矩形框</strong>（无像素掩膜），自带 5 折划分。只能用于“掩膜转框”的检测级旁证（AP50），不能计算 PA/mIoU。</li>
+<li><strong>预训练权重</strong>：SAM3（sam3.pt 与 HF 格式）、DINOv3 ViT-L/16 与 ConvNeXt-Base（LVD-1689M）从 ModelScope 的 facebook 组织仓库下载，附原始 LICENSE（DINOv3 License、SAM License，均非 Apache-2.0，商用前须核对条款），SHA256 记录于 <code>output/segbench/weights/SHA256SUMS</code>。</li>
+<li><strong>代码</strong>：统一训练评测 <code>scripts/segbench/train.py</code>、模型注册 <code>scripts/segbench/models.py</code>、nnU-Net 适配 <code>scripts/segbench/nnunet_msd.py</code>、指标 <code>src/darkfield_defects/eval/seg_metrics.py</code>；第三方仓库版本见 <code>output/segbench/repos_versions.txt</code>。</li>
+<li><strong>适配状态</strong>：UNet-R34、FPN-R34、DSGNet、DSCNet、DINOv3-UNet（ConvNeXt-B + 全分辨率细节分支）、nnU-Net ResEnc-M 已接入并通过冒烟测试，MSD 正式训练队列已启动；SAM3/SAM2-UNet、CSWinUNETR 需补依赖（hydra/omegaconf、monai 等）；SCSegamba 依赖 mamba_ssm CUDA 算子，本机仅有 CUDA 13 编译器而 torch 为 cu128，编译可能失败，待单独处理。</li>
+</ul>
+<h4>5.5.5 实验顺序</h4>
+<ol>
+<li><strong>P0（不依赖人工标注，可立即开始）</strong>：生成 MSD 6:2:2 固定划分；在 MSD 上复现 A、B、C、D、E 各候选（固定训练预算），得到公开基准表。</li>
+<li><strong>P1（调参窗口审完 + 训练窗口约 150 个后）</strong>：A–D 在本项目数据上的同协议比较。</li>
+<li><strong>P2</strong>：DF-Seg 按 M1→M5 逐项消融，在本项目数据与 MSD 上同时检验。</li>
+<li><strong>P3</strong>：管线冻结后，本项目测试集与 MSD 测试集各评估一次。</li>
+<li>训练窗口按“模型与 trad_v2 分歧区优先”继续主动审核（K4），每轮标签更新后重跑 P2 的最优配置。</li>
+</ol>
 <hr />
 <h2>六、几何/光学分析</h2>
 <h3>6.1 单条缺陷几何</h3>
@@ -213,34 +270,53 @@ hr { border: 0; border-top: 1px solid #dbe2ea; margin: 28px 0; }
 <h2>八、机器学习与传统算法的对比实验设计（第二阶段核心）</h2>
 <h3>8.1 对比矩阵</h3>
 <table><thead><tr><th>场景层</th><th>典型样本</th><th>主要指标</th><th>真值来源</th></tr></thead><tbody><tr><td>S-稀疏</td><td>孤立划痕、少量斑点（如 108l）</td><td>缺陷单元 F1、宽度误差、斑点召回</td><td>锚点单元、合成</td></tr><tr><td>S-交叠</td><td>多条长划痕交叉（如 76r）</td><td>单条划痕完整率、交叉连续率、长度与条数误差、方向分布误差</td><td>合成交叠（逐条已知）</td></tr><tr><td>S-碎裂</td><td>碎裂区 + 点缀斑点（如 72l）</td><td>碎裂边界与共识一致性、碎裂内斑点召回、面积稳定性</td><td>共识单元、合成</td></tr><tr><td>S-弱划痕</td><td>低对比细线</td><td>弱段召回、断裂率</td><td>合成、锚点</td></tr><tr><td>S-干扰</td><td>离焦残余、边缘结构</td><td>误检率</td><td>锚点（评审标注的非缺陷）</td></tr><tr><td>镜片级</td><td>测试集约 60 张</td><td>等级一致率 A、光学代理量与等级相关性</td><td>共识等级</td></tr></tbody></table>
-<p>参评方法：R0、R1、R2、R2 + R1、第一阶段检测模型（在新划分上重训，作对照）。</p>
+<p>参评方法：R0、R1、R2、R2 + R1、U1、U3（路线 U）、第一阶段检测模型（在新划分上重训，作对照）。v3.1 起，各层级之上增加区域级识别准确率 A 与区域精确率 P（2.4 节）作为正式指标。</p>
 <h3>8.2 待检验假设</h3>
 <table><thead><tr><th>编号</th><th>假设</th><th>判据</th></tr></thead><tbody><tr><td>H1</td><td>R2 在 S-交叠上的单条划痕完整率与交叉连续率显著高于 R0</td><td>合成真值，按眼镜分组自助法置信区间</td></tr><tr><td>H2</td><td>R1/R2 在 S-碎裂上的碎裂边界与共识一致性高于 R0，且对阈值不敏感</td><td>共识单元 Jaccard</td></tr><tr><td>H3</td><td>多标签语义使 S-碎裂、S-交叠中的斑点召回显著高于 R0</td><td>合成斑点</td></tr><tr><td>H4</td><td>R1 显著降低 S-干扰误检（传统斑点格仅 27%、碎裂格仅 12% 被助手多数认可）</td><td>锚点</td></tr><tr><td>H5</td><td>孤立缺陷上传统剖面测宽不劣于机器学习</td><td>合成宽度误差</td></tr><tr><td>H6</td><td>基于 R2 个体分解的方向分布与光学代理量，使镜片等级一致率高于 R0</td><td>调参集与交叉验证，测试集最终确认</td></tr></tbody></table>
 <p>“显著”以按眼镜分组的配对自助法判断；不显著的环节保留传统方法并如实报告。</p>
 <hr />
 <h2>九、数据、标注与评审分工</h2>
+<h3>9.0 工作逻辑（v3.1）：一次审核，三份产出</h3>
+<p>原始数据没有标注，逐像素人工标注不可行。第二阶段采用“传统算法给出完整初稿，人只做判断题”的方式，一轮审核同时产出三样东西：</p>
+<pre><code>            ┌─ trad_v2（R0）初稿 ─┐
+247 张标准输入 ─┼─ 高召回分割 hr_segment ─┼─→ 候选并集 ─→ 人工审核（判断题）─┬→ ① 冻结基准（测试区 + 锚点区，仅评价）
+            └─ U1 异常热图 ───────┘                    ├→ ② 修正标签（训练集，供 R2/半监督）
+                                                        └→ ③ 审核统计：各来源的误检/漏检率 → 改进 R0、U
+路线 U（U2 合成 → U3 自训练）只读训练集图像与 trad_v2 输出，不读 ①②；①只用于评价与选模。</code></pre>
+<p>原则：</p>
+<ol>
+<li><strong>先划分，后审核。</strong> 按眼镜分组冻结 训练/调参/测试 后才开始审核与训练；之后一切选择只看训练/调参数据。</li>
+<li><strong>测试基准不能只来自 trad_v2。</strong> 测试区的候选取 trad_v2、hr_segment、U1 三个来源的并集，审核员还可以补画漏检；每个基准单元记录来源。否则基准会偏向 trad_v2，机器学习路线的优势无法被测到（循环论证）。</li>
+<li><strong>人只做判断题。</strong> 每个操作是“接受/拒绝”“改类别”“两段是不是同一条”“看不清（不计）”，只有漏检才需要画线；按复核队列优先级审核，高置信项抽检 ≥ 10% 估计其错误率。</li>
+<li><strong>审核范围按用途分级。</strong> 测试集：分层抽取的窗口内全部单元审核（完整）；调参集：锚点窗口完整审核；训练集：只审核复核队列与模型分歧区（主动学习），其余用 trad_v2 原值并记录“未审核”。</li>
+<li><strong>标签带来源与可信度。</strong> 每个单元记录 <code>source / confidence / reviewed / used_for_training</code>（沿用 <code>research_loops/segmentation_program.md</code> 的弱标签元数据）。</li>
+</ol>
 <h3>9.1 现有数据利用</h3>
-<p>不新增图像，基于 247 张标准输入图像（124 副眼镜）：三助手盲评分级全部镜片；按眼镜分层划分测试约 30 副、调参约 8 副、训练约 86 副，异型样本只进训练集；训练集内按眼镜分组 5 折交叉验证；自监督与无监督只用训练/调参集；合成真值在无缺陷背景区渲染。</p>
+<p>不新增图像，基于 247 张标准输入图像（124 副眼镜）：按眼镜分层划分测试约 30 副、调参约 8 副、训练约 86 副，异型样本只进训练集；训练集内按眼镜分组 5 折交叉验证；路线 U 的自监督、自训练与合成背景只用训练集（必要时含调参集图像，但不读其标注）；合成真值在无缺陷背景区渲染。第二批数据 ScrachDF_20260318（300 张，无眼镜配对信息）可作为路线 U 的额外无标签训练数据，不进入基准。三助手镜片分级（原 T1）降为物理延伸功能的标定数据，可后置。</p>
 <h3>9.2 三助手分工</h3>
 <table><thead><tr><th>账号</th><th>角色</th><th>模型</th><th>推理强度</th><th>调用</th></tr></thead><tbody><tr><td>A：Claude 账号 1</td><td>研发主线（智能识别、几何/光学分析、综合评定、工具）+ 评审员 R1</td><td><code>claude-opus-5-5</code></td><td>研发 <code>high</code>，架构与疑难 <code>xhigh</code>，评审 <code>high</code></td><td><code>claude --model claude-opus-5-5 --effort high</code></td></tr><tr><td>B：Claude 账号 2</td><td>评审员 R2 + 独立审查与关键结果复算</td><td><code>claude-sonnet-5-5</code>（<code>claude-fable-5-1</code> 在当前账号需额外用量额度）</td><td>评审 <code>high</code>，审查 <code>xhigh</code></td><td><code>claude --model claude-sonnet-5-5 --effort high</code> 或脚本无头调用</td></tr><tr><td>C：ChatGPT（Codex CLI）</td><td>评审员 R3 + U 无监督路线 + 分布与光学代理量模块</td><td><code>gpt-6.1-sol</code></td><td><code>high</code></td><td><code>codex exec -m gpt-6.1-sol -c model_reasoning_effort="high" -s read-only ...</code></td></tr><tr><td>用户</td><td>人工仲裁与 ≥ 10% 抽检</td><td>—</td><td>—</td><td>审阅分歧包</td></tr></tbody></table>
 <p>原则：盲评、独立会话、只读评审包、不同模型；像素级结果与物理量由算法给出，助手只做分级、单元判定与漏检标记；CNAS 材料中基准写为“三名独立 AI 评审盲评、项目组人工仲裁与抽检”。</p>
 <h3>9.3 五图试点结论与协作优化</h3>
 <p>试点（108l、26l、90r、76r、72l；详见 <code>output/review/pilot5/pilot_report.html</code>）：分级 3/5 三人一致、5/5 有多数；划痕网格 R1–R3 在密集镜片上 Jaccard 0.97，传统划痕结果对多数意见精度 0.86、召回 0.72；斑点、碎裂两两 Jaccard 仅 0.36、0.12；传统斑点格仅 27%、碎裂格仅 12% 被多数认可；R2 存在列举遗漏，长划痕被象限切断。</p>
 <p>协作优化：输出改为每象限每类 12×16 固定矩阵（<code>doc/评审/评审提示词_v2_矩阵格式.md</code>）；碎裂与斑点给出操作性定义并附共识样例；长划痕改在整镜图上描述，逐条完整性由合成真值度量；三人脚本并行调用、自动汇总，只有分歧格进入第二轮或用户仲裁；评审包改用 dataset_v3 标准输入。</p>
-<h3>9.4 评审任务</h3>
-<table><thead><tr><th>任务</th><th>内容</th><th>数量</th></tr></thead><tbody><tr><td>T0 校准</td><td>v2 矩阵格式提示词，三助手与用户共同评审，修订规程</td><td>20 张</td></tr><tr><td>T1 镜片分级</td><td>等级与各区严重度</td><td>247 张 × 3</td></tr><tr><td>T2 候选单元核查</td><td>R0 候选接受/拒绝、定类、标漏检</td><td>约 1500 个单元 × 3（可先做一半）</td></tr><tr><td>T3 测试区域参考</td><td>测试集分层区域全部单元核查</td><td>约 300 个区域 × 3</td></tr><tr><td>T4 仲裁</td><td>用户裁决分歧</td><td>视分歧量</td></tr></tbody></table>
-<p>共识：≥ 2 人一致为共识；三人各异或共识与 R0 相差 ≥ 2 级时送仲裁；报告 Fleiss κ 与加权 κ，T0 加权 κ ≥ 0.6 后进入 T1。</p>
+<h3>9.4 审核任务（v3.1 重排）</h3>
+<table><thead><tr><th>任务</th><th>内容</th><th>数量（估计）</th><th>执行</th></tr></thead><tbody><tr><td>K0 续接判读</td><td>trad_v2 交叉续接的 24 个抽样事件（26 个判读例），盲判“两段是否同一条”</td><td>26 例，约 15 分钟</td><td>开发者；<code>scripts/review_links.py</code></td></tr><tr><td>K1 规程校准</td><td>在 5 张试点上按像素级可操作定义审核候选单元，修订类别定义与“不计”规则</td><td>5 张的复核队列</td><td>开发者 + 助手预筛</td></tr><tr><td>K2 测试基准</td><td>测试集 60 片，每片按中央区/内环/外环分层随机抽 6 个 512×512 窗口（约 3.5 mm），窗口内全部候选审核并补画漏检；待 U1 候选就绪后启用</td><td>360 个窗口</td><td>开发者（标注服务）</td></tr><tr><td>K3 锚点基准</td><td>调参集 16 片，同 K2，已启用、排在队列最前</td><td>96 个窗口</td><td>开发者（标注服务）</td></tr><tr><td>K3b 训练首批</td><td>训练集 171 片，每片 3 区各 1 窗，排在锚点之后</td><td>513 个窗口（先做约 150 个即可开始 E1）</td><td>开发者（标注服务）</td></tr><tr><td>K4 训练集主动审核</td><td>训练集复核队列与模型分歧区，按优先级分批</td><td>每批约 500 单元</td><td>同上；结果进入修正标签</td></tr><tr><td>K5 镜片分级（物理延伸）</td><td>原 T0/T1，等级与各区严重度</td><td>可后置</td><td>三助手 + 开发者仲裁</td></tr></tbody></table>
+<p><strong>审核类别判定规则（v3.2，像素级）：</strong></p>
+<table><thead><tr><th>类别</th><th>判定</th><th>说明</th></tr></thead><tbody><tr><td>划痕（1）</td><td>细长亮线：可沿走向追踪，长宽比 ≥ 5 或长度 ≥ 0.1 mm（15 像素），含浅淡段</td><td>交叉处两条线的像素都算划痕；划痕上的亮节点若没有独立的圆形光晕，仍算划痕</td></tr><tr><td>斑点（2）</td><td>近似各向同性的亮点或亮斑（长宽比 &lt; 3）</td><td>只标亮核及紧邻的可见光晕，不含远处的弥散光</td></tr><tr><td>碎裂（3）</td><td>亮而无法逐条追踪的碎短线、片状亮区：片段大多短于 0.1 mm、走向杂乱</td><td>能逐条看清的密集划痕仍标划痕</td></tr><tr><td>背景（误检）</td><td>噪声、预处理残留（弥散光晕、边缘亮带）、算法臆造的线</td><td>在候选上按 X 或单击拒绝</td></tr><tr><td>不计（255）</td><td>确实看不清是否为缺陷、或类别无法判断的区域</td><td>尽量少用；“待确认”候选默认不计，能判断的应改为具体类别</td></tr></tbody></table>
+<p>边界不逐像素修改：接受算法给出的线宽（半高宽掩膜）；只有明显过宽或错位时拒绝该候选，再用画线工具补画。审核服务记录每窗用时，用于估算全量审核成本。</p>
+<p>助手预筛：三助手对同一单元独立判定，三人一致的单元按开发者 ≥ 10% 抽检的结果决定是否直接采用，其余进入开发者审核。助手判定不作为最终真值，最终以开发者审核结果冻结基准。审核工具：判断题部分沿用 <code>review_links.py</code> 的静态网页形式（键盘作答、本地保存、导出 JSON），漏检补画用 LabelMe（trad_v2 已导出 LabelMe 格式）。</p>
 <hr />
 <h2>十、阶段计划</h2>
 <p>计算资源：232 服务器（RTX 4090 D 24 GB）。时间以周计，起点为计划批准之日。</p>
-<table><thead><tr><th>阶段</th><th>周次</th><th>内容</th><th>产出</th><th>通过判据（建议）</th></tr></thead><tbody><tr><td>S0 标准输入与对接准备</td><td>W1（大部分已完成）</td><td>dataset_v3 复核与冻结；亮度-走向关系验证；眼镜分组表；GUI 接入新预处理</td><td>冻结的标准输入清单</td><td>全部图像有质检结论</td></tr><tr><td>S1 镜片级基准</td><td>W1–W4</td><td>T0 校准、T1 全量分级、按眼镜分组冻结测试集</td><td>共识等级、κ 报告</td><td>T0 加权 κ ≥ 0.6；无同副眼镜跨集</td></tr><tr><td>S2 传统完整基线 R0</td><td>W2–W5</td><td>k·σ 迟滞分割、线/斑增强与方向场、规则分类、几何与分布、WearScore v1</td><td>R0 端到端结果</td><td>R0 可运行，候选召回可测</td></tr><tr><td>S3 参考标注与合成真值</td><td>W4–W7</td><td>T2、T3；合成交叠/碎裂/弱划痕场景生成器</td><td>锚点集、测试参考、合成集</td><td>抽检不一致率 ≤ 10%</td></tr><tr><td>S4 机器学习识别</td><td>W6–W11</td><td>R1 判别；STAPLE 融合与自训练；R2 多头分割；U 热图</td><td>R1/R2/U 模型</td><td>在锚点与合成集上完成对比</td></tr><tr><td>S5 几何/光学分析</td><td>W8–W12</td><td>单条划痕追踪、剖面测宽、分布统计、光学代理量</td><td>几何与光学模块</td><td>合成真值上误差可量化</td></tr><tr><td>S6 综合评定与方法比较</td><td>W11–W13</td><td>WearScore v2 标定；H1–H6 检验；管线选择</td><td>对比报告与冻结管线</td><td>选择只基于训练/调参数据</td></tr><tr><td>S7 冻结测试与集成</td><td>W13–W16</td><td>测试集一次性评估；第一阶段检测对照；GUI 集成；CNAS 预演</td><td>准确率报告（A 与 CI）、方法对比结论</td><td>A ≥ 90% 并报告置信区间</td></tr></tbody></table>
-<p>决策门：G1（S1 末）一致性不达标则修订规程重新校准；G2（S2 末）R0 召回不足先改进候选层；G3（S4 末）机器学习只在 H1–H5 判定显著的环节采用；G4（S6 末）冻结后才打开测试集。每阶段由 B 账号核查划分、结果与指标。</p>
+<p>v3.1 按“先定尺子、再造标签、标签与无监督开发并行”重排（v3.0 的 S0–S7 编号保留对应关系）：</p>
+<table><thead><tr><th>阶段</th><th>周次</th><th>内容</th><th>产出</th><th>通过判据（建议）</th></tr></thead><tbody><tr><td>A0 口径与划分（原 S0）</td><td>W1</td><td>确认 2.4 节区域级口径；K0 续接判读并据此修正交叉配对；按眼镜分组冻结 训练/调参/测试 清单</td><td>口径确认稿、<code>splits</code> 清单、trad_v2.1 参数</td><td>无同副眼镜跨集；错拆比例较 S12 下降</td></tr><tr><td>A1 全量初稿与独立候选（原 S2）</td><td>W1–W2</td><td>trad_v2.1 跑 247 张；hr_segment 高召回结果；U1 免训练异常热图（训练集建记忆库，全量推理）；损伤区 E1–E2 敏感性统计</td><td>三来源候选、<code>index.csv</code>、损伤区敏感性报告</td><td>三来源在试点 6 张上的互补性可量化</td></tr><tr><td>A2 基准构建（原 S1/S3）</td><td>W2–W5</td><td>K1 规程校准 → K2 测试基准、K3 锚点基准；R0 在锚点上的 A、P</td><td>冻结基准 v1（测试 + 锚点）、R0 基线成绩</td><td>抽检不一致率 ≤ 10%；测试区冻结后不再修改</td></tr><tr><td>A3 物理合成（U2，原 S3）</td><td>W2–W5（与 A2 并行）</td><td>非相干叠加验证；真实划痕剪贴库 + 程序化生成；交叉/密集/碎裂/干扰场景；合成实体级真值</td><td>合成生成器与合成集</td><td>合成样本与真实图像的亮度、宽度、噪声统计一致</td></tr><tr><td>A4 路线 U 训练（原 S4）</td><td>W5–W9</td><td>U2 合成预训练 → U3 真实图像自训练（与 trad_v2 一致区域为确信标签）；锚点选模</td><td>U 模型与锚点成绩</td><td>锚点 A、P 不低于 R0；实体级指标优于 R0</td></tr><tr><td>A5 主模型训练与标签迭代（原 S4，v3.2 为主线）</td><td>W3–W11</td><td>第一批审核标签到位即开始 5.5 节 E1–E5（nnU-Net 主模型 + 对照）；K4 主动审核（模型与 trad_v2 分歧区优先）→ 修正标签 → 再训练；审核统计反馈改进 R0</td><td>审核标签 v1–v3、主模型</td><td>每轮调参集 mIoU 提升或分歧区减少</td></tr><tr><td>A6 几何/光学分析与物理延伸（原 S5/S6）</td><td>W8–W13</td><td>单条划痕追踪、剖面测宽、分布、光学代理量；损伤区 E3–E4；镜片分级 K5 与 WearScore v2 标定</td><td>几何与光学模块、损伤区阈值 v1.0 说明</td><td>合成真值上几何误差可量化</td></tr><tr><td>A7 冻结测试与集成（原 S7）</td><td>W13–W16</td><td>管线冻结 → 测试集一次性评估（A、P、分类别、CI）；R0/U/R2/检测对照；GUI 集成；CNAS 大纲 B.2 更新与预演</td><td>准确率报告、方法对比结论</td><td>A ≥ 90% 且 P 达到约定门槛</td></tr></tbody></table>
+<p>决策门：G1（A0 末）口径确认后才开始审核；G2（A2 末）基准冻结后才打开路线 U、R2 的锚点比较；G3（A4/A5 末）机器学习只在 H1–H5 判定显著的环节采用，路线 U 与 R2 的差距如实报告；G4（A7 前）管线冻结后才打开测试集。每阶段由 B 账号核查划分、结果与指标。</p>
 <hr />
 <h2>十一、前期系统的改进与对接</h2>
 <table><thead><tr><th>模块</th><th>改进</th></tr></thead><tbody><tr><td>导入与预处理</td><td>GUI 与命令行接入 <code>standardize</code>：原始图像 → 标准输入；保留旧流程以便追溯；支持设备配置</td></tr><tr><td>智能识别服务</td><td>推理服务从“检测框”改为“缺陷实例”接口（类别、像素、方向、置信度），检测模型作为可选对照</td></tr><tr><td>几何/光学分析</td><td>新增分析服务，输出单条缺陷几何、分布特征与光学代理量</td></tr><tr><td>综合评定</td><td>WearScore v2 与 v1 并存，配置切换；检测记录与报告增加分割图、方向分布、光学代理量</td></tr><tr><td>评价工具</td><td>镜片级 δᵢ 评估改为直接比较等级；新增实体级、几何级评估与合成集评估</td></tr><tr><td>CNAS 测试子系统</td><td>测试集清单改为按眼镜分组的新测试集；判定规则为镜片级等级一致</td></tr><tr><td>评审工具</td><td><code>review_pilot.py</code> 扩展为 T0–T3 通用评审包生成、并行调用与汇总</td></tr></tbody></table>
 <hr />
 <h2>十二、风险与对策</h2>
-<table><thead><tr><th>风险</th><th>对策</th></tr></thead><tbody><tr><td>评价循环论证</td><td>测试参考与锚点独立构建并冻结，测试集只用一次</td></tr><tr><td>左右片泄漏</td><td>一切划分以眼镜为单位，B 账号核查</td></tr><tr><td>测试样本量小、A/B 级少</td><td>测试集约 60 张并报告置信区间；如实说明 A 级未验证</td></tr><tr><td>弥散层分离误删真实宽缺陷</td><td>幅度与边缘锐利度双判据；弥散层单独保存可回加；重点样本目视复核</td></tr><tr><td>合成真值与真实分布差异</td><td>合成参数取自真实缺陷统计；实体级结论同时报告锚点单元结果</td></tr><tr><td>AI 评审同源偏差</td><td>三种不同模型、盲评、用户仲裁与抽检</td></tr><tr><td>机器学习不优于传统</td><td>如实报告，该环节保留传统方法</td></tr><tr><td>232 未合入工作</td><td>背景锚定迟滞阈值先在 232 提交推送，纳入 R0</td></tr></tbody></table>
+<table><thead><tr><th>风险</th><th>对策</th></tr></thead><tbody><tr><td>评价循环论证</td><td>测试参考与锚点独立构建并冻结，测试集只用一次</td></tr><tr><td>左右片泄漏</td><td>一切划分以眼镜为单位，B 账号核查</td></tr><tr><td>测试样本量小、A/B 级少</td><td>测试集约 60 张并报告置信区间；如实说明 A 级未验证</td></tr><tr><td>弥散层分离误删真实宽缺陷</td><td>幅度与边缘锐利度双判据；弥散层单独保存可回加；重点样本目视复核</td></tr><tr><td>合成真值与真实分布差异</td><td>合成参数取自真实缺陷统计；实体级结论同时报告锚点单元结果</td></tr><tr><td>AI 评审同源偏差</td><td>三种不同模型、盲评、用户仲裁与抽检</td></tr><tr><td>机器学习不优于传统</td><td>如实报告，该环节保留传统方法</td></tr><tr><td>232 未合入工作</td><td>背景锚定迟滞阈值先在 232 提交推送，纳入 R0</td></tr><tr><td>基准偏向 trad_v2（v3.1）</td><td>测试区候选取 trad_v2、hr_segment、U1 并集并允许补画漏检；单元记录来源，分来源报告召回</td></tr><tr><td>只按召回计分被“多报”操纵（v3.1）</td><td>区域精确率 P 同时达标；“不计”区域单独统计</td></tr><tr><td>合成-真实域差（v3.1）</td><td>非相干叠加先验证；合成参数取自真实统计；U3 自训练在真实图像上校正；结论以真实锚点为准</td></tr><tr><td>损伤区阈值缺乏物理标定（v3.1）</td><td>不进入识别指标；按损伤区文档第 7 节完成敏感性与替代论证</td></tr></tbody></table>
 <hr />
 <h2>十三、资源需求</h2>
 <p>不新增图像；三助手完成 T0–T3（每名评审员读图约 4900 张，分批）；用户负责仲裁与抽检；232 服务器单卡可满足训练与检测对照重训。</p>
@@ -278,6 +354,36 @@ hr { border: 0; border-top: 1px solid #dbe2ea; margin: 28px 0; }
 <p>[30] Tian Z, Shen C, Wang X, Chen H. BoxInst: high-performance instance segmentation with box annotations. <em>CVPR</em>, 2021.</p>
 <p>[31] Ripley BD. Modelling spatial patterns. <em>J R Stat Soc Series B</em>, 1977, 39(2): 172–212.</p>
 <p>[32] ASTM D1003. Standard Test Method for Haze and Luminous Transmittance of Transparent Plastics. ASTM International.</p>
+<p>以下为 v3.1 新增（2026-10-26 检索；未注明核对的条目，作者与卷期以原文为准）：</p>
+<p>[33] Li X, Huang Z, Xue F, Zhou Y. MuSc: zero-shot industrial anomaly classification and segmentation with mutual scoring of the unlabeled images. <em>ICLR</em>, 2024. arXiv:2401.16753</p>
+<p>[34] Li X, Xue F, Zhou Y. MuSc-V2: zero-shot multimodal industrial anomaly classification and segmentation with mutual scoring of unlabeled samples. arXiv:2511.10047（arXiv 页面标注 TPAMI 2026）</p>
+<p>[35] Im J, Son Y, Hong JH. FUN-AD: fully unsupervised learning for anomaly detection with noisy training data. <em>WACV</em>, 2025: 9429–9438. arXiv:2411.16110</p>
+<p>[36] Roming L, et al. SuperADD: training-free class-agnostic anomaly segmentation — CVPR 2026 VAND 4.0 Workshop Challenge industrial track. arXiv:2605.14808</p>
+<p>[37] Siméoni O, et al. DINOv3. arXiv:2508.10104, 2025. https://ai.meta.com/dinov3/</p>
+<p>[38] Zavrtanik V, Kristan M, Skočaj D. DRAEM: a discriminatively trained reconstruction embedding for surface anomaly detection. <em>ICCV</em>, 2021.</p>
+<p>[39] A survey on industrial anomalies synthesis. arXiv:2502.16412, 2025.（作者未逐项核对）</p>
+<p>[40] Kirchhoff Y, et al. Skeleton recall loss for connectivity conserving and resource efficient segmentation of thin tubular structures. <em>ECCV</em>, 2024. arXiv:2404.03010</p>
+<p>[41] Graph-based synthetic crack generation via Dijkstra path tracing for concrete and pavement crack segmentation. <em>Automation in Construction</em>, 2026. https://www.sciencedirect.com/science/article/abs/pii/S0926580526003638 （作者未核对；摘要称仅用合成数据训练可达人工标注训练的水平）</p>
+<p>[42] Kyem BA, Asamoah JK, Denteh E, Danyo A, Aboah A. Self-supervised multi-scale transformer with attention-guided fusion for efficient crack detection. <em>Automation in Construction</em>, 2025. arXiv:2510.10378（训练信号细节未核对）</p>
+<p>[43] Xie Q, Luong MT, Hovy E, Le QV. Self-training with noisy student improves ImageNet classification. <em>CVPR</em>, 2020.</p>
+<p>[44] ScratchSim: a procedural synthetic data pipeline for surface scratch detection. arXiv:2607.27065（作者未核对）</p>
+<p>[45] Cuttano C, et al. INSID3: training-free in-context segmentation with DINOv3. <em>CVPR</em>, 2026. arXiv:2603.28480</p>
+<p>[46] Quantitative detection of weak scratches of optical elements based on image segmentation and connection of broken scratches. <em>Optics Communications</em>, 2025. https://www.sciencedirect.com/science/article/pii/S0030401824011337 （作者未核对）</p>
+<p>[47] Long J, Shelhamer E, Darrell T. Fully convolutional networks for semantic segmentation. <em>CVPR</em>, 2015. arXiv:1411.4038（指标定义见 TPAMI 版 arXiv:1605.06211 第 5 节）</p>
+<p>[48] Cordts M, et al. The Cityscapes dataset for semantic urban scene understanding. <em>CVPR</em>, 2016.</p>
+<p>[49] Maier-Hein L, Reinke A, et al. Metrics reloaded: recommendations for image analysis validation. <em>Nat Methods</em>, 2024, 21(2): 195–212. doi:10.1038/s41592-023-02151-z</p>
+<p>[50] Reinke A, et al. Understanding metric-related pitfalls in image analysis validation. <em>Nat Methods</em>, 2024, 21(2): 182–194. doi:10.1038/s41592-023-02150-0</p>
+<p>[51] Isensee F, Wald T, Ulrich C, et al. nnU-Net revisited: a call for rigorous validation in 3D medical image segmentation. <em>MICCAI</em>, 2024. arXiv:2404.09556；代码 https://github.com/MIC-DKFZ/nnUNet （ignore 标签说明：documentation/ignore_label.md）</p>
+<p>[52] Gotkowski K, Maier-Hein KH, Isensee F. Revisiting 3D medical scribble supervision: benchmarking beyond cardiac segmentation. <em>MICCAI</em>, 2025. arXiv:2403.12834</p>
+<p>[53] Liu H, Jia C, Shi F, Cheng X, Chen S. SCSegamba: lightweight structure-aware vision Mamba for crack segmentation in structures. <em>CVPR</em>, 2025: 29406–29416. arXiv:2503.01113；代码 https://github.com/Karl1109/SCSegamba</p>
+<p>[54] Skeleton Recall 代码与 nnU-Net 训练器：https://github.com/MIC-DKFZ/Skeleton-Recall （对应文献 [40]）</p>
+<p>[55] Rapid-deployment crack measurement based on SAM3 semantic-edge response decoding. arXiv:2607.12292（作者未核对；含六个裂缝数据集上监督方法与免训练方法的对比）</p>
+<p>[56] Qi Y, He Y, Qi X, Zhang Y, Yang G. Dynamic snake convolution based on topological geometric constraints for tubular structure segmentation. <em>ICCV</em>, 2023: 6070–6079. arXiv:2307.08388；代码 https://github.com/YaoleiQi/DSCNet</p>
+<p>[57] CSWinUNETR: segmentation of thin anatomical structures in medical images. <em>MICCAI</em>, 2026. arXiv:2606.19824；代码 https://github.com/labhai/CSWinUNETR （作者未核对）</p>
+<p>[58] Xiong X, et al. SAM2-UNet: Segment Anything 2 makes strong encoder for natural and medical image segmentation. arXiv:2408.08870, 2024；代码 https://github.com/WZH0120/SAM2-UNet</p>
+<p>[59] Yoshihara K, Sugawara Y, Tokuoka Y, Hong L. VesselBridge3D: a foundation model adaptation framework for label-efficient 3D vessel segmentation. arXiv:2602.23782, 2026（冻结 DINOv3/MedSAM 编码器 + 可训练 3D 适配器与聚合器）</p>
+<p>[60] Lu H, Zhao Y, Yang G, Wu S. DSGNet: a lightweight network integrating depthwise separable and ghost convolutions for real-time surface defect segmentation. <em>Expert Systems</em>, 2026, 43(2): e70187；代码 https://github.com/young-zyy/DSGNet</p>
+<p>[61] Zhang J, Ding R, Ban M, Guo T. FDSNeT: an accurate real-time surface defect segmentation network. <em>ICASSP</em>, 2022: 3803–3807；MSD 数据集 https://github.com/jianzhang96/MSD</p>
   </main>
 </body>
 </html>

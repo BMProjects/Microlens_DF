@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>损伤区定义_光学功能依据_20261026</title>
+  <style>
+body {
+  margin: 0;
+  background: #f5f7fb;
+  color: #1f2937;
+  font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+.page {
+  max-width: 1100px;
+  margin: 32px auto;
+  background: #ffffff;
+  padding: 36px 48px 56px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  border-radius: 18px;
+}
+.doc-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #eff6ff;
+  border: 1px solid #dbeafe;
+}
+.doc-nav a {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+  font-size: 13px;
+}
+h1, h2, h3, h4 {
+  color: #0f172a;
+  line-height: 1.35;
+}
+h1 { font-size: 2rem; border-bottom: 3px solid #dbeafe; padding-bottom: 12px; }
+h2 { font-size: 1.45rem; margin-top: 2rem; border-left: 5px solid #60a5fa; padding-left: 12px; }
+h3 { font-size: 1.15rem; margin-top: 1.4rem; }
+p, li { font-size: 15px; line-height: 1.8; }
+code {
+  background: #eff6ff;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-family: "JetBrains Mono", "Consolas", monospace;
+}
+pre {
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 16px 18px;
+  border-radius: 12px;
+  overflow-x: auto;
+  line-height: 1.55;
+}
+pre code { background: transparent; color: inherit; padding: 0; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 18px 0 24px;
+  font-size: 14px;
+}
+th, td {
+  border: 1px solid #dbe2ea;
+  padding: 10px 12px;
+  vertical-align: top;
+}
+th {
+  background: #eff6ff;
+  font-weight: 700;
+}
+tr:nth-child(even) td {
+  background: #fafcff;
+}
+img {
+  max-width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.10);
+}
+figure {
+  margin: 24px 0;
+}
+figcaption {
+  color: #475569;
+  font-size: 14px;
+  margin-top: 8px;
+}
+a { color: #2563eb; text-decoration: none; }
+a:hover { text-decoration: underline; }
+hr { border: 0; border-top: 1px solid #dbe2ea; margin: 28px 0; }
+.meta {
+  color: #64748b;
+  margin-bottom: 24px;
+  font-size: 14px;
+}
+</style>
+</head>
+<body>
+  <main class="page">
+    <nav class="doc-nav"><a href="index.html">文档总目录</a><a href="损伤区定义_光学功能依据_20261026.md">Markdown 源文档</a><a href="deep-research-report.html">deep-research-report</a><a href="第二阶段分割算法开发与实验计划_20261025.html">第二阶段分割算法开发与实验计划_20261025</a><a href="系统架构_模块化梳理_20260531.html">系统架构_模块化梳理_20260531</a></nav>
+    <div class="meta">自动渲染的 HTML 研究日志，适合继续补充图片、表格与结果对比图。</div>
+    <h1>大面积损伤（碎裂）的定义：由镜片光学功能反推</h1>
+<p>&gt; 版本 0.2（2026-10-26，补第 7 节阈值说明），对应 <code>src/darkfield_defects/annotation/trad_segment.py</code> 中 <code>damage_mode="footprint"</code>。 &gt; 文中区分三类内容：<strong>[文献]</strong> 有出处的事实；<strong>[推断]</strong> 本项目据此做出的推导；<strong>[待标定]</strong> 需要实测确定的量。</p>
+<h2>1. 为什么要从光学功能出发</h2>
+<p>前几轮试验中，“碎裂”按纹理描述（方向杂乱、碎短线、无法逐条追踪），三名评审员对它的判断很不一致（R3 从不标碎裂，R1 只标过 1 处）。纹理描述没有对应到镜片的使用后果，因此难以统一。改为回答一个功能问题：<strong>镜片哪些区域的缺陷已经多到明显影响透过该区域的成像质量，这样的区域占多大面积。</strong></p>
+<h2>2. 光学机理</h2>
+<ul>
+<li><strong>[文献]</strong> 前向散射（偏折角小于 90° 的散射光）在视网膜像上叠加一层亮度，降低像的对比度，并可能造成失能眩光（<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4844042">综述，PMC4844042</a>）。</li>
+<li><strong>[文献]</strong> 健康受试者在人为增加少量视网膜散射光后，光晕变大、亮度检测阈值升高、对比敏感度下降；有无眩光源都会出现（<a href="https://iovs.arvojournals.org/article.aspx?articleid=2571341">van der Mooren 等，IOVS</a>）。</li>
+<li><strong>[文献]</strong> 中央区有划痕的防护眼镜，雾度在 1%–30% 之间；同时有划痕和污物的镜片雾度最高，光漫射值与雾度一致（<a href="https://www.academia.edu/85526177/Forward_light_scatter_and_visual_acuity_through_scratched_protective_eyewear">Forward light scatter and visual acuity through scratched protective eyewear</a>）。</li>
+<li><strong>[文献]</strong> 在模拟夜间驾驶眩光下，透过有划痕的减反射镀膜镜片，视觉表现下降（<a href="https://iovs.arvojournals.org/article.aspx?articleid=2372596">Visual Performance With Scratched Antireflective Coated Spectacle Lenses，IOVS</a>）。</li>
+<li><strong>[文献]</strong> ANSI/ISEA Z87.1-2020 要求透明平光镜片雾度不超过 3%（<a href="https://globusgroup.com/certifications/ansi-z87-1">说明页</a>）。眼镜片标准中，ISO 8980-5 用雾度增量评价耐磨性，但具体限值未能在公开资料中核实。</li>
+<li><strong>[文献]</strong> 以 DIMS 离焦镜片为例：中央 9 mm 清晰区；直径约 33 mm 的治疗区内有 396 个直径 1.03 mm、+3.50 D 的微透镜（<a href="https://bjo.bmj.com/content/104/3/363">Lam 等，BJO 2020</a>；<a href="https://en.wikipedia.org/wiki/Defocus_Incorporated_Multiple_Segments_lens">维基百科条目</a>）。</li>
+<li><strong>[推断]</strong> 由上述数字推算，微透镜约覆盖治疗区面积的 396 × π × 0.515² ÷ [π/4 × (33² − 9²)] ≈ 42%。</li>
+</ul>
+<p><strong>[文献 + 推断] 暗场图像的含义</strong>：暗场成像只收集被缺陷散射的光，所以暗场图上“亮”的像素，就是透射光被散射的位置；背景补偿后的亮度近似正比于该处的散射光强。这是本定义直接使用暗场缺陷掩膜和暗场强度的物理依据。</p>
+<h2>3. 定义</h2>
+<h3>3.1 尺度：光束足迹</h3>
+<ul>
+<li><strong>[推断]</strong> 眼睛透过镜片注视某一方向时，进入瞳孔的光在镜片平面上的截面约等于瞳孔大小（镜眼距约 12 mm，与瞳孔相比很近）。明视瞳孔约 3 mm，因此取直径 <strong>D = 3 mm</strong>（441 像素）的圆为“光束足迹”。足迹以外的缺陷不影响该注视方向。</li>
+</ul>
+<h3>3.2 第一阈值：损伤区（局部散射过强）</h3>
+<ul>
+<li>在每个位置计算足迹内缺陷像素占比 <em>f</em>。缺陷包括划痕、斑点、碎裂和待确认像素，即暗场可见的全部散射结构。</li>
+<li><strong>[推断]</strong> 该注视方向的雾度近似为 <em>H ≈ η·f</em>。其中 η 是单位“暗场可见缺陷面积”的散射效率，由划痕深度、粗糙度和成像模糊共同决定。</li>
+<li><strong>定义</strong>：<em>f</em> ≥ <em>f</em>&lt;sub&gt;min&lt;/sub&gt; 且面积不小于一个足迹的连通区域为<strong>损伤区</strong>。</li>
+<li><strong>[待标定]</strong> 物理上应取 <em>f</em>&lt;sub&gt;min&lt;/sub&gt; = <em>H</em>&lt;sub&gt;max&lt;/sub&gt; / η，<em>H</em>&lt;sub&gt;max&lt;/sub&gt; 为可接受的雾度上限（例如参照 ANSI Z87.1 的 3%）。η 尚未测得，当前按 6 张试点镜片的分布暂定 **<em>f</em>&lt;sub&gt;min&lt;/sub&gt; = 0.35**：轻、中度镜片（108l、26l）没有损伤区，重度镜片有。</li>
+<li><strong>注意</strong>：<em>f</em> 依赖检测灵敏度。同一张 90r，按第一轮掩膜，<em>f</em> ≥ 0.30 的面积为 0.2%；按第二轮掩膜（多检出浅淡划痕）则为 18%。所以 <em>f</em>&lt;sub&gt;min&lt;/sub&gt; 必须和检测参数一起标定，检测参数改动后要重新标定。</li>
+</ul>
+<h3>3.3 第二阈值：大面积损伤（镜片级结论）</h3>
+<ul>
+<li><strong>定义</strong>：损伤区面积占有效区面积 ≥ <em>a</em>&lt;sub&gt;min&lt;/sub&gt;，判为<strong>大面积损伤</strong>。</li>
+<li><strong>[推断]</strong> 损伤区面积比例约等于“任取一个注视方向落在损伤区内”的概率。暂定 **<em>a</em>&lt;sub&gt;min&lt;/sub&gt; = 10%**。</li>
+<li><strong>分区统计</strong>：中央 9 mm 清晰区内出现损伤区时，会直接影响主视方向的视力与对比度，因此单独报告其面积比例。治疗区内的损伤区，按其面积比例 <em>a</em> 降低离焦信号的有效覆盖率（散射光替代了微透镜的离焦像）。</li>
+<li><strong>[待标定]</strong> 离焦覆盖率下降多少会影响近视控制效果，目前没有找到文献依据。</li>
+</ul>
+<h3>3.4 其他描述（不参与判定，用于解释与分级）</h3>
+<table><thead><tr><th>描述量</th><th>含义</th><th>物理意义</th></tr></thead><tbody><tr><td>类型：密集划痕型 / 碎裂型</td><td>区内缺陷像素中，属于可逐条追踪划痕（长度 ≥ 0.5 mm）的比例 ≥ 50% 为密集划痕型，否则为碎裂型</td><td>可追踪划痕的散射有方向性；碎裂（碎短线、片状亮区）的散射接近各向同性</td></tr><tr><td>足迹缺陷占比均值</td><td>区内 <em>f</em> 的平均</td><td>区内平均雾度（乘以 η）</td></tr><tr><td>暗场散射强度</td><td>区内背景补偿后暗场亮度均值</td><td>与散射光强成正比，标定后可直接换算为雾度，比 <em>f</em> 更直接</td></tr><tr><td>取向有序度</td><td>区内划痕走向的倍角平均模长（0 随机 – 1 完全平行）</td><td>平行划痕把散射光集中到垂直于划痕的方向（见第 5 节）</td></tr><tr><td>主走向</td><td>区内划痕的平均走向</td><td>条纹状眩光的方向与之垂直</td></tr><tr><td>到镜片中心距离</td><td>区域中心到有效区质心的距离</td><td>判断位于中央清晰区还是治疗区</td></tr></tbody></table>
+<h2>4. 试点结果（6 张，第二轮掩膜）</h2>
+<table><thead><tr><th>镜片</th><th>损伤区 / 有效区</th><th>损伤区 / 中央 9 mm 区</th><th>类型</th><th>可追踪划痕占比</th><th>取向有序度</th><th>大面积损伤（≥10%）</th></tr></thead><tbody><tr><td>108l、26l</td><td>0</td><td>0</td><td>—</td><td>—</td><td>—</td><td>否</td></tr><tr><td>90r</td><td>5.4%</td><td>2.8%</td><td>密集划痕型</td><td>0.63</td><td>0.40</td><td>否</td></tr><tr><td>72l</td><td>8.0%</td><td><strong>52%</strong></td><td>碎裂型</td><td>0.38</td><td>0.08</td><td>否（按全镜面积）</td></tr><tr><td>76r</td><td>59%</td><td>60%</td><td>密集划痕型</td><td>0.63</td><td>0.27</td><td>是</td></tr><tr><td>55l</td><td>66%</td><td>100%</td><td>密集划痕型</td><td>0.63</td><td>0.42</td><td>是</td></tr></tbody></table>
+<p>72l 的碎裂型损伤区只占全镜 8%，却覆盖中央清晰区的一半，正好在主视方向上。<strong>建议镜片级判据增加一条</strong>：中央 9 mm 区内损伤区占比 ≥ 25%（暂定）也判为大面积损伤（或单列“中央区损伤”）。是否采用，请开发者确认。</p>
+<p>（具体数值以 <code>output/annotation/ablation/ablation_report.html</code> 为准。72l 正是上一轮 R2 圈出碎裂的镜片，它也是唯一的碎裂型。）</p>
+<h2>5. 平行划痕是否比随机划痕影响更大</h2>
+<ul>
+<li><strong>[文献]</strong> 规则排列的沟槽会产生光栅型衍射图样（散射测量与沟槽阵列研究）；划痕可按线段建模，其衍射图样相干叠加（<a href="https://light.informatik.uni-bonn.de/papers/WernerEtAl-ScratchIridescence-SIGAsia2017.pdf">Werner 等，SIGGRAPH Asia 2017</a>）。铝板 BRDF 测量也表明，入射光平行或垂直于细沟槽时，散射特性不同（<a href="https://origin-www.synopsys.com/content/dam/synopsys/optical-solutions/documents/measurements-aluminum-app-note.pdf">Synopsys 应用说明</a>）。</li>
+<li><strong>[推断]</strong> 一条直划痕主要把光散射到垂直于其长度的平面内。点光源透过它，会看到一条垂直于划痕的亮纹。</li>
+<li>大量平行划痕时，各自的亮纹叠在同一方向上，形成强烈的条纹状眩光，例如雨刷划痕造成的夜间光条（只有经验性描述，未找到测量研究）。</li>
+<li>走向随机的划痕则把散射光均匀分散成一圈光晕。</li>
+<li><strong>[推断]</strong> 总散射量（雾度）主要取决于划痕的总面积和截面形状，与走向关系不大。但在相同雾度下，平行划痕的散射光集中在一个方向上：该方向的眩光亮度更高，对与划痕平行的细节的对比度损失也更大。所以对夜间眩光和特定方向的视物，平行划痕的影响更大；对总体对比度，两者接近。</li>
+<li><strong>[初步观察]</strong> 6 张试点镜片中，预处理“弥散层”均值（0.12 → 4.48）与划痕面积占比的排序完全一致（等级相关 ρ = 1），与取向有序度没有一致关系。这提示光晕/雾化首先随划痕密度增加；平行程度是否另有贡献，需要在 247 张全量结果上，用划痕密度、取向有序度、平行族比例对弥散层做多元回归后再下结论。</li>
+</ul>
+<h2>6. 标定实验建议</h2>
+<ol>
+<li>按综合等级选 10–15 片镜片，覆盖轻度到大面积损伤。</li>
+<li>用雾度计（ASTM D1003 或 ISO 14782）加 3 mm 光阑，在每片镜片的中央区和治疗区各测 3–5 个位置的局部雾度，并记录测量位置。</li>
+<li>在暗场图像的对应位置计算足迹缺陷占比 <em>f</em> 与暗场散射强度，回归得到 η，以及暗场强度到雾度的换算系数。</li>
+<li>取 <em>H</em>&lt;sub&gt;max&lt;/sub&gt;（如 3%），得到 <em>f</em>&lt;sub&gt;min&lt;/sub&gt; = <em>H</em>&lt;sub&gt;max&lt;/sub&gt; / η；或直接用标定后的暗场强度作为第一阈值。</li>
+<li>可选：用直射散射光测量（如 C-Quant）或对比敏感度测试，验证 <em>H</em> 与视功能的关系。</li>
+</ol>
+<h2>7. 两个阈值的物理意义、现有依据与待解释事项（v0.2，2026-10-26 补充）</h2>
+<p>开发者决定：<em>f</em>&lt;sub&gt;min&lt;/sub&gt; = 0.35、<em>a</em>&lt;sub&gt;min&lt;/sub&gt; = 10% 暂按当前值执行，后续必须给出解释；雾度计标定（第 6 节）因条件限制暂不开展。本节写清两个数现在“代表什么”“凭什么”“还缺什么”，并给出不依赖雾度计的替代论证路径。</p>
+<h3>7.1 <em>f</em>&lt;sub&gt;min&lt;/sub&gt; = 0.35（第一阈值，局部）</h3>
+<ul>
+<li><strong>物理意义。</strong> 以 3 mm 光束足迹（≈ 明视瞳孔）为窗口，窗口内暗场可见散射结构的面积占比 ≥ 35%。直观说：透过该处注视时，进入瞳孔的光束截面有三分之一以上穿过了可见的散射结构。</li>
+<li><strong>与雾度的换算关系 [推断]。</strong> <em>H</em> ≈ η·<em>f</em>。若以 ANSI Z87.1 的 3% 为 <em>H</em>&lt;sub&gt;max&lt;/sub&gt;，<em>f</em>&lt;sub&gt;min&lt;/sub&gt; = 0.35 等价于假设 η ≈ 0.086，即“单位暗场可见缺陷面积把约 8.6% 的透射光散射到 2.5° 以外”。η 未测，这只是一种可检验的解释，不是依据。</li>
+<li><strong>需要注意的偏差 [推断]。</strong> 2 倍物镜下像素 6.8 µm，划痕成像宽度通常 3–5 像素（20–34 µm），宽于其物理沟槽，<em>f</em> 因此高估了缺陷的物理覆盖面积；η 是“每单位成像面积”的散射效率，会相应偏小。这个偏差对所有镜片同向，不影响排序，但影响与雾度的绝对换算。</li>
+<li><strong>现有依据（经验性）。</strong> ① 6 张试点中轻、中度（108l、26l）无损伤区，重度有；② 旧版碎裂定义下，72l 中评审员 R2 圈出的碎裂区，其“亮而不可追踪”像素占比中位数约 0.33；③ <em>f</em> 依赖检测灵敏度（90r 在两轮掩膜下 <em>f</em> ≥ 0.30 的面积分别为 0.2% 与 18%），所以 0.35 只对当前 trad_v2 检测参数有效。</li>
+<li><strong>结论：</strong> 0.35 目前是“与当前检测参数绑定的经验值”，物理含义清楚，但数值没有物理标定。</li>
+</ul>
+<h3>7.2 <em>a</em>&lt;sub&gt;min&lt;/sub&gt; = 10%（第二阈值，镜片级）</h3>
+<ul>
+<li><strong>物理意义。</strong> 损伤区面积 / 有效区面积 ≈ 视线随机落在有效区内时，穿过损伤区的概率。10% 即约十分之一的注视方向透过严重散射区。</li>
+<li><strong>现有依据。</strong> 没有文献依据。6 张试点的损伤区占比为 0、0、5.4%、8.0%、59%、66%：取 8%–59% 之间的任何值，试点结论都相同。<strong>也就是说，试点并没有约束这个数</strong>，10% 只是落在这个区间内的保守取值。</li>
+<li><strong>中央 9 mm 区附加判据（≥ 25%）。</strong> 尚未采纳；当前只单列报告中央区损伤占比，不参与“大面积损伤”判定。</li>
+</ul>
+<h3>7.3 不依赖雾度计的替代论证（在 247 张全量结果上完成）</h3>
+<table><thead><tr><th>编号</th><th>做法</th><th>回答的问题</th></tr></thead><tbody><tr><td>E1 敏感性</td><td><em>f</em>&lt;sub&gt;min&lt;/sub&gt; 在 0.20–0.50、足迹在 2–4 mm 范围内扫描，统计损伤区面积与“大面积损伤”判定的变化；同时报告检测阈值 ±0.5σ 时的变化</td><td>结论是否落在平台区；阈值 ±0.05 会改变多少张镜片的判定</td></tr><tr><td>E2 分布</td><td>247 张的损伤区占比直方图，是否存在双峰或明显间隙</td><td><em>a</em>&lt;sub&gt;min&lt;/sub&gt; 是否可以放在分布的自然间隙处</td></tr><tr><td>E3 暗场散射量</td><td>足迹内“标准输入 + 弥散层”的原始计数积分（与散射光强成正比），与 <em>f</em> 回归</td><td>能否用散射积分直接定义第一阈值，减少对检测灵敏度的依赖</td></tr><tr><td>E4 人工一致性</td><td>在 E1 的分歧窗口中抽样，由开发者判断“是否已明显影响透过该处的成像”</td><td>阈值与人眼判断的一致率</td></tr></tbody></table>
+<p>E1–E4 完成后，给出最终取值和取值理由，写入本文档 v1.0。若届时可以开展雾度测量，按第 6 节执行，并以测量结果为准。</p>
+<h3>7.4 与识别准确率指标的关系</h3>
+<p>按 2026-10-26 的决定，90% 指标衡量的是<strong>智能识别</strong>（缺陷区域识别），镜片等级与损伤区属于第④部分“几何/光学分析”的物理延伸输出。因此：</p>
+<ul>
+<li>识别基准中的类别使用<strong>像素级可操作定义</strong>：划痕、斑点、碎裂碎片（亮而无法逐条追踪的碎短线/片状亮区）；</li>
+<li><strong>损伤区（足迹判据）不作为识别类别</strong>，<em>f</em>&lt;sub&gt;min&lt;/sub&gt; 与 <em>a</em>&lt;sub&gt;min&lt;/sub&gt; 不影响 90% 指标的计算；</li>
+<li>当前 trad_v2 中“碎裂型损伤区内的待确认碎片改判为碎裂”这一步依赖 <em>f</em>&lt;sub&gt;min&lt;/sub&gt;，构建识别基准时不使用这一步的输出，碎裂碎片由人工审核按像素级定义确认。</li>
+</ul>
+  </main>
+</body>
+</html>
